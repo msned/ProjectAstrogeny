@@ -1,26 +1,32 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.15
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{002A2DE9-8BB6-484D-9802-7E4AD4084715}") = "ProjectAstrogeny", "ProjectAstrogeny\ProjectAstrogeny.visualdproj", "{680520AF-1CED-48E8-96B8-59505EE64877}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{52A3CFA3-02D9-41B9-B37B-5F51526A4C0F}") = "projectastrogeny", ".dub/projectastrogeny.visualdproj", "{735E5FDB-F06D-4C1F-B5EE-DF5B7BDF80E9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A3A9309F-67A3-422B-B3A6-BB2E46616968} = {A3A9309F-67A3-422B-B3A6-BB2E46616968}
+		{EAD90704-9EF1-4E2F-8DD5-E95E1BBE021E} = {EAD90704-9EF1-4E2F-8DD5-E95E1BBE021E}
+		{25AAD77F-3F87-4320-9A90-E4D3A24E0E4D} = {25AAD77F-3F87-4320-9A90-E4D3A24E0E4D}
+		{25AAD77F-3F87-4320-9A90-E4D3A24E0E4D} = {25AAD77F-3F87-4320-9A90-E4D3A24E0E4D}
+	EndProjectSection
+EndProject
+Project("{52A3CFA3-02D9-41B9-B37B-5F51526A4C0F}") = "derelict-gl3", ".dub/derelict-gl3.visualdproj", "{A3A9309F-67A3-422B-B3A6-BB2E46616968}"
+EndProject
+Project("{52A3CFA3-02D9-41B9-B37B-5F51526A4C0F}") = "derelict-util", ".dub/derelict-util.visualdproj", "{25AAD77F-3F87-4320-9A90-E4D3A24E0E4D}"
+EndProject
+Project("{52A3CFA3-02D9-41B9-B37B-5F51526A4C0F}") = "derelict-glfw3", ".dub/derelict-glfw3.visualdproj", "{EAD90704-9EF1-4E2F-8DD5-E95E1BBE021E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
+		debug|Win32 = debug|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Debug|x64.ActiveCfg = Debug|x64
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Debug|x64.Build.0 = Debug|x64
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Debug|x86.ActiveCfg = Debug|Win32
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Debug|x86.Build.0 = Debug|Win32
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Release|x64.ActiveCfg = Release|x64
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Release|x64.Build.0 = Release|x64
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Release|x86.ActiveCfg = Release|Win32
-		{680520AF-1CED-48E8-96B8-59505EE64877}.Release|x86.Build.0 = Release|Win32
+		{25AAD77F-3F87-4320-9A90-E4D3A24E0E4D}.debug|Win32.ActiveCfg = debug|Win32
+		{25AAD77F-3F87-4320-9A90-E4D3A24E0E4D}.debug|Win32.Build.0 = debug|Win32
+		{735E5FDB-F06D-4C1F-B5EE-DF5B7BDF80E9}.debug|Win32.ActiveCfg = debug|Win32
+		{735E5FDB-F06D-4C1F-B5EE-DF5B7BDF80E9}.debug|Win32.Build.0 = debug|Win32
+		{A3A9309F-67A3-422B-B3A6-BB2E46616968}.debug|Win32.ActiveCfg = debug|Win32
+		{A3A9309F-67A3-422B-B3A6-BB2E46616968}.debug|Win32.Build.0 = debug|Win32
+		{EAD90704-9EF1-4E2F-8DD5-E95E1BBE021E}.debug|Win32.ActiveCfg = debug|Win32
+		{EAD90704-9EF1-4E2F-8DD5-E95E1BBE021E}.debug|Win32.Build.0 = debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

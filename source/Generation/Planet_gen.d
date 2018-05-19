@@ -4,13 +4,13 @@ import std.random;
 import std.math;
 
 /** Enum for standard atmosphereic gases*/
-enum gases {Hydrogen, Helium, Methane, Water, Ammonia, Neon, Nitrogen, Carbon_Monoxide, Nitrogen_Oxide, Oxygen, Hydrogen_sulfide, Argon, Carbon_Dioxide, Nitrogen_dioxide, Sulfur_dioxide, Chlorine, Fluorine, Bromine, Iodine};
+const enum gases {Hydrogen=0, Helium, Methane, Water, Ammonia, Neon, Nitrogen, Carbon_Monoxide, Nitrogen_Oxide, Oxygen, Hydrogen_Sulfide, Argon, Carbon_Dioxide, Nitrogen_Dioxide, Sulfur_Dioxide, Chlorine, Fluorine, Bromine, Iodine};
 //enum for boiling points and greenhousefactor
-enum boilingPoints : double[]  {hydrogen = [-252.879, 1], helium = [-268.9289, 0], methane = [-161.49, 1], water = [100, 1], ammonia = [-33.34, 1], neon = [-246.046, 0], nitrogen = [-195.795, 0], carbon_Monoxide = [-191.55, 1], nitrogen_Oxide = [-152, 1], oxygen = [-182.962, 0], hydrogen_sulfide  = [-60, 1], argon  = [-185.848, 0], carbon_Dioxide = [-56.6, 1], nitrogen_dioxide = [21.2, 1], sulfur_dioxide = [-10, 1], chlorine = [-34.04, 1], fluorine = [-188.11,1], bromine = [58.8, 1], iodine = [184.32, 1]};
+const double[2][gases.max + 1] boilingPoints = [ gases.Hydrogen:[-252.879, 1], gases.Helium:[-268.9289, 0], gases.Methane:[-161.49, 1], gases.Water:[100, 1], gases.Ammonia:[-33.34, 1], gases.Neon:[-246.046, 0], gases.Nitrogen:[-195.795, 0], gases.Carbon_Monoxide:[-191.55, 1], gases.Nitrogen_Oxide:[-152, 1], gases.Oxygen:[-182.962, 0], gases.Hydrogen_Sulfide:[-60, 1], gases.Argon:[-185.848, 0], gases.Carbon_Dioxide:[-56.6, 1], gases.Nitrogen_Dioxide:[21.2, 1], gases.Sulfur_Dioxide:[-10, 1], gases.Chlorine:[-34.04, 1], gases.Fluorine:[-188.11,1], gases.Bromine:[58.8, 1], gases.Iodine:[184.32, 1]];
 //types of atmosphere
-enum ats {Meth, CarbonDI, Oxygen};
+const enum ats {Meth, CarbonDI, Oxygen};
 //Types of planets
-enum planet_type {GasGiant, IceGiant, GasDwarf, Terrestrial};
+const enum planet_type {GasGiant, IceGiant, GasDwarf, Terrestrial};
 
 /** Radius of sun*/
 immutable double solarRad = 695700;
@@ -25,11 +25,9 @@ class Atmosphere {
 	private:
 		double pressure, hydrosphereExtent, greenhouseFactor, albedo, surfaceTemperature;
 		bool hydrosphere, hasAtmos, toxic;
-		double[gases] atmosComposition;
+		double[gases.max + 1] atmosComposition;
 	public:
 		this(double albedo){
-			
-			
 			this.albedo = albedo;
 			hydrosphere = false;
 			hydrosphereExtent = 0;
@@ -41,11 +39,11 @@ class Atmosphere {
 			hydrosphere = val;
 		}
 
-		double[gases] getGasComp(){
+		double[gases.max + 1] getGasComp(){
 			return atmosComposition;
 		}
 
-		void addGas(gases gas, double percent){
+		void addGas(int gas, double percent){
 			atmosComposition[gas] = percent;
 		}
 
@@ -246,7 +244,7 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 		int numTrace = uniform(1, 5);
 		for(int i = 0; i < numTrace; i++){
 			int num = uniform(5, 18);
-			atmos.addGas((gases[num]), .01);
+			atmos.addGas(num, .01);
 			totalATM += .01;
 		}
 
@@ -358,7 +356,7 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 						Trace = 1;
 					}
 				}
-				atmos.addGas(gases[gasTrace], .01);
+				atmos.addGas(gasTrace, .01);
 				totalATM += .01;
 			}
 
@@ -377,11 +375,11 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 	}
 	else{
 		atmos.setPressure(totalATM);
-		double[gases] comp = atmos.getGasComp();
+		double[gases.max + 1] comp = atmos.getGasComp();
 
-		foreach (key; comp.byKey){
-			if(boilingPoints[key][0] <= gasTemp){
-				GreenhousePressure += boilingPoints[key][1] * comp[key];
+		foreach (index, value; comp){
+			if(boilingPoints[index][0] <= gasTemp){
+				GreenhousePressure += boilingPoints[index][1] * value;
 			}
 		}
 
