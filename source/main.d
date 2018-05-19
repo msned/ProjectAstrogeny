@@ -7,7 +7,7 @@ mixin glFreeFuncs!(GLVersion.gl33);
 GLFWwindow* window;
 //GLContext context;
 void main() {
-	writeln("game start");
+	writeln("link start");
 	DerelictGLFW3.load();
 	DerelictGL3.load();
 	if (!glfwInit())
