@@ -1,28 +1,38 @@
 module MainEntry;
 import std.stdio;
+import core.thread;
 import derelict.glfw3.glfw3;
-public import derelict.opengl;
-mixin glFreeFuncs!(GLVersion.gl33);
+import derelict.opengl;
+import Render.Window.WindowLoop;
+import Render.RenderLoop;
+import GameState;
+import Render.Window.WindowObject;
 
-GLFWwindow* window;
+
 //GLContext context;
 void main() {
-	writeln("link start");
 	DerelictGLFW3.load();
 	DerelictGL3.load();
 	if (!glfwInit())
 		return;
-	window = glfwCreateWindow(1280, 720, "Project Astrogeny", null, null);
-	glfwMakeContextCurrent(window);
-	DerelictGL3.reload();
-	mainLoop();
+	RenderInit();
+	WindowObject first = CreateNewWindow("Project Astrogeny");
+	glfwMakeContextCurrent(first.getGLFW());
+	try {
+		DerelictGL3.reload();
+	} catch (Exception e) {
+		writeln(DerelictGL3.loadedVersion);
+	}
+	running = true;
+	auto mainthread = new Thread(&mainLoop).start();
+	CreateNewWindow("Testing");
+	WindowLoop();
 	
 }
 
 
 void mainLoop() {
-	while(!glfwWindowShouldClose(window)) {
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+	while(running) {
+		
 	}
 }
