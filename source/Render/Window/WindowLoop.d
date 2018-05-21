@@ -16,14 +16,14 @@ public void WindowLoop() {
 	while (running){
 		foreach(i, current; windowList) {
 			glfwMakeContextCurrent(current.getGLFW());
+			OpenglPreRender();
+			current.RenderObjects();
+			glfwSwapBuffers(current.getGLFW());
+			glfwPollEvents();
 			if (glfwWindowShouldClose(current.getGLFW())){
 				removeList.insertBack(i);
 				glfwDestroyWindow(current.getGLFW());
-				break;
 			}
-			glfwSwapBuffers(current.getGLFW());
-			glfwPollEvents();
-			OpenglRender();
 		}
 		foreach(i; removeList){
 			RemoveWindow(i);
@@ -34,8 +34,8 @@ public void WindowLoop() {
 	}
 }
 
-WindowObject CreateNewWindow(string name) {
-	WindowObject current = new WindowObject(name);
+WindowObject CreateNewWindow(string name, int x = 960, int y = 540) {
+	WindowObject current = new WindowObject(name, x, y);
 	windowList.assumeSafeAppend();
 	windowList ~= current;
 	return current;

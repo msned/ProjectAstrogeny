@@ -5,8 +5,10 @@ import derelict.glfw3.glfw3;
 import derelict.opengl;
 import Render.Window.WindowLoop;
 import Render.RenderLoop;
+import Render.RenderObject;
 import GameState;
 import Render.Window.WindowObject;
+import Render.TextureUtil;
 
 
 //GLContext context;
@@ -15,17 +17,13 @@ void main() {
 	DerelictGL3.load();
 	if (!glfwInit())
 		return;
-	RenderInit();
-	WindowObject first = CreateNewWindow("Project Astrogeny");
-	glfwMakeContextCurrent(first.getGLFW());
-	try {
-		DerelictGL3.reload();
-	} catch (Exception e) {
-		writeln(DerelictGL3.loadedVersion);
-	}
+	WindowObject first = CreateNewWindow("Project Astrogeny", 540, 540);
+	WindowObject test = CreateNewWindow("Testing");
 	running = true;
 	auto mainthread = new Thread(&mainLoop).start();
-	CreateNewWindow("Testing");
+	test.AddObject("file_edit.png");
+	first.AddObject("file_new.png");
+	first.AddObject("file_search.png");
 	WindowLoop();
 	
 }

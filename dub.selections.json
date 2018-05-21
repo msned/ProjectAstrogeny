@@ -1,8 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"derelict-gl3": {"version": "~>2.0.0-beta.6", "path": "packages/derelict-gl3-2.0.0-beta.6/derelict-gl3"},
-		"derelict-glfw3": {"version": "~>4.0.0-beta.1", "path": "packages/derelict-glfw3-4.0.0-beta.1/derelict-glfw3"},
-		"derelict-util": {"version":"~>3.0.0-beta.2", "path": "packages/derelict-util-3.0.0-beta.2/derelict-util"}
+		"derelict-gl3": {"path":"packages/derelict-gl3-2.0.0-beta.6/derelict-gl3"},
+		"derelict-glfw3": {"path":"packages/derelict-glfw3-4.0.0-beta.1/derelict-glfw3"},
+		"derelict-util": {"path":"packages/derelict-util-3.0.0-beta.2/derelict-util"},
+		"imageformats": {"path": "packages/imageformats-7.0.0/imageformats"}
 	}
 }

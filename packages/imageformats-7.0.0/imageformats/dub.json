@@ -1,0 +1,22 @@
+{
+	"authors": [
+		"Tero Hänninen"
+	],
+	"targetName": "imageformats",
+	"description": "Decoders for PNG, TGA, BMP, JPEG and encoders for PNG, TGA, BMP.",
+	"importPaths": [
+		"."
+	],
+	"name": "imageformats",
+	"version": "7.0.0",
+	"license": "BSL-1.0",
+	"sourcePaths": [
+		"imageformats"
+	],
+	"configurations": [
+		{
+			"name": "library",
+			"targetType": "library"
+		}
+	]
+}
