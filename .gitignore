@@ -12,10 +12,12 @@ projectastrogeny.dll
 projectastrogeny.a
 projectastrogeny.lib
 projectastrogeny-test-*
-*.exe
+projectastrogeny.sln
+ProjectAstrogeny.sln
 *.o
 *.obj
 *.lst
+
 
 
 # User-specific files
