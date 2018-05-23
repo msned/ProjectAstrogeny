@@ -54,6 +54,22 @@ class RenderObject {
 		1,2,3
 	];
 
+	private float xPos, yPos;
+	private float width = 10f, height = 10f;
+
+	public float getXPos() {
+		return xPos;
+	}
+	public float getYPos() {
+		return yPos;
+	}
+	public float getWidth() {
+		return width;
+	}
+	public float getHeight(){
+		return height;
+	}
+
 	/++
 	Shifts the position of the quad by x and y in their respective directions
 	+/
@@ -66,6 +82,8 @@ class RenderObject {
 		vertices[9] += y;
 		vertices[17] += y;
 		vertices[25] += y;
+		xPos += x;
+		yPos += y;
 		updateVertices = true;
 	}
 	/++
@@ -80,6 +98,8 @@ class RenderObject {
 		vertices[9] = height;
 		vertices[17] = height;
 		vertices[25] = -height;
+		this.width = width;
+		this.height = height;
 		updateVertices = true;
 	}
 
@@ -179,8 +199,13 @@ class RenderObject {
 		updateOrtho = 2;
 	}
 
-	public void onClosing() {
-		glDeleteProgram(shaderPrograms[windowID]);
+	public static void onDestroyWindow(UUID winID) {
+		glDeleteProgram(shaderPrograms[winID]);
+		shaderPrograms.remove(winID);
+		projMatrices.remove(winID);
+	}
+
+	public void onDestroy() {
 		glDeleteBuffers(1, &EBO);
 		glDeleteBuffers(1, &VBO);
 		glDeleteVertexArrays(1, &VAO);

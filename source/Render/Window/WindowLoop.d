@@ -14,6 +14,7 @@ WindowObject[] windowList;
 public void WindowLoop() {
 	Array!int removeList;
 	while (running){
+		glfwSwapInterval(0);
 		foreach(i, current; windowList) {
 			glfwMakeContextCurrent(current.getGLFW());
 			OpenglPreRender();
@@ -22,9 +23,11 @@ public void WindowLoop() {
 			glfwPollEvents();
 			if (glfwWindowShouldClose(current.getGLFW())){
 				removeList.insertBack(i);
-				glfwDestroyWindow(current.getGLFW());
+				break;
 			}
 		}
+		glfwSwapInterval(1);
+
 		foreach(i; removeList){
 			RemoveWindow(i);
 		}
@@ -41,9 +44,8 @@ WindowObject CreateNewWindow(string name, int x = 960, int y = 540) {
 	return current;
 }
 
-void RemoveWindow(WindowObject o) {
-	
-}
 void RemoveWindow(int index) {
+	windowList[index].onDestroy();
+	glfwDestroyWindow(windowList[index].getGLFW());
 	windowList = remove(windowList, index);
 }

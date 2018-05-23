@@ -55,6 +55,13 @@ class WindowObject {
 		sizeY = y;
 	}
 
+	public void onDestroy() {
+		RenderObject.onDestroyWindow(windowID);
+		foreach(RenderObject o; objects) {
+			o.onDestroy();
+		}
+	}
+
 }
 
 extern (C)
