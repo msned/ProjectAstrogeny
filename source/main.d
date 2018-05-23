@@ -22,8 +22,17 @@ void main() {
 	running = true;
 	auto mainthread = new Thread(&mainLoop).start();
 	test.AddObject("file_edit.png");
-	first.AddObject("file_new.png");
-	first.AddObject("file_search.png");
+	RenderObject xd = first.AddObject("file_edit.png");
+	RenderObject fileNew = test.AddObject("file_new.png");
+	RenderObject fileSearch = first.AddObject("file_search.png");
+	fileSearch.ShiftPosition(-80f, -80f);
+	fileNew.ScalePosition(100f, 100f);
+	fileNew.ShiftPosition(40f, 20f);
+	fileNew.SetDepth(0.9f);
+	first.AddObject("random2.png");
+	xd.ScalePosition(130f, 130f);
+	xd.SetDepth(.2f);
+	
 	WindowLoop();
 	
 }

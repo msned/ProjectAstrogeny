@@ -5,15 +5,19 @@ import Render.RenderObject;
 import Render.RenderLoop;
 import std.uuid;
 
+WindowObject[GLFWwindow*] windowObjects;
+
 class WindowObject {
 	GLFWwindow* window;
 
-	UUID windowID;
+	public UUID windowID;
 
 	RenderObject[] objects;
 
-	int sizeX, sizeY;
+	public int sizeX, sizeY;
 	string windowName;
+
+	GLFWwindow* getGLFW() { return window; }
 
 	this(string name, int x = 960, int y = 540) {
 		window = glfwCreateWindow(x, y, cast(char*)name, null, null);
@@ -21,17 +25,23 @@ class WindowObject {
 		sizeY = y;
 		windowName = name;
 		windowID = randomUUID();
+		glfwSetWindowSizeCallback(window, &windowResize);
+
+		windowObjects[window] = this;
 		glfwMakeContextCurrent(window);
 		RenderInit();
 	}
 	private void AddObject(RenderObject obj) {
 		objects ~= obj;
 	}
-	public void AddObject(string textureName) {
+	public RenderObject AddObject(string textureName) {
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
-		AddObject(new RenderObject(textureName, windowID));
+		RenderObject o = new RenderObject(textureName, this);
+		//RenderObject.glOrtho(0, sizeX, 0, sizeY, -10, 10, windowID);
+		AddObject(o);
 		glfwMakeContextCurrent(old);
+		return o;
 	}
 
 	public void RenderObjects() {
@@ -40,6 +50,18 @@ class WindowObject {
 			o.render();
 		}
 	}
+	nothrow public void setSize(int x, int y) {
+		sizeX = x;
+		sizeY = y;
+	}
 
-	GLFWwindow* getGLFW() { return window; }
+}
+
+extern (C)
+nothrow void windowResize(GLFWwindow* window, int width, int height) {
+	auto winO = window in windowObjects;
+	if (winO !is null) {
+		winO.setSize(width, height);
+		RenderObject.glOrtho(0, width, 0, height, -10, 10, winO.windowID);
+	}
 }

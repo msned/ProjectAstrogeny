@@ -15,12 +15,15 @@ public bool RenderInit() {
 		writeln("Error loading %s", DerelictGL3.loadedVersion);
 	}
 	glEnable(GL_TEXTURE_2D);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
 	glfwSwapInterval(1);
 	return true;
 }
 
 void OpenglPreRender() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(1f, 1f, 1f, 1f);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(177 / 255f, 57 / 255f, 208 / 255f, 1f);
 }
