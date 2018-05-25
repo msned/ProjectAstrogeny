@@ -1,4 +1,4 @@
-module Render.TextureUtil;
+module render.TextureUtil;
 
 import derelict.opengl.gl;
 import derelict.opengl;

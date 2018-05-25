@@ -1,15 +1,17 @@
-module Render.RenderObject;
+module render.RenderObject;
+
 import derelict.opengl;
-import Render.TextureUtil;
+import render.TextureUtil;
 import std.stdio;
 import std.uuid;
-import Render.Window.WindowObject;
+import render.window.WindowObject;
+import render.Fonts;
 
 class RenderObject {
 
 	GLuint texture = 0;
 
-	const static char* vertexShaderSource = 
+	const static char* vertexShader = 
 		"#version 330 core
 		layout (location = 0) in vec3 aPos;
 		layout (location = 1) in vec3 aColor;
@@ -25,7 +27,7 @@ class RenderObject {
 		ourColor = aColor;
 		TexCoord = vec2(aTexCoord.x, aTexCoord.y);
 		}";
-	const static char* fragmentShaderSource = 
+	const static char* fragmentShader = 
 		"#version 330 core
 		out vec4 FragColor;
 
@@ -42,11 +44,11 @@ class RenderObject {
 			discard;
 		}";
 
-	private float[32] vertices = [
+	protected float[32] vertices = [
 		// positions				// colors				// texture coords
 		10f,	-10f, 0.0f,		1.0f, 0.0f, 0.0f,		1.0f, 1.0f, // bottom right
-		10f,	10f, 0.0f,			0.0f, 1.0f, 0.0f,		1.0f, 0.0f, // top right
-        -10f,	10f, 0.0f,			0.0f, 0.0f, 1.0f,		0.0f, 0.0f, // top left
+		10f,	10f, 0.0f,		0.0f, 1.0f, 0.0f,		1.0f, 0.0f, // top right
+        -10f,	10f, 0.0f,		0.0f, 0.0f, 1.0f,		0.0f, 0.0f, // top left
         -10f,  -10f, 0.0f,		1.0f, 1.0f, 0.0f,		0.0f, 1.0f  // bottom left 
     ];
 	private uint[6] indices = [
@@ -54,8 +56,8 @@ class RenderObject {
 		1,2,3
 	];
 
-	private float xPos, yPos;
-	private float width = 10f, height = 10f;
+	protected float xPos, yPos;
+	protected float width = 10f, height = 10f;
 
 	public float getXPos() {
 		return xPos;
@@ -73,7 +75,7 @@ class RenderObject {
 	/++
 	Shifts the position of the quad by x and y in their respective directions
 	+/
-	public void ShiftPosition(float x = 0, float y = 0) {
+	public void shiftPosition(float x = 0, float y = 0) {
 		vertices[0] += x;
 		vertices[8] += x;
 		vertices[16] += x;
@@ -89,7 +91,7 @@ class RenderObject {
 	/++
 	Sets the size of the window from 0 to 1 on each side x and y
 	+/
-	public void ScalePosition(float width, float height) {
+	public void scalePosition(float width, float height) {
 		vertices[0] = width;
 		vertices[8] = width;
 		vertices[16] = -width;
@@ -103,7 +105,7 @@ class RenderObject {
 		updateVertices = true;
 	}
 
-	public void SetDepth(float depth) {
+	public void setDepth(float depth) {
 		vertices[2] = depth;
 		vertices[10] = depth;
 		vertices[18] = depth;
@@ -111,8 +113,8 @@ class RenderObject {
 		updateVertices = true;
 	}
 
-	private bool updateVertices = false;
-	private static char updateOrtho = 0;
+	protected bool updateVertices = false;
+	protected static bool[UUID] updateOrtho;
 
 	GLuint VBO, VAO;
 	static GLuint EBO;
@@ -120,9 +122,17 @@ class RenderObject {
 	static float[16][UUID] projMatrices;
 
 	UUID windowID;
-
+	
 	this(string textureName, WindowObject windowObj) {
 		texture = LoadTexture(textureName, windowObj.windowID);
+		this(windowObj);
+	}
+
+	this() {}
+
+	this(WindowObject windowObj) {
+		
+		windowID = windowObj.windowID;
 
 		//GL texture stuff
 		glGenVertexArrays(1, &VAO);
@@ -145,17 +155,16 @@ class RenderObject {
 
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * float.sizeof, cast(void*)(6 * float.sizeof));
 		glEnableVertexAttribArray(2);
-
-		windowID = windowObj.windowID;
+		glBindVertexArray(0);
 		
 		if (!(windowID in shaderPrograms))
-			loadShader();
+			loadShader(vertexShader, fragmentShader);
 		glUseProgram(shaderPrograms[windowID]);
 		initProj(windowID);
 		glOrtho(0, windowObj.sizeX, 0, windowObj.sizeY, -10, 10, windowID);
 		glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
 	}
-	void loadShader() {
+	void loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
 
 		int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vertexShaderSource, null);
@@ -191,12 +200,7 @@ class RenderObject {
 		
 		projMatrices[winID][0]  = 2.0f/(right - left);
 		projMatrices[winID][5]  = 2.0f/(top - bottom);
-		//projMatrices[winID][10] = -2.0f/(zfar - znear);
-		//projMatrices[winID][12] = -(right + left)/(right - left);
-		//projMatrices[winID][13] = -(top + bottom)/(top - bottom);
-		//projMatrices[winID][14] = -(zfar + znear)/(zfar - znear);
-		//projMatrices[winID][15] = 1.0f;
-		updateOrtho = 2;
+		updateOrtho[winID] = true;
 	}
 
 	public static void onDestroyWindow(UUID winID) {
@@ -206,27 +210,40 @@ class RenderObject {
 	}
 
 	public void onDestroy() {
-		glDeleteBuffers(1, &EBO);
 		glDeleteBuffers(1, &VBO);
 		glDeleteVertexArrays(1, &VAO);
 	}
 
+	private bool nineSlice = false;
+	private float nineSliceBoarder;
+
+	public void enableNineSlice(float boarder) {
+		nineSliceBoarder = boarder;
+		nineSlice = true;
+	}
+
 	public void render() {
 		if (texture != 0) {
-			if (true) {		//TODO: Fix uniform not updating always
-				//writeln("ortho");
+			if (updateOrtho[windowID]) {
 				glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
-				updateOrtho--;
+				updateOrtho[windowID] = false;
 			}
-			glBindTexture(GL_TEXTURE_2D, texture);
-			glBindVertexArray(VAO);
-			if (updateVertices) {
-				glBindBuffer(GL_ARRAY_BUFFER, VBO);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vertices.sizeof, &vertices[0]);
-				updateVertices = false;
+			if (nineSlice) {
+				nineSliceRender();
+			} else {
+				glBindTexture(GL_TEXTURE_2D, texture);
+				glBindVertexArray(VAO);
+				if (updateVertices) {
+					glBindBuffer(GL_ARRAY_BUFFER, VBO);
+					glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vertices.sizeof, &vertices[0]);
+					updateVertices = false;
+				}
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, cast(void*)0);
 			}
-			
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, cast(void*)0);
 		}
+	}
+
+	private void nineSliceRender() {
+		
 	}
 }

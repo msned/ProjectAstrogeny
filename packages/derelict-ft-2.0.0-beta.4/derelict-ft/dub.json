@@ -1,0 +1,27 @@
+{
+	"authors": [
+		"Mike Parker"
+	],
+	"targetName": "DerelictFT",
+	"description": "A dynamic binding to the FreeType library.",
+	"importPaths": [
+		"source/"
+	],
+	"targetPath": "lib",
+	"name": "derelict-ft",
+	"dependencies": {
+		"derelict-util": ">=3.0.0-beta.1 <3.1.0-0"
+	},
+	"license": "Boost",
+	"version": "2.0.0-beta.4",
+	"sourcePaths": [
+		"source/"
+	],
+	"configurations": [
+		{
+			"name": "library",
+			"targetType": "library"
+		}
+	],
+	"homepage": "https://github.com/DerelictOrg/DerelictFT"
+}

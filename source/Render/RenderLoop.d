@@ -1,6 +1,7 @@
-module Render.RenderLoop;
+module render.RenderLoop;
+
 import derelict.opengl;
-import Render.TextureUtil;
+import render.TextureUtil;
 import derelict.glfw3.glfw3;
 import std.stdio;
 

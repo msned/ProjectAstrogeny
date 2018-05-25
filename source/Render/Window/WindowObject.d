@@ -1,8 +1,11 @@
-module Render.Window.WindowObject;
+module render.window.WindowObject;
+
 import derelict.opengl;
 import derelict.glfw3.glfw3;
-import Render.RenderObject;
-import Render.RenderLoop;
+import render.RenderObject;
+import render.RenderLoop;
+import render.screenComponents.Text;
+import render.Fonts;
 import std.uuid;
 
 WindowObject[GLFWwindow*] windowObjects;
@@ -30,11 +33,12 @@ class WindowObject {
 		windowObjects[window] = this;
 		glfwMakeContextCurrent(window);
 		RenderInit();
+		FontInit();
 	}
 	private void AddObject(RenderObject obj) {
 		objects ~= obj;
 	}
-	public RenderObject AddObject(string textureName) {
+	public RenderObject addObject(string textureName) {
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
 		RenderObject o = new RenderObject(textureName, this);
@@ -43,8 +47,16 @@ class WindowObject {
 		glfwMakeContextCurrent(old);
 		return o;
 	}
+	public RenderText addText(string text, float xPos, float yPos, float scale) {
+		GLFWwindow* old = glfwGetCurrentContext();
+		glfwMakeContextCurrent(window);
+		RenderText t = new RenderText(text, xPos, yPos, scale, this);
+		AddObject(t);
+		glfwMakeContextCurrent(old);
+		return t;
+	}
 
-	public void RenderObjects() {
+	public void renderObjects() {
 		glViewport(0, 0, sizeX, sizeY);
 		foreach(RenderObject o; objects) {
 			o.render();

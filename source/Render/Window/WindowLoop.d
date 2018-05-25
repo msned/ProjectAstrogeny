@@ -1,8 +1,9 @@
-module Render.Window.WindowLoop;
+module render.window.WindowLoop;
+
 import derelict.glfw3.glfw3;
 import derelict.opengl;
-import Render.Window.WindowObject;
-import Render.RenderLoop;
+import render.window.WindowObject;
+import render.RenderLoop;
 import std.container.array;
 import std.algorithm;
 import std.range;
@@ -18,7 +19,7 @@ public void WindowLoop() {
 		foreach(i, current; windowList) {
 			glfwMakeContextCurrent(current.getGLFW());
 			OpenglPreRender();
-			current.RenderObjects();
+			current.renderObjects();
 			glfwSwapBuffers(current.getGLFW());
 			glfwPollEvents();
 			if (glfwWindowShouldClose(current.getGLFW())){
