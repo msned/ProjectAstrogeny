@@ -48,7 +48,9 @@ class Star {
 Star genStar(){
 	import std.random;
 	import std.math;
-	import MathConsts;
+	immutable double bolometricConstant = .2632;
+	immutable double solTemp = 5770;
+
 
 	int num = uniform(1, 100000);
 	star_types type;
