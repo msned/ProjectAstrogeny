@@ -1,4 +1,4 @@
-module Star_gen;
+module world.generation.Star_gen;
 import std.stdio;
 
 /** Enum for the different classifications of star*/

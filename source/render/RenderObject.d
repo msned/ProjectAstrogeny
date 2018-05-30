@@ -39,41 +39,42 @@ class RenderObject {
 
 		void main()
 		{
-		FragColor = texture(texture1, TexCoord);
+		FragColor = vec4(ourColor, 1.0) * texture(texture1, TexCoord);
 		if (FragColor.a < 0.5)
 			discard;
 		}";
 
 	protected float[32] vertices = [
 		// positions				// colors				// texture coords
-		10f,	-10f, 0.0f,		1.0f, 0.0f, 0.0f,		1.0f, 1.0f, // bottom right
-		10f,	10f, 0.0f,		0.0f, 1.0f, 0.0f,		1.0f, 0.0f, // top right
-        -10f,	10f, 0.0f,		0.0f, 0.0f, 1.0f,		0.0f, 0.0f, // top left
-        -10f,  -10f, 0.0f,		1.0f, 1.0f, 0.0f,		0.0f, 1.0f  // bottom left 
+		10f,	-10f, 0.0f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f, // bottom right
+		10f,	10f, 0.0f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, // top right
+        -10f,	10f, 0.0f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f, // top left
+        -10f,  -10f, 0.0f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f  // bottom left 
     ];
 	private uint[6] indices = [
 		0,1,3,
 		1,2,3
 	];
 
-	protected float xPos, yPos;
-	protected float width = 10f, height = 10f;
+	protected float xPos = 0, yPos = 0, depth = 0;
+	protected float width = 30f, height = 30f;
 
-	public float getXPos() {
+	public nothrow float getXPos() {
 		return xPos;
 	}
-	public float getYPos() {
+	public nothrow float getYPos() {
 		return yPos;
 	}
-	public float getWidth() {
+	public nothrow float getWidth() {
 		return width;
 	}
-	public float getHeight(){
+	public nothrow float getHeight(){
 		return height;
 	}
 
 	/++
 	Shifts the position of the quad by x and y in their respective directions
+	Not to be confused with setPosition()
 	+/
 	public void shiftPosition(float x = 0, float y = 0) {
 		vertices[0] += x;
@@ -88,6 +89,24 @@ class RenderObject {
 		yPos += y;
 		updateVertices = true;
 	}
+
+	/++
+	Sets the position of the quad at x and y values from the bottom left corner, uses current or default width and height
+	Not to be confused with shiftPosition()
+	++/
+	public void setPosition(float x = 0, float y = 0) {
+		vertices[0] = x + width;
+		vertices[1] = y - height;
+		vertices[8] = x + width;
+		vertices[9] = y + height;
+		vertices[16] = x - width;
+		vertices[17] = y + height;
+		vertices[24] = x - width;
+		vertices[25] = y - height;
+		this.xPos = x;
+		this.yPos = y;
+	}
+
 	/++
 	Sets the size of the window from 0 to 1 on each side x and y
 	+/
@@ -110,16 +129,21 @@ class RenderObject {
 		vertices[10] = depth;
 		vertices[18] = depth;
 		vertices[26] = depth;
+		this.depth = depth;
 		updateVertices = true;
+	}
+	public float getDepth() {
+		return depth;
 	}
 
 	protected bool updateVertices = false;
-	protected static bool[UUID] updateOrtho;
+	public static bool[UUID] updateOrtho;
+	private static bool[UUID] orthoUpdated;
 
-	GLuint VBO, VAO;
-	static GLuint EBO;
-	static GLuint[UUID] shaderPrograms;
-	static float[16][UUID] projMatrices;
+	protected GLuint VBO, VAO;
+	protected static GLuint EBO;
+	protected static GLuint[UUID] shaderPrograms;
+	protected static float[16][UUID] projMatrices;
 
 	UUID windowID;
 	
@@ -128,7 +152,13 @@ class RenderObject {
 		this(windowObj);
 	}
 
-	this() {}
+	this(float xPos, float yPos, float depth, string textureName, WindowObject windowObj) {
+		this(textureName, windowObj);
+		setPosition(xPos, yPos);
+		setDepth(depth);
+	}
+
+	protected this() {}
 
 	this(WindowObject windowObj) {
 		
@@ -160,9 +190,10 @@ class RenderObject {
 		if (!(windowID in shaderPrograms))
 			loadShader(vertexShader, fragmentShader);
 		glUseProgram(shaderPrograms[windowID]);
-		initProj(windowID);
 		glOrtho(0, windowObj.sizeX, 0, windowObj.sizeY, -10, 10, windowID);
+		orthoUpdated[windowID] = false;
 		glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
+
 	}
 	void loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
 
@@ -223,10 +254,16 @@ class RenderObject {
 	}
 
 	public void render() {
+		glUseProgram(shaderPrograms[windowID]);
 		if (texture != 0) {
 			if (updateOrtho[windowID]) {
-				glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
-				updateOrtho[windowID] = false;
+				if (!orthoUpdated[windowID]){
+					glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
+					orthoUpdated[windowID] = true;
+				}
+			} else {
+				if (orthoUpdated[windowID])
+					orthoUpdated[windowID] = false;
 			}
 			if (nineSlice) {
 				nineSliceRender();

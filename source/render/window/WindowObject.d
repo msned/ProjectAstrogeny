@@ -2,23 +2,25 @@ module render.window.WindowObject;
 
 import derelict.opengl;
 import derelict.glfw3.glfw3;
+import core.sync.mutex;
 import render.RenderObject;
 import render.RenderLoop;
-import render.screenComponents.Text;
+import render.screenComponents;
 import render.Fonts;
+import Input;
 import std.uuid;
 
 WindowObject[GLFWwindow*] windowObjects;
 
-class WindowObject {
-	GLFWwindow* window;
+abstract class WindowObject {
+	protected GLFWwindow* window;
 
 	public UUID windowID;
 
 	RenderObject[] objects;
 
 	public int sizeX, sizeY;
-	string windowName;
+	public string windowName;
 
 	GLFWwindow* getGLFW() { return window; }
 
@@ -29,38 +31,79 @@ class WindowObject {
 		windowName = name;
 		windowID = randomUUID();
 		glfwSetWindowSizeCallback(window, &windowResize);
-
+		glfwSetKeyCallback(window, &glfwKeyCallback);
+		glfwSetCharCallback(window, &glfwCharCallback);
+		glfwSetScrollCallback(window, &glfwScrollCallback);
+		glfwSetMouseButtonCallback(window, &glfwMouseButtonCallback);
 		windowObjects[window] = this;
+		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
 		RenderInit();
 		FontInit();
+		loadRenderObjects();
+		glfwMakeContextCurrent(old);
 	}
-	private void AddObject(RenderObject obj) {
+
+	protected void addObject(RenderObject obj) {
 		objects ~= obj;
+		sortRenderObjects();
 	}
+
+	deprecated
 	public RenderObject addObject(string textureName) {
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
 		RenderObject o = new RenderObject(textureName, this);
 		//RenderObject.glOrtho(0, sizeX, 0, sizeY, -10, 10, windowID);
-		AddObject(o);
+		addObject(o);
 		glfwMakeContextCurrent(old);
 		return o;
 	}
+
+	deprecated
 	public RenderText addText(string text, float xPos, float yPos, float scale) {
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
 		RenderText t = new RenderText(text, xPos, yPos, scale, this);
-		AddObject(t);
+		addObject(t);
 		glfwMakeContextCurrent(old);
 		return t;
 	}
 
+	/++
+	Sorts the RenderObject array with highest depth first
+	++/
+	protected void sortRenderObjects() {
+		for(int i = objects.length - 1; i > 0; i--) {		//bubble sort for in-place space efficiency and best case for a mostly sorted list
+			for(int j = 0; j < i; j++) {
+				if (objects[j].getDepth() < objects[j+1].getDepth()) {
+					RenderObject tmp = objects[j+1];
+					objects[j+1] = objects[j];
+					objects[j] = tmp;
+				}
+			}
+		}
+	}
+
+	public nothrow abstract void characterInput(uint i);
+
+	//0 for left click, 1 for right click
+	public nothrow void mouseClick(float x, float y, int button) {
+		foreach(RenderObject o; objects){
+			if (auto b = cast(Clickable)o)
+				b.checkClick(x, y, button);
+		}
+	}
+
+	protected abstract void loadRenderObjects();
+
 	public void renderObjects() {
 		glViewport(0, 0, sizeX, sizeY);
+		glScissor(0, 0, sizeX, sizeY);
 		foreach(RenderObject o; objects) {
 			o.render();
 		}
+		RenderObject.updateOrtho[windowID] = false;
 	}
 	nothrow public void setSize(int x, int y) {
 		sizeX = x;

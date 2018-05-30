@@ -1,5 +1,5 @@
-module Planet_gen;
-import Star_gen;
+module world.generation.Planet_gen;
+import world.generation.Star_gen;
 import std.random;
 import std.math;
 

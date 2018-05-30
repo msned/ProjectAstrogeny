@@ -43,34 +43,52 @@ class RenderText : RenderObject {
 		this.scale = scale;
 		this.displayText = displayText;
 		windowID = windowObj.windowID;
-		if (!(windowID in textVAO)) {
-			textVAO[windowID] = 0;
-			glGenVertexArrays(1, &textVAO[windowID]);
-			glGenBuffers(1, &VBO);
-			glBindVertexArray(textVAO[windowID]);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			glBufferData(GL_ARRAY_BUFFER, GLfloat.sizeof * 6 * 4, null, GL_DYNAMIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * GLfloat.sizeof, cast(void*)0);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-		}
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, GLfloat.sizeof * 6 * 4, null, GL_DYNAMIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * GLfloat.sizeof, cast(void*)0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		if (!(windowID in textPrograms))
 			loadTextShader();
 		glUseProgram(textPrograms[windowID]);
 		glOrtho(0, windowObj.sizeX, 0, windowObj.sizeY, -10, 10, windowID);
+		orthoUpdated[windowID] = false;
 		glUniformMatrix4fv(glGetUniformLocation(textPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
-		glUseProgram(shaderPrograms[windowID]);
 	}
-	float colorR = 106 /255f, colorG = 126 /255f, colorB = 255 /255f;
-	
-	GLfloat[4][6] vert;
+
+	protected float colorR = 106 /255f, colorG = 126 /255f, colorB = 255 /255f;
+
+	/++
+	Sets the color of the text to RGB values from 0 to 255
+	++/
+	public void setColor(float r, float g, float b) {
+		colorR = r / 255;
+		colorG = g / 255;
+		colorB = b / 255;
+	}
+
+
+	protected GLfloat[4][6] vert;
 
 	static GLuint[UUID] textPrograms;
-	static GLuint[UUID] textVAO;
 
-	void loadTextShader() {
+	/++
+	Returns the number of pixels needed to render the current string of text
+	++/
+	public GLuint getTextLength() {
+		GLuint total = 0;
+		foreach(char c; displayText) {
+			Character ch = Characters[c];
+			total += ch.Advance >> 6;
+		}
+		return total;
+	}
+
+	private void loadTextShader() {
 		
 		int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vertexShaderSource, null);
@@ -98,16 +116,23 @@ class RenderText : RenderObject {
 		glDeleteShader(fragmentShader);
 	}
 
+	private static bool[UUID] orthoUpdated;
+
 	override void render() {
 		glUseProgram(textPrograms[windowID]);
 		if (updateOrtho[windowID]) {
-			glUniformMatrix4fv(glGetUniformLocation(textPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
-			updateOrtho[windowID] = false;
+			if (!orthoUpdated[windowID]) {
+				glUniformMatrix4fv(glGetUniformLocation(textPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
+				orthoUpdated[windowID] = true;
+			}
+		} else {
+			if (orthoUpdated[windowID])
+				orthoUpdated[windowID] = false;
 		}
 
 		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);
 
-		glBindVertexArray(textVAO[windowID]);
+		glBindVertexArray(VAO);
 
 		float xOffset = 0;
 		foreach(char c; displayText) {
@@ -135,7 +160,6 @@ class RenderText : RenderObject {
 
 			xOffset += (ch.Advance >> 6) * scale;
 		}
-		glUseProgram(shaderPrograms[windowID]);
 	}
 
 }

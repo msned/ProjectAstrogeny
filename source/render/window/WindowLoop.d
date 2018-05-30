@@ -10,7 +10,7 @@ import std.range;
 import core.thread;
 import GameState;
 
-WindowObject[] windowList;
+__gshared WindowObject[] windowList;
 
 public void WindowLoop() {
 	Array!int removeList;
@@ -38,11 +38,9 @@ public void WindowLoop() {
 	}
 }
 
-WindowObject CreateNewWindow(string name, int x = 960, int y = 540) {
-	WindowObject current = new WindowObject(name, x, y);
-	windowList.assumeSafeAppend();
-	windowList ~= current;
-	return current;
+WindowObject AddWindow(WindowObject o) {
+	windowList ~= o;
+	return o;
 }
 
 void RemoveWindow(int index) {
