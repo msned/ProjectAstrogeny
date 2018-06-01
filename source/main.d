@@ -38,11 +38,11 @@ void main() {
 	if (!glfwInit())
 		return;
 
+	running = true;
+	auto mainthread = new Thread(&mainLoop).start();
 
 	WindowObject first = AddWindow(new TestWindow("Project Astrogeny"));
 	WindowObject deb = AddWindow(new DebugWindow());
-	running = true;
-	auto mainthread = new Thread(&mainLoop).start();
 
 	WindowLoop();
 }

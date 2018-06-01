@@ -7,6 +7,7 @@ import render.RenderLoop;
 import std.container.array;
 import std.algorithm;
 import std.range;
+import std.stdio;
 import core.thread;
 import GameState;
 
@@ -17,10 +18,7 @@ public void WindowLoop() {
 	while (running){
 		glfwSwapInterval(0);
 		foreach(i, current; windowList) {
-			glfwMakeContextCurrent(current.getGLFW());
-			OpenglPreRender();
-			current.renderObjects();
-			glfwSwapBuffers(current.getGLFW());
+			current.renderElements();
 			glfwPollEvents();
 			if (glfwWindowShouldClose(current.getGLFW())){
 				removeList.insertBack(i);

@@ -9,12 +9,14 @@ import std.conv;
 /++
 	Initializes the OpenGL settings, returns success
 +/
-public bool RenderInit() {
+public nothrow bool RenderInit() {
 	try {
 		auto loaded = DerelictGL3.reload();
 		//writeln(loaded);
 	} catch (Exception e) {
+		try {
 		writeln("Error loading %s", DerelictGL3.loadedVersion);
+		} catch (Exception e) {}
 	}
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -27,10 +29,10 @@ public bool RenderInit() {
 	return true;
 }
 
-void OpenglPreRender() {
+nothrow void OpenglPreRender() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glClearColor(177 / 255f, 57 / 255f, 208 / 255f, 1f);
+	glClearColor(29 / 255f, 70 / 255f, 94 / 255f, 1f);
 }
 extern (Windows)
 nothrow void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userparam) {

@@ -1,8 +1,9 @@
 module world.generation.SolarSystem;
 
-import Planet_gen;
-import Star_gen;
-import std.rnd;
+import world.generation.Planet_gen;
+import world.generation.Star_gen;
+import std.random;
+import std.math;
 
 class AsteroidBelt{
 	private:
@@ -35,12 +36,14 @@ SolarSystem genSolSystem(){
 	Planet[] planets = genPlanets(sun);
 
 	int numBelts = uniform(1,3);
-	double min = fmax((0.2 * sun.getMass()) , (pow((sun.getLuminosity() / 16.0), 0.5))(0.2 * sun.getMass()) , (pow((sun.getLuminosity() / 16.0), 0.5)));
+	//Mark Fix
+	//double min = fmax(0.2 * sun.getMass() , (pow((sun.getLuminosity() / 16.0), 0.5))*(0.2 * sun.getMass()), (pow((sun.getLuminosity() / 16.0), 0.5)));
+	double min = 0;
 	double max = 40.0 * sun.getMass();
 
-	AsteroidBelts[] asteroids = new AsteroidBelts[numBelts];
+	AsteroidBelt[] asteroids = new AsteroidBelt[numBelts];
 	for(int i = 0; i < numBelts; i++){
-		asteroids[i] = new AstroidBelt(min, max);
+		asteroids[i] = new AsteroidBelt(min, max);
 	}
 
 	SolarSystem sys = new SolarSystem(sun, planets, asteroids);

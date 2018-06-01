@@ -4,6 +4,7 @@ import render.screenComponents;
 import derelict.glfw3;
 import render.window.WindowObject;
 import std.stdio;
+import render.Color;
 
 class TestWindow : WindowObject {
 
@@ -22,6 +23,7 @@ class TestWindow : WindowObject {
 		objects ~= xd;
 		objects ~= new RenderText("file_edit.png", 0, 0, .5f, this);
 		objects ~= new RenderText("heyo", -100, 100, .5f, this);
+		objects ~= new RenderButton(40, 40, Colors.Golden_Dragons, this);
 
 		sortRenderObjects();
 	}

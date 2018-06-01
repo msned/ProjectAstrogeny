@@ -3,13 +3,16 @@ module render.screenComponents.Text;
 import derelict.opengl;
 import render.RenderObject;
 import render.window.WindowObject;
+import render.screenComponents;
 import render.Fonts;
 import std.uuid;
 
-class RenderText : RenderObject {
+class RenderText : RenderObject, ResponsiveElement {
 
 	string displayText;
 	float scale;
+
+	float minTextScale = .1f;
 
 	const static char* vertexShaderSource = 
 		"#version 330 core
@@ -60,12 +63,12 @@ class RenderText : RenderObject {
 		glUniformMatrix4fv(glGetUniformLocation(textPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
 	}
 
-	protected float colorR = 106 /255f, colorG = 126 /255f, colorB = 255 /255f;
+	protected float colorR = 210 /255f, colorG = 118 /255f, colorB = 94 /255f;
 
 	/++
 	Sets the color of the text to RGB values from 0 to 255
 	++/
-	public void setColor(float r, float g, float b) {
+	public override void setColor(float r, float g, float b) {
 		colorR = r / 255;
 		colorG = g / 255;
 		colorB = b / 255;
@@ -77,16 +80,60 @@ class RenderText : RenderObject {
 	static GLuint[UUID] textPrograms;
 
 	/++
-	Returns the number of pixels needed to render the current string of text
+	Returns the number of pixels needed to render the current string of text at the given scale
 	++/
-	public GLuint getTextLength() {
-		GLuint total = 0;
+	public nothrow float getTextLength(float scale) {
+		long total = 0;
 		foreach(char c; displayText) {
 			Character ch = Characters[c];
 			total += ch.Advance >> 6;
 		}
-		return total;
+		return total * scale;
 	}
+
+	public nothrow float getTextHeight(float scale) {
+		int maxY = 0;
+		foreach(char c; displayText)
+			if (Characters[c].ySize > maxY)
+				maxY = Characters[c].ySize;
+		return maxY * scale;
+	}
+
+	public nothrow float getTextHeight() {
+		return getTextHeight(scale);
+	}
+
+	/++
+	Returns the largest scale for which the text will fit within the given size contraints
+	+/
+	public nothrow float getMaxScale(float width, float height) {
+		float xScale, yScale;
+		int maxY = 0;
+		long xTotal = 0;
+		foreach(char c; displayText) {
+			Character ch = Characters[c];
+			if (ch.ySize > maxY)
+				maxY = ch.ySize;
+			xTotal += ch.Advance >> 6;
+		}
+		xScale = width / xTotal;
+		yScale = height / maxY;
+		return (xScale < yScale) ? (xScale) : (yScale);
+	}
+
+	public nothrow void setMaxScale(float width, float height) {
+		scale = getMaxScale(width, height);
+	}
+
+	public nothrow float getMinWidth() {
+		return getTextLength(minTextScale);
+	}
+	public nothrow float getMinHeight() {
+		return getTextHeight(minTextScale);
+	}
+	public nothrow bool isStretchy() { return false; }
+
+
 
 	private void loadTextShader() {
 		
@@ -118,7 +165,7 @@ class RenderText : RenderObject {
 
 	private static bool[UUID] orthoUpdated;
 
-	override void render() {
+	override nothrow void render() {
 		glUseProgram(textPrograms[windowID]);
 		if (updateOrtho[windowID]) {
 			if (!orthoUpdated[windowID]) {
@@ -133,6 +180,7 @@ class RenderText : RenderObject {
 		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);
 
 		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 		float xOffset = 0;
 		foreach(char c; displayText) {
@@ -154,12 +202,12 @@ class RenderText : RenderObject {
 			];
 
 			glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vert.sizeof, &vert[0]);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			xOffset += (ch.Advance >> 6) * scale;
 		}
+		glUseProgram(shaderPrograms[windowID]);
 	}
 
 }

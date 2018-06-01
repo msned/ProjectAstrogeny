@@ -1,16 +1,16 @@
 module render.screenComponents.Button;
 
-import render.RenderObject;
 import render.screenComponents;
 import render.window.WindowObject;
+import render.Color;
 import std.stdio;
 
 class RenderButton : RenderObject, Clickable {
 
-	private nothrow void delegate() click;
-	private nothrow void delegate() rClick;
+	protected nothrow void delegate() click;
+	protected nothrow void delegate() rClick;
 
-	nothrow bool checkClick(float x, float y, int button) {
+	public nothrow bool checkClick(float x, float y, int button) {
 		if (x > this.getXPos() - this.getWidth() && x < this.getXPos() + this.getWidth() &&
 			y >  this.getYPos() - this.getHeight() && y < this.getYPos() + this.getHeight()) {
 				if (button == 0) {
@@ -23,6 +23,16 @@ class RenderButton : RenderObject, Clickable {
 				return true;
 			}
 		return false;
+	}
+
+	protected this() {}
+
+	this(float width, float height, string texture, WindowObject win) {
+		super(0, 0, .1f, width, height, texture, win);
+	}
+	this(float width, float height, Color col, WindowObject win) {
+		this(width, height, "blank.png", win);
+		setColor(col.red, col.green, col.blue);
 	}
 
 	this(float xPos, float yPos, float depth, string texture, WindowObject win) {

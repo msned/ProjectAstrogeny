@@ -72,11 +72,18 @@ class RenderObject {
 		return height;
 	}
 
+	public void setColor(float red, float green, float blue) {
+		vertices[3] = vertices[11] = vertices[19] = vertices[27] = red;
+		vertices[4] = vertices[12] = vertices[20] = vertices[28] = green;
+		vertices[5] = vertices[13] = vertices[21] = vertices[29] = blue;
+		updateVertices = true;
+	}
+
 	/++
 	Shifts the position of the quad by x and y in their respective directions
 	Not to be confused with setPosition()
 	+/
-	public void shiftPosition(float x = 0, float y = 0) {
+	public nothrow void shiftPosition(float x = 0, float y = 0) {
 		vertices[0] += x;
 		vertices[8] += x;
 		vertices[16] += x;
@@ -94,7 +101,7 @@ class RenderObject {
 	Sets the position of the quad at x and y values from the bottom left corner, uses current or default width and height
 	Not to be confused with shiftPosition()
 	++/
-	public void setPosition(float x = 0, float y = 0) {
+	public nothrow void setPosition(float x = 0, float y = 0) {
 		vertices[0] = x + width;
 		vertices[1] = y - height;
 		vertices[8] = x + width;
@@ -105,26 +112,19 @@ class RenderObject {
 		vertices[25] = y - height;
 		this.xPos = x;
 		this.yPos = y;
+		updateVertices = true;
 	}
 
 	/++
 	Sets the size of the window from 0 to 1 on each side x and y
 	+/
-	public void scalePosition(float width, float height) {
-		vertices[0] = width;
-		vertices[8] = width;
-		vertices[16] = -width;
-		vertices[24] = -width;
-		vertices[1] = -height;
-		vertices[9] = height;
-		vertices[17] = height;
-		vertices[25] = -height;
+	public nothrow void setScale(float width, float height) {
 		this.width = width;
 		this.height = height;
-		updateVertices = true;
+		setPosition(xPos, yPos);
 	}
 
-	public void setDepth(float depth) {
+	public nothrow void setDepth(float depth) {
 		vertices[2] = depth;
 		vertices[10] = depth;
 		vertices[18] = depth;
@@ -156,6 +156,11 @@ class RenderObject {
 		this(textureName, windowObj);
 		setPosition(xPos, yPos);
 		setDepth(depth);
+	}
+
+	this (float xPos, float yPos, float depth, float width, float height, string textureName, WindowObject windowObj) {
+		setScale(width, height);
+		this(xPos, yPos, depth, textureName, windowObj);
 	}
 
 	protected this() {}
@@ -253,34 +258,31 @@ class RenderObject {
 		nineSlice = true;
 	}
 
-	public void render() {
-		glUseProgram(shaderPrograms[windowID]);
-		if (texture != 0) {
-			if (updateOrtho[windowID]) {
-				if (!orthoUpdated[windowID]){
-					glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
-					orthoUpdated[windowID] = true;
-				}
-			} else {
-				if (orthoUpdated[windowID])
-					orthoUpdated[windowID] = false;
+	public nothrow void render() {
+		if (updateOrtho[windowID]) {
+			if (!orthoUpdated[windowID]){
+				glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
+				orthoUpdated[windowID] = true;
 			}
-			if (nineSlice) {
-				nineSliceRender();
-			} else {
-				glBindTexture(GL_TEXTURE_2D, texture);
-				glBindVertexArray(VAO);
-				if (updateVertices) {
-					glBindBuffer(GL_ARRAY_BUFFER, VBO);
-					glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vertices.sizeof, &vertices[0]);
-					updateVertices = false;
-				}
-				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, cast(void*)0);
+		} else {
+			if (orthoUpdated[windowID])
+				orthoUpdated[windowID] = false;
+		}
+		if (nineSlice) {
+			nineSliceRender();
+		} else {
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glBindVertexArray(VAO);
+			if (updateVertices) {
+				glBindBuffer(GL_ARRAY_BUFFER, VBO);
+				glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vertices.sizeof, &vertices[0]);
+				updateVertices = false;
 			}
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, cast(void*)0);
 		}
 	}
 
-	private void nineSliceRender() {
+	protected nothrow void nineSliceRender() {
 		
 	}
 }

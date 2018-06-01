@@ -6,9 +6,11 @@ import core.sync.mutex;
 import render.RenderObject;
 import render.RenderLoop;
 import render.screenComponents;
+import render.responsiveControl;
 import render.Fonts;
 import Input;
 import std.uuid;
+import std.stdio;
 
 WindowObject[GLFWwindow*] windowObjects;
 
@@ -18,6 +20,8 @@ abstract class WindowObject {
 	public UUID windowID;
 
 	RenderObject[] objects;
+
+	ResponsiveRegion left, top, right, bottom, center;
 
 	public int sizeX, sizeY;
 	public string windowName;
@@ -42,6 +46,13 @@ abstract class WindowObject {
 		FontInit();
 		loadRenderObjects();
 		glfwMakeContextCurrent(old);
+	}
+
+	public nothrow void renderElements() {
+		glfwMakeContextCurrent(window);
+		OpenglPreRender();
+		renderObjects();
+		glfwSwapBuffers(window);
 	}
 
 	protected void addObject(RenderObject obj) {
@@ -89,7 +100,7 @@ abstract class WindowObject {
 
 	//0 for left click, 1 for right click
 	public nothrow void mouseClick(float x, float y, int button) {
-		foreach(RenderObject o; objects){
+		foreach(RenderObject o; objects) {
 			if (auto b = cast(Clickable)o)
 				b.checkClick(x, y, button);
 		}
@@ -97,17 +108,39 @@ abstract class WindowObject {
 
 	protected abstract void loadRenderObjects();
 
-	public void renderObjects() {
+	public nothrow void renderObjects() {
 		glViewport(0, 0, sizeX, sizeY);
 		glScissor(0, 0, sizeX, sizeY);
+		//TODO: Depreciate direct object rendering
 		foreach(RenderObject o; objects) {
 			o.render();
 		}
+
+		if (left !is null)
+			left.renderObjects();
+		if (top !is null)
+			top.renderObjects();
+		if (right !is null)
+			right.renderObjects();
+		if (bottom !is null)
+			bottom.renderObjects();
+		if (center !is null)
+			center.renderObjects();
+
 		RenderObject.updateOrtho[windowID] = false;
 	}
-	nothrow public void setSize(int x, int y) {
+
+	protected nothrow updateResponsiveElements() {
+		//Scale top and bottom first, the left and right, then center fills the gaps
+	}
+
+	/++
+	Sets the size of the window, updates all Responsive elements as needed
+	+/
+	public nothrow void setSize(int x, int y) {
 		sizeX = x;
 		sizeY = y;
+		updateResponsiveElements();
 	}
 
 	public void onDestroy() {
@@ -126,4 +159,9 @@ nothrow void windowResize(GLFWwindow* window, int width, int height) {
 		winO.setSize(width, height);
 		RenderObject.glOrtho(0, width, 0, height, -10, 10, winO.windowID);
 	}
+}
+
+extern (C)
+nothrow void windowRefresh(GLFWwindow* window) {
+	OpenglPreRender();
 }
