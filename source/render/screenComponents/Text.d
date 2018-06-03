@@ -4,6 +4,7 @@ import derelict.opengl;
 import render.RenderObject;
 import render.window.WindowObject;
 import render.screenComponents;
+import render.responsiveControl;
 import render.Fonts;
 import std.uuid;
 
@@ -58,10 +59,15 @@ class RenderText : RenderObject, ResponsiveElement {
 		if (!(windowID in textPrograms))
 			loadTextShader();
 		glUseProgram(textPrograms[windowID]);
-		glOrtho(0, windowObj.sizeX, 0, windowObj.sizeY, -10, 10, windowID);
-		orthoUpdated[windowID] = false;
+		glOrtho(windowObj.sizeX, windowObj.sizeY, windowID);
 		glUniformMatrix4fv(glGetUniformLocation(textPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
+		if (windowID !in registeredOrtho) {
+			orthoUpdates[windowID] ~= &glOrtho;
+			registeredOrtho[windowID] = true;
+		}
 	}
+
+	private static bool[UUID] registeredOrtho;
 
 	protected float colorR = 210 /255f, colorG = 118 /255f, colorB = 94 /255f;
 
@@ -133,6 +139,16 @@ class RenderText : RenderObject, ResponsiveElement {
 	}
 	public nothrow bool isStretchy() { return false; }
 
+	public override nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {
+		initProj(winID);
+		projMatrices[winID][0]  = 2.0f/(width);
+		projMatrices[winID][5]  = 2.0f/(height);
+		glUseProgram(textPrograms[windowID]);
+		glUniformMatrix4fv(glGetUniformLocation(textPrograms[winID], "proj"), 1, GL_FALSE, &projMatrices[winID][0]);
+		if (winID in shaderPrograms)
+			glUseProgram(shaderPrograms[winID]);
+	}
+
 
 
 	private void loadTextShader() {
@@ -167,16 +183,6 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	override nothrow void render() {
 		glUseProgram(textPrograms[windowID]);
-		if (updateOrtho[windowID]) {
-			if (!orthoUpdated[windowID]) {
-				glUniformMatrix4fv(glGetUniformLocation(textPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
-				orthoUpdated[windowID] = true;
-			}
-		} else {
-			if (orthoUpdated[windowID])
-				orthoUpdated[windowID] = false;
-		}
-
 		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);
 
 		glBindVertexArray(VAO);

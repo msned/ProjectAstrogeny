@@ -6,6 +6,8 @@ import std.stdio;
 import std.uuid;
 import render.window.WindowObject;
 import render.Fonts;
+import std.signals;
+import std.conv;
 
 class RenderObject {
 
@@ -116,12 +118,18 @@ class RenderObject {
 	}
 
 	/++
-	Sets the size of the window from 0 to 1 on each side x and y
+	Sets the size of the object on each side x and y
 	+/
 	public nothrow void setScale(float width, float height) {
 		this.width = width;
 		this.height = height;
 		setPosition(xPos, yPos);
+	}
+
+	public nothrow void setScaleAndPosition(float width, float height, float x, float y) {
+		this.width = width;
+		this.height = height;
+		setPosition(x, y);
 	}
 
 	public nothrow void setDepth(float depth) {
@@ -137,8 +145,6 @@ class RenderObject {
 	}
 
 	protected bool updateVertices = false;
-	public static bool[UUID] updateOrtho;
-	private static bool[UUID] orthoUpdated;
 
 	protected GLuint VBO, VAO;
 	protected static GLuint EBO;
@@ -195,9 +201,12 @@ class RenderObject {
 		if (!(windowID in shaderPrograms))
 			loadShader(vertexShader, fragmentShader);
 		glUseProgram(shaderPrograms[windowID]);
-		glOrtho(0, windowObj.sizeX, 0, windowObj.sizeY, -10, 10, windowID);
-		orthoUpdated[windowID] = false;
+		glOrtho(windowObj.sizeX, windowObj.sizeY, windowID);
 		glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
+		if (windowID !in registeredOrtho) {
+			orthoUpdates[windowID] ~= &glOrtho;
+			registeredOrtho[windowID] = true;
+		}
 
 	}
 	void loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
@@ -228,15 +237,37 @@ class RenderObject {
 		glDeleteShader(fragmentShader);
 	}
 
-	private static nothrow void initProj(UUID winID) {
+	private static bool[UUID] registeredOrtho;
+
+	protected static nothrow void initProj(UUID winID) {
 		projMatrices[winID] = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 	}
-	static nothrow void glOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble znear, GLdouble zfar, UUID winID) {
+
+	static nothrow void safeWriteln(string input) {
+		try {
+			writeln(input);
+		} catch (Exception e) {}
+	}
+
+	public static nothrow void delegate(GLdouble, GLdouble, UUID)[][UUID] orthoUpdates;
+
+	public nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {
 		initProj(winID);
 		
-		projMatrices[winID][0]  = 2.0f/(right - left);
-		projMatrices[winID][5]  = 2.0f/(top - bottom);
-		updateOrtho[winID] = true;
+		projMatrices[winID][0]  = 2.0f/(width);
+		projMatrices[winID][5]  = 2.0f/(height);
+
+		glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
+	}
+
+	public static nothrow void updateOrtho(GLdouble width, GLdouble height, UUID winID) {
+		void delegate(GLdouble, GLdouble, UUID) nothrow [] arr = orthoUpdates[winID];
+		if (arr !is null) {
+			foreach(void delegate(GLdouble, GLdouble, UUID) nothrow g; arr) {
+				if (g !is null)
+					g(width, height, winID);
+			}
+		}
 	}
 
 	public static void onDestroyWindow(UUID winID) {
@@ -259,15 +290,7 @@ class RenderObject {
 	}
 
 	public nothrow void render() {
-		if (updateOrtho[windowID]) {
-			if (!orthoUpdated[windowID]){
-				glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
-				orthoUpdated[windowID] = true;
-			}
-		} else {
-			if (orthoUpdated[windowID])
-				orthoUpdated[windowID] = false;
-		}
+
 		if (nineSlice) {
 			nineSliceRender();
 		} else {
@@ -286,3 +309,9 @@ class RenderObject {
 		
 	}
 }
+
+class ProjectionEvent {
+	mixin Signal!(GLdouble, GLdouble, UUID);
+}
+
+ProjectionEvent updateProjection;

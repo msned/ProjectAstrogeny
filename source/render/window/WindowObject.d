@@ -11,6 +11,7 @@ import render.Fonts;
 import Input;
 import std.uuid;
 import std.stdio;
+import std.conv;
 
 WindowObject[GLFWwindow*] windowObjects;
 
@@ -21,7 +22,7 @@ abstract class WindowObject {
 
 	RenderObject[] objects;
 
-	ResponsiveRegion left, top, right, bottom, center;
+	ResponsiveRegion[] regions;
 
 	public int sizeX, sizeY;
 	public string windowName;
@@ -34,17 +35,20 @@ abstract class WindowObject {
 		sizeY = y;
 		windowName = name;
 		windowID = randomUUID();
-		glfwSetWindowSizeCallback(window, &windowResize);
+		glfwSetFramebufferSizeCallback(window, &windowResize);
 		glfwSetKeyCallback(window, &glfwKeyCallback);
 		glfwSetCharCallback(window, &glfwCharCallback);
 		glfwSetScrollCallback(window, &glfwScrollCallback);
 		glfwSetMouseButtonCallback(window, &glfwMouseButtonCallback);
+		glfwSetWindowRefreshCallback(window, &windowRefresh);
 		windowObjects[window] = this;
+		RenderObject.orthoUpdates[windowID] = new void delegate(GLdouble, GLdouble, UUID) nothrow[1];
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
 		RenderInit();
 		FontInit();
 		loadRenderObjects();
+		updateResponsiveElements();
 		glfwMakeContextCurrent(old);
 	}
 
@@ -116,22 +120,23 @@ abstract class WindowObject {
 			o.render();
 		}
 
-		if (left !is null)
-			left.renderObjects();
-		if (top !is null)
-			top.renderObjects();
-		if (right !is null)
-			right.renderObjects();
-		if (bottom !is null)
-			bottom.renderObjects();
-		if (center !is null)
-			center.renderObjects();
-
-		RenderObject.updateOrtho[windowID] = false;
+		foreach(ResponsiveRegion r; regions)
+			r.renderObjects();
 	}
 
-	protected nothrow updateResponsiveElements() {
-		//Scale top and bottom first, the left and right, then center fills the gaps
+	protected nothrow void updateResponsiveElements() {
+		foreach(ResponsiveRegion r; regions)
+			r.clearHidden();
+		responsiveElementsLoop();
+	}
+	protected nothrow void responsiveElementsLoop() {
+		foreach(ResponsiveRegion r; regions)
+			r.clearBounds();
+		foreach(ResponsiveRegion r; regions)
+			if (!r.updateElements(sizeX, sizeY)) {
+				responsiveElementsLoop();
+				break;
+			}
 	}
 
 	/++
@@ -156,12 +161,16 @@ extern (C)
 nothrow void windowResize(GLFWwindow* window, int width, int height) {
 	auto winO = window in windowObjects;
 	if (winO !is null) {
+		glfwMakeContextCurrent(window);
 		winO.setSize(width, height);
-		RenderObject.glOrtho(0, width, 0, height, -10, 10, winO.windowID);
+		RenderObject.updateOrtho(width, height, winO.windowID);
 	}
 }
 
 extern (C)
 nothrow void windowRefresh(GLFWwindow* window) {
-	OpenglPreRender();
+	auto winO = window in windowObjects;
+	if (winO !is null) {
+		winO.renderElements();
+	}
 }

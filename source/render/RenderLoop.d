@@ -30,9 +30,9 @@ public nothrow bool RenderInit() {
 }
 
 nothrow void OpenglPreRender() {
+	glClearColor(29 / 255f, 70 / 255f, 94 / 255f, 1f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glClearColor(29 / 255f, 70 / 255f, 94 / 255f, 1f);
 }
 extern (Windows)
 nothrow void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userparam) {

@@ -2,6 +2,7 @@ module render.screenComponents.ScalingIcon;
 
 import render.screenComponents;
 import render.window.WindowObject;
+import render.responsiveControl;
 
 class RenderScalingIcon : RenderObject, ResponsiveElement {
 

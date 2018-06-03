@@ -18,6 +18,7 @@ public void WindowLoop() {
 	while (running){
 		glfwSwapInterval(0);
 		foreach(i, current; windowList) {
+			OpenglPreRender();
 			current.renderElements();
 			glfwPollEvents();
 			if (glfwWindowShouldClose(current.getGLFW())){

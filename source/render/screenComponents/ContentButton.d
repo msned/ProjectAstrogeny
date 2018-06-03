@@ -2,6 +2,7 @@ module render.screenComponents.ContentButton;
 
 import render.screenComponents;
 import render.window.WindowObject;
+import render.responsiveControl;
 import render.Color;
 
 class RenderContentButton : RenderButton, ResponsiveElement {
@@ -32,7 +33,7 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	public override nothrow void setPosition(float x = 0, float y = 0) {
 		super.setPosition(x, y);
 		if (displayText !is null)
-			displayText.setPosition(x - width + sidePadding, y - displayText.getTextHeight() / 2);		//Update logic to handle icons and text side by side
+			displayText.setPosition(x - displayText.getTextLength(displayText.scale) / 2, y - displayText.getTextHeight() / 2);		//Update logic to handle icons and text side by side
 		if (icon !is null)
 			icon.setPosition(x, y);
 	}
@@ -40,9 +41,14 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	public override nothrow void setScale(float width, float height) {
 		super.setScale(width, height);
 		if (displayText !is null)
-			displayText.setMaxScale(width * 2 - sidePadding * 2, height * 2 - topPadding * 2);
+			displayText.setMaxScale(width * 2 - sidePadding * 2, (height * 1.5f > height * 2 - topPadding * 2) ? (height * 1.5f) : (height * 2 - topPadding * 2));
 		if (icon !is null)
 			icon.setScale(width, height);		//need to update for scaling based on text size
+	}
+
+	public override nothrow void setScaleAndPosition(float width, float height, float x, float y) {
+		setScale(width, height);
+		setPosition(x, y);
 	}
 
 	public nothrow bool isStretchy() {return true;}
