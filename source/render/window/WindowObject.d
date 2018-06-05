@@ -42,7 +42,7 @@ abstract class WindowObject {
 		glfwSetMouseButtonCallback(window, &glfwMouseButtonCallback);
 		glfwSetWindowRefreshCallback(window, &windowRefresh);
 		windowObjects[window] = this;
-		RenderObject.orthoUpdates[windowID] = new void delegate(GLdouble, GLdouble, UUID) nothrow[1];
+		RenderObject.orthoUpdates[windowID] = [];
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
 		RenderInit();
@@ -57,47 +57,6 @@ abstract class WindowObject {
 		OpenglPreRender();
 		renderObjects();
 		glfwSwapBuffers(window);
-	}
-
-	protected void addObject(RenderObject obj) {
-		objects ~= obj;
-		sortRenderObjects();
-	}
-
-	deprecated
-	public RenderObject addObject(string textureName) {
-		GLFWwindow* old = glfwGetCurrentContext();
-		glfwMakeContextCurrent(window);
-		RenderObject o = new RenderObject(textureName, this);
-		//RenderObject.glOrtho(0, sizeX, 0, sizeY, -10, 10, windowID);
-		addObject(o);
-		glfwMakeContextCurrent(old);
-		return o;
-	}
-
-	deprecated
-	public RenderText addText(string text, float xPos, float yPos, float scale) {
-		GLFWwindow* old = glfwGetCurrentContext();
-		glfwMakeContextCurrent(window);
-		RenderText t = new RenderText(text, xPos, yPos, scale, this);
-		addObject(t);
-		glfwMakeContextCurrent(old);
-		return t;
-	}
-
-	/++
-	Sorts the RenderObject array with highest depth first
-	++/
-	protected void sortRenderObjects() {
-		for(int i = objects.length - 1; i > 0; i--) {		//bubble sort for in-place space efficiency and best case for a mostly sorted list
-			for(int j = 0; j < i; j++) {
-				if (objects[j].getDepth() < objects[j+1].getDepth()) {
-					RenderObject tmp = objects[j+1];
-					objects[j+1] = objects[j];
-					objects[j] = tmp;
-				}
-			}
-		}
 	}
 
 	public nothrow abstract void characterInput(uint i);
@@ -137,6 +96,21 @@ abstract class WindowObject {
 				responsiveElementsLoop();
 				break;
 			}
+	}
+
+	/++
+	Sorts the region array in decending order of priority
+	+/
+	protected void sortRegions() {
+		for(int i = regions.length - 1; i > 0; i--) {		//bubble sort for in-place space efficiency and best case for a mostly sorted list
+			for(int j = 0; j < i; j++) {
+				if (regions[j].priority < regions[j+1].priority) {
+					ResponsiveRegion tmp = regions[j+1];
+					regions[j+1] = regions[j];
+					regions[j] = tmp;
+				}
+			}
+		}
 	}
 
 	/++

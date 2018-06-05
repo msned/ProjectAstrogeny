@@ -12,13 +12,14 @@ class DebugWindow : WindowObject {
 	}
 
 	protected override void loadRenderObjects() {
-		ResponsiveRegion left = new ResponsiveRegion(new AnchorPercentage(-1f, Side.left), new AnchorPercentage(1f, Side.top), new AnchorRatio(30/80f, true, Side.right), new AnchorPercentage(-1f, Side.bottom));
+		ResponsiveRegion left = new VerticalRegion(new AnchorPercentage(-1f, Side.left), new AnchorPercentage(1f, Side.top), new AnchorPercentage(30/80f, Side.right), new AnchorPercentage(-1f, Side.bottom), Side.left);
 		regions ~= left;
 
 		//Sort regions by decreasing priority
 		left.addObject(new RenderContentButton(80, 40, Colors.Rose, "Welcome", this));
-		//left.addObject(new RenderContentButton(20, 20, Colors.Clues, "Test", this));
-		sortRenderObjects();
+		left.addObject(new RenderContentButton(20, 20, Colors.Clues, "Test", this));
+		left.addObject(new RenderContentButton(10, 10, Colors.Patina, "Edit", "file_edit.png", Side.left, this));
+		sortRegions();
 	}
 
 

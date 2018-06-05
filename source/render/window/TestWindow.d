@@ -25,7 +25,7 @@ class TestWindow : WindowObject {
 		objects ~= new RenderText("heyo", -100, 100, .5f, this);
 		objects ~= new RenderButton(40, 40, Colors.Golden_Dragons, this);
 
-		sortRenderObjects();
+		sortRegions();
 	}
 
 	public override nothrow void characterInput(uint i) {

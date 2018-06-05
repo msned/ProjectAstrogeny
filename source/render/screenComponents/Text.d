@@ -15,6 +15,8 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	float minTextScale = .1f;
 
+	float defaultScale;
+
 	const static char* vertexShaderSource = 
 		"#version 330 core
 		layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
@@ -45,6 +47,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		super.xPos = x;
 		super.yPos = y;
 		this.scale = scale;
+		this.defaultScale = scale;
 		this.displayText = displayText;
 		windowID = windowObj.windowID;
 		glGenVertexArrays(1, &VAO);
@@ -109,6 +112,10 @@ class RenderText : RenderObject, ResponsiveElement {
 		return getTextHeight(scale);
 	}
 
+	public nothrow float getTextLength() {
+		return getTextLength(scale);
+	}
+
 	/++
 	Returns the largest scale for which the text will fit within the given size contraints
 	+/
@@ -137,6 +144,14 @@ class RenderText : RenderObject, ResponsiveElement {
 	public nothrow float getMinHeight() {
 		return getTextHeight(minTextScale);
 	}
+	public nothrow float getDefaultWidth() {
+		return getTextLength(defaultScale);
+	}
+	public nothrow float getDefaultHeight() {
+		return getTextHeight(defaultScale);
+	}
+
+
 	public nothrow bool isStretchy() { return false; }
 
 	public override nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {

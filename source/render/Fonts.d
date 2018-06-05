@@ -7,7 +7,7 @@ import std.stdio;
 FT_Library ft;
 FT_Face face;
 
-int fontSize = 48;
+int fontSize = 128;
 
 void FontInit() {
 	if (FT_Init_FreeType(&ft))

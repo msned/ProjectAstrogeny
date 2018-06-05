@@ -6,6 +6,7 @@ import render.screenComponents;
 import render.responsiveControl;
 import Settings;
 import std.exception;
+import std.algorithm;
 import std.math;
 import render.Color;
 import std.stdio;
@@ -115,9 +116,8 @@ class ResponsiveRegion {
 		rightAnchor = right;
 		bottomAnchor = bottom;
 		priority = pri;
+		elements.assumeSafeAppend();
 	}
-
-	protected this() {}
 
 	AnchorPoint leftAnchor, topAnchor, rightAnchor, bottomAnchor;
 
@@ -181,11 +181,47 @@ class ResponsiveRegion {
 		hidden = false;
 	}
 
-
+	/++
+	Adds a RenderObject that implements ResponsiveElement
+	+/
 	public void addObject(RenderObject o) {
 		static if (DEBUG)
 			enforce(cast(ResponsiveElement)o, "All added objects must be of type ResponsiveElement");
 		elements ~= o;
+	}
+
+	/++
+	Removes the object if it exists
+	+/
+	public void removeObject(RenderObject o) {
+		int i = countUntil(elements, o);
+		if (i != -1)
+			removeObject(i);
+	}
+	/++
+	Removes the object at the index
+	+/
+	public void removeObject(int index) {
+		elements = elements.remove(index);
+		//sortElements();
+	}
+	public void clearObjects() {
+		elements = [];
+	}
+
+	/++
+	Sorts the RenderObject element array with highest depth first
+	++/
+	public void sortElements() {
+		for(int i = elements.length - 1; i > 0; i--) {		//bubble sort for in-place space efficiency and best case for a mostly sorted list
+			for(int j = 0; j < i; j++) {
+				if (elements[j].getDepth() < elements[j+1].getDepth()) {
+					RenderObject tmp = elements[j+1];
+					elements[j+1] = elements[j];
+					elements[j] = tmp;
+				}
+			}
+		}
 	}
 
 	public nothrow void renderObjects() {
@@ -216,7 +252,12 @@ class ResponsiveRegion {
 			reUpdate = false;
 			return false;
 		}
+		arrangeElements();
 		return true;
+	}
+
+	protected nothrow void arrangeElements() {
+		return;
 	}
 	
 }

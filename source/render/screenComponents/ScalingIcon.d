@@ -22,5 +22,11 @@ class RenderScalingIcon : RenderObject, ResponsiveElement {
 	public nothrow float getMinHeight() {
 		return minHeight;
 	}
+	public nothrow float getDefaultWidth() {
+		return minWidth;
+	}
+	public nothrow float getDefaultHeight() {
+		return minHeight;
+	}
 	
 }
