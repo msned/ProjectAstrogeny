@@ -49,7 +49,7 @@ class AnchorRegion : AnchorPoint {
 
 	int priority;
 
-	this(ResponsiveRegion relation, bool lock, Side assigned) {
+	this(ResponsiveRegion relation, Side assigned) {
 		static if (DEBUG) {
 			enforce(relation !is null, "Referenced region was NULL");
 			if (relation.getAnchor(-assigned) !is null && relation.getAnchor(-assigned).type == AnchorType.region)
@@ -57,7 +57,7 @@ class AnchorRegion : AnchorPoint {
 		}
 		reg = relation;
 		type = AnchorType.region;
-		super(lock, assigned);
+		super(false, assigned);
 	}
 
 	nothrow override float getPos(ResponsiveRegion r) {
@@ -102,24 +102,115 @@ class AnchorRatio : AnchorPoint {
 	}
 }
 
+interface DragAnchor {
+	nothrow RegionBoarder linkRegion(ResponsiveRegion);
+	nothrow void updateValue(float value, int width, int height);
+}
+
+class DragRatio : AnchorRatio, DragAnchor {
+	
+	RegionBoarder board;
+	ResponsiveRegion reg;
+
+	this(float ratio, Side assigned, RegionBoarder boarder) {
+		super(ratio, false, assigned);
+		board = boarder;
+	}
+
+	nothrow RegionBoarder linkRegion(ResponsiveRegion r) {
+		reg = r;
+		return board;
+	}
+
+	nothrow void updateValue(float val, int width, int height) {
+		
+	}
+}
+class DragPercentage : AnchorPercentage, DragAnchor {
+
+	RegionBoarder board;
+
+	this(float percentage, Side assigned, RegionBoarder boarder) {
+		super(percentage, assigned);
+		board = boarder;
+		board.setAnchor(this);
+	}
+	
+	nothrow RegionBoarder linkRegion(ResponsiveRegion r) {
+		return board;
+	}
+
+	nothrow void updateValue(float val, int width, int height) {
+		if (assignedAnchor % 2) {	//horizontal
+			percentage = val / width * 2f;
+		} else {
+			percentage = val / height * 2f;
+		}
+		board.window.setSize(width, height);
+	}
+
+}
+
 
 class ResponsiveRegion {
+
+	protected RenderObject background;
+	public bool renderBackground = false;
 
 	public int priority;
 	public bool hidden;
 
 	protected RenderObject[] elements;
 
+	protected AnchorPoint leftAnchor, topAnchor, rightAnchor, bottomAnchor;
+
+	protected RegionBoarder leftB, rightB, topB, bottomB;
+
+	public RegionBoarder[] boarders;
+
 	this(AnchorPoint left, AnchorPoint top, AnchorPoint right, AnchorPoint bottom, int pri = 0) {
 		leftAnchor = left;
 		topAnchor = top;
 		rightAnchor = right;
 		bottomAnchor = bottom;
+
 		priority = pri;
 		elements.assumeSafeAppend();
 	}
 
-	AnchorPoint leftAnchor, topAnchor, rightAnchor, bottomAnchor;
+	public nothrow void postInit(float width, float height) {
+		windowWidth = width;
+		windowHeight = height;
+		if (auto c = cast(DragAnchor)leftAnchor) {
+			leftB = c.linkRegion(this);
+			boarders ~= leftB;
+		}
+		if (auto c = cast(DragAnchor)topAnchor) {
+			topB = c.linkRegion(this);
+			boarders ~= topB;
+		}
+		if (auto c = cast(DragAnchor)rightAnchor) {
+			rightB = c.linkRegion(this);
+			boarders ~= rightB;
+		}
+		if (auto c = cast(DragAnchor)bottomAnchor) {
+			bottomB = c.linkRegion(this);
+			boarders ~= bottomB;
+		}
+		sizeBoarders();
+	}
+
+	protected nothrow void sizeBoarders() {
+		if (leftB !is null)
+			leftB.setScaleAndPosition(5f, (getPosition(Side.top) - getPosition(Side.bottom)) / 2f, getPosition(Side.left), (getPosition(Side.top) + getPosition(Side.bottom)) / 2f);
+		if (topB !is null)
+			topB.setScaleAndPosition((getPosition(Side.right) - getPosition(Side.left)) / 2f, 5f, (getPosition(Side.right) + getPosition(Side.left)) / 2f, getPosition(Side.top));
+		if (rightB !is null)
+			rightB.setScaleAndPosition(5f, (getPosition(Side.top) - getPosition(Side.bottom)) / 2f, getPosition(Side.right), (getPosition(Side.top) + getPosition(Side.bottom)) / 2f);
+		if (bottomB !is null)
+			bottomB.setScaleAndPosition((getPosition(Side.right) - getPosition(Side.left)) / 2f, 5f, (getPosition(Side.right) + getPosition(Side.left)) / 2f, getPosition(Side.bottom));
+	}
+
 
 	nothrow AnchorPoint getAnchor(int sd) {
 		switch(sd) {
@@ -134,6 +225,15 @@ class ResponsiveRegion {
 			default:
 				return null;
 		}
+	}
+
+	public nothrow RenderObject[] getRenderObjects() {
+		return elements;
+	}
+
+	public void setBackground(RenderObject o) {
+		background = o;
+		renderBackground = true;
 	}
 
 	float leftBound = float.infinity, topBound = float.infinity, rightBound = float.infinity, bottomBound = float.infinity;
@@ -227,13 +327,25 @@ class ResponsiveRegion {
 	public nothrow void renderObjects() {
 		if (hidden)
 			return;
-		glScissor(cast(int)abs(leftBound + windowWidth / 2f), cast(int)abs(windowHeight / 2f + bottomBound), cast(int)abs(rightBound - leftBound), cast(int)abs(topBound - bottomBound));
-		glClearColor(Colors.Golden_Dragons.red, Colors.Golden_Dragons.green, Colors.Golden_Dragons.blue, 1f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glScissor(0, 0, cast(int)windowWidth, cast(int)windowHeight);
+		if (renderBackground) {
+			background.render();
+			//glScissor(cast(int)abs(leftBound + windowWidth / 2f), cast(int)abs(windowHeight / 2f + bottomBound), cast(int)abs(rightBound - leftBound), cast(int)abs(topBound - bottomBound));
+			//glClearColor(Colors.Golden_Dragons.red, Colors.Golden_Dragons.green, Colors.Golden_Dragons.blue, 1f);
+			//glClear(GL_COLOR_BUFFER_BIT);
+			//glScissor(0, 0, cast(int)windowWidth, cast(int)windowHeight);
+		}
 		foreach (RenderObject e; elements) {
 			e.render();
 		}
+		if (leftB !is null)
+			leftB.render();
+		if (topB !is null)
+			topB.render();
+		if (rightB !is null)
+			rightB.render();
+		if (bottomB !is null)
+			bottomB.render();
+
 	}
 
 	/++
@@ -247,12 +359,18 @@ class ResponsiveRegion {
 			getPosition(Side.top);
 			getPosition(Side.right);
 			getPosition(Side.bottom);
+
+			if (background !is null) {
+				background.setScaleAndPosition((getPosition(Side.right) - getPosition(Side.left)) / 2f, (getPosition(Side.top) - getPosition(Side.bottom)) / 2f,
+											   (getPosition(Side.right) + getPosition(Side.left)) / 2f, (getPosition(Side.top) + getPosition(Side.bottom)) / 2f);
+			}
+			arrangeElements();
+			sizeBoarders();
 		}
 		if (reUpdate) {
 			reUpdate = false;
 			return false;
 		}
-		arrangeElements();
 		return true;
 	}
 

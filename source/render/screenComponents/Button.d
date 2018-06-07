@@ -11,8 +11,7 @@ class RenderButton : RenderObject, Clickable {
 	protected nothrow void delegate() rClick;
 
 	public nothrow bool checkClick(float x, float y, int button) {
-		if (x > this.getXPos() - this.getWidth() && x < this.getXPos() + this.getWidth() &&
-			y >  this.getYPos() - this.getHeight() && y < this.getYPos() + this.getHeight()) {
+		if (within(x, y)) {
 				if (button == 0) {
 					if (click !is null)
 						click();
@@ -24,6 +23,10 @@ class RenderButton : RenderObject, Clickable {
 			}
 		return false;
 	}
+
+	public nothrow void mouseReleased() {
+		
+	} 
 
 	protected this() {}
 

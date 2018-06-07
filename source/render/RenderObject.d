@@ -6,6 +6,7 @@ import std.stdio;
 import std.uuid;
 import render.window.WindowObject;
 import render.Fonts;
+import render.Color;
 import std.signals;
 import std.conv;
 
@@ -79,6 +80,18 @@ class RenderObject {
 		vertices[4] = vertices[12] = vertices[20] = vertices[28] = green;
 		vertices[5] = vertices[13] = vertices[21] = vertices[29] = blue;
 		updateVertices = true;
+	}
+
+	/++
+	Returns true if the passed x and y coordinates are within the bounds of the rectangle of the RenderObject
+	+/
+	public nothrow bool within(float x, float y) {
+		return (x > this.getXPos() - this.getWidth() && x < this.getXPos() + this.getWidth() &&
+				y >  this.getYPos() - this.getHeight() && y < this.getYPos() + this.getHeight());
+	}
+
+	public void setColor(Color c) {
+		setColor(c.red, c.green, c.blue);
 	}
 
 	/++

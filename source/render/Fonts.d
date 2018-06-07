@@ -3,11 +3,11 @@ module render.Fonts;
 import derelict.freetype;
 import derelict.opengl;
 import std.stdio;
+import Settings;
 
 FT_Library ft;
 FT_Face face;
 
-int fontSize = 128;
 
 void FontInit() {
 	if (FT_Init_FreeType(&ft))

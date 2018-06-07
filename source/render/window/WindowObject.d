@@ -27,6 +27,8 @@ abstract class WindowObject {
 	public int sizeX, sizeY;
 	public string windowName;
 
+	public float cursorXPos, cursorYPos;
+
 	GLFWwindow* getGLFW() { return window; }
 
 	this(string name, int x = 960, int y = 540) {
@@ -40,6 +42,8 @@ abstract class WindowObject {
 		glfwSetCharCallback(window, &glfwCharCallback);
 		glfwSetScrollCallback(window, &glfwScrollCallback);
 		glfwSetMouseButtonCallback(window, &glfwMouseButtonCallback);
+		glfwSetCursorPosCallback(window, &glfwCursorPositionCallback);
+		glfwSetCursorEnterCallback(window, &glfwMouseEnterCallback);
 		glfwSetWindowRefreshCallback(window, &windowRefresh);
 		windowObjects[window] = this;
 		RenderObject.orthoUpdates[windowID] = [];
@@ -60,14 +64,6 @@ abstract class WindowObject {
 	}
 
 	public nothrow abstract void characterInput(uint i);
-
-	//0 for left click, 1 for right click
-	public nothrow void mouseClick(float x, float y, int button) {
-		foreach(RenderObject o; objects) {
-			if (auto b = cast(Clickable)o)
-				b.checkClick(x, y, button);
-		}
-	}
 
 	protected abstract void loadRenderObjects();
 
@@ -122,10 +118,54 @@ abstract class WindowObject {
 		updateResponsiveElements();
 	}
 
+	public nothrow void updateCursor(float x, float y) {
+		cursorXPos = x;
+		cursorYPos = y;
+		foreach(ResponsiveRegion r; regions) {
+			foreach(RegionBoarder b; r.boarders)
+				if (b.checkPosition(x, y))
+					return;
+			foreach(RenderObject o; r.getRenderObjects()) {
+				if (auto a = cast(Hoverable)o)
+					a.checkHover(x, y);
+				if (auto a = cast(Draggable)o)
+					if (a.checkPosition(x, y))
+						return;
+			}
+		}
+	}
+
+	public nothrow void mouseReleased() {
+		foreach(ResponsiveRegion r; regions) {
+			foreach(RegionBoarder b; r.boarders)
+				b.mouseReleased();
+			foreach(RenderObject o; r.getRenderObjects())
+				if (auto a = cast(Clickable)o)
+					a.mouseReleased();
+		}
+	}
+
+
+	public nothrow void mouseClick(float x, float y, int button) {
+		foreach(ResponsiveRegion r; regions) {
+			foreach(RegionBoarder b; r.boarders)
+				if (b.checkClick(x, y, button))
+					return;
+			foreach(RenderObject o; r.getRenderObjects())
+				if (auto b = cast(Clickable)o)
+					if (b.checkClick(x, y, button))
+						return;
+		}
+	}
+
+
 	public void onDestroy() {
 		RenderObject.onDestroyWindow(windowID);
-		foreach(RenderObject o; objects) {
-			o.onDestroy();
+		foreach(ResponsiveRegion r; regions) {
+			foreach(RegionBoarder b; r.boarders)
+				b.onDestroy();
+			foreach(RenderObject o; r.getRenderObjects())
+				o.onDestroy();
 		}
 	}
 
