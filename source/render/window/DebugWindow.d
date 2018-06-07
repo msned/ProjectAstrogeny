@@ -14,7 +14,7 @@ class DebugWindow : WindowObject {
 	protected override void loadRenderObjects() {
 		ResponsiveRegion left = new VerticalRegion(new AnchorPercentage(-1f, Side.left), new AnchorPercentage(1f, Side.top), new AnchorRatio(30/80f, true, Side.right), new AnchorPercentage(-1f, Side.bottom), Side.left);
 		regions ~= left;
-		ResponsiveRegion topRight = new VerticalGridRegion(new AnchorRegion(left, Side.left), new AnchorPercentage(1f, Side.top), new AnchorPercentage(1f, Side.right), new DragPercentage(.75f, Side.bottom, new RegionBoarder(false, this)));
+		ResponsiveRegion topRight = new VerticalGridRegion(new AnchorRegion(left, Side.left), new AnchorPercentage(1f, Side.top), new AnchorPercentage(1f, Side.right), new DragPercentage(.75f, Side.bottom, new RegionBoarder(false, this), .9f));
 		regions ~= topRight;
 		ResponsiveRegion right = new VerticalGridRegion(new AnchorRegion(left, Side.left), new AnchorRegion(topRight, Side.top), new AnchorPercentage(1f, Side.right), new AnchorPercentage(-1f, Side.bottom));
 		regions ~= right;

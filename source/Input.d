@@ -2,6 +2,7 @@ module Input;
 
 import derelict.glfw3;
 import render.window.WindowObject;
+import std.stdio;
 
 
 
@@ -32,10 +33,16 @@ nothrow void glfwMouseButtonCallback(GLFWwindow* window, int button, int action,
 	}
 }
 
+nothrow void safeWrite(string s) {
+	try {
+		writeln(s);
+	} catch (Exception e) {}
+}
+
 extern(C)
 nothrow void glfwMouseEnterCallback(GLFWwindow* window, int entered) {
 	if (entered) {
-		
+
 	} else {
 		auto winO = window in windowObjects;
 		if (winO !is null)

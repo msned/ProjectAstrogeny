@@ -104,17 +104,21 @@ class AnchorRatio : AnchorPoint {
 
 interface DragAnchor {
 	nothrow RegionBoarder linkRegion(ResponsiveRegion);
-	nothrow void updateValue(float value, int width, int height);
+	nothrow bool updateValue(float value, int width, int height);
 }
 
 class DragRatio : AnchorRatio, DragAnchor {
 	
 	RegionBoarder board;
 	ResponsiveRegion reg;
+	float min;
 
-	this(float ratio, Side assigned, RegionBoarder boarder) {
+	this(float ratio, Side assigned, RegionBoarder boarder, float minimum = float.infinity) {
 		super(ratio, false, assigned);
 		board = boarder;
+		min = minimum;
+		board.setAnchor(this);
+		throw new Exception("Functionality not Implemented");
 	}
 
 	nothrow RegionBoarder linkRegion(ResponsiveRegion r) {
@@ -122,17 +126,19 @@ class DragRatio : AnchorRatio, DragAnchor {
 		return board;
 	}
 
-	nothrow void updateValue(float val, int width, int height) {
-		
+	nothrow bool updateValue(float val, int width, int height) {
+		return true;
 	}
 }
 class DragPercentage : AnchorPercentage, DragAnchor {
 
 	RegionBoarder board;
+	float min;
 
-	this(float percentage, Side assigned, RegionBoarder boarder) {
+	this(float percentage, Side assigned, RegionBoarder boarder, float minimum = float.infinity) {
 		super(percentage, assigned);
 		board = boarder;
+		min = minimum;
 		board.setAnchor(this);
 	}
 	
@@ -140,13 +146,30 @@ class DragPercentage : AnchorPercentage, DragAnchor {
 		return board;
 	}
 
-	nothrow void updateValue(float val, int width, int height) {
+	nothrow bool updateValue(float val, int width, int height) {
+		float per;
 		if (assignedAnchor % 2) {	//horizontal
-			percentage = val / width * 2f;
+			if (val <= -width / 2f || val >= width / 2f)
+				return false;
+			per = val / width * 2f;
 		} else {
-			percentage = val / height * 2f;
+			if (val <= -height / 2f || val >= height / 2f)
+				return false;
+			per = val / height * 2f;
 		}
+		if (min != float.infinity) {
+			if (assignedAnchor < 0) {
+				if (per > min)
+					return false;
+			} else if (assignedAnchor > 0) {
+				if (per > min)
+					return false;
+			}
+		}
+			
+		percentage = per;
 		board.window.setSize(width, height);
+		return true;
 	}
 
 }

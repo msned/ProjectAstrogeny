@@ -15,6 +15,7 @@ class RegionBoarder : RenderObject, Draggable, Hoverable {
 
 	WindowObject window;
 
+
 	this(bool vertical, WindowObject win) {
 		super("boarder.png", win);
 		this.vertical = vertical;
@@ -30,11 +31,12 @@ class RegionBoarder : RenderObject, Draggable, Hoverable {
 			if (vertical) {
 				setPosition(x, yPos);
 				if (anchor !is null)
-					anchor.updateValue(x, window.sizeX, window.sizeY);
+					if (anchor.updateValue(x, window.sizeX, window.sizeY))
+						setPosition(x, yPos);
 			} else {
-				setPosition(xPos, y);
 				if (anchor !is null)
-					anchor.updateValue(y, window.sizeX, window.sizeY);
+					if (anchor.updateValue(y, window.sizeX, window.sizeY))
+						setPosition(xPos, y);
 			}
 			return true;
 		}
@@ -53,10 +55,18 @@ class RegionBoarder : RenderObject, Draggable, Hoverable {
 
 	public nothrow bool checkHover(float x, float y) {
 		if (within(x, y)) {
-			//Update Cursor
+			if (window !is null) {
+				if (vertical)
+					window.setCursor(WindowCursor.hResize);
+				else
+					window.setCursor(WindowCursor.vResize);
+			}
 			return true;
+		} else {
+			if (window !is null)
+				window.setCursor();
+			return false;
 		}
-		return false;
 	}
 
 	public nothrow void mouseReleased() {

@@ -15,6 +15,8 @@ import std.conv;
 
 WindowObject[GLFWwindow*] windowObjects;
 
+enum WindowCursor {hResize, vResize, iBeam, arrow};
+
 abstract class WindowObject {
 	protected GLFWwindow* window;
 
@@ -29,6 +31,8 @@ abstract class WindowObject {
 
 	public float cursorXPos, cursorYPos;
 
+	static GLFWcursor* hResize, vResize, iBeam, arrow;
+
 	GLFWwindow* getGLFW() { return window; }
 
 	this(string name, int x = 960, int y = 540) {
@@ -37,6 +41,7 @@ abstract class WindowObject {
 		sizeY = y;
 		windowName = name;
 		windowID = randomUUID();
+		//GLFW setup
 		glfwSetFramebufferSizeCallback(window, &windowResize);
 		glfwSetKeyCallback(window, &glfwKeyCallback);
 		glfwSetCharCallback(window, &glfwCharCallback);
@@ -45,10 +50,17 @@ abstract class WindowObject {
 		glfwSetCursorPosCallback(window, &glfwCursorPositionCallback);
 		glfwSetCursorEnterCallback(window, &glfwMouseEnterCallback);
 		glfwSetWindowRefreshCallback(window, &windowRefresh);
+
+		hResize = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+		vResize = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+		iBeam = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+		arrow = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+
 		windowObjects[window] = this;
 		RenderObject.orthoUpdates[windowID] = [];
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
+		//Render Setup
 		RenderInit();
 		FontInit();
 		loadRenderObjects();
@@ -125,6 +137,9 @@ abstract class WindowObject {
 			foreach(RegionBoarder b; r.boarders)
 				if (b.checkPosition(x, y))
 					return;
+			foreach(RegionBoarder b; r.boarders)
+				if (b.checkHover(x, y))
+					return;
 			foreach(RenderObject o; r.getRenderObjects()) {
 				if (auto a = cast(Hoverable)o)
 					a.checkHover(x, y);
@@ -166,6 +181,24 @@ abstract class WindowObject {
 				b.onDestroy();
 			foreach(RenderObject o; r.getRenderObjects())
 				o.onDestroy();
+		}
+	}
+
+	public nothrow void setCursor(WindowCursor c = WindowCursor.arrow) {
+		switch(c) {
+			default:
+			case WindowCursor.arrow:
+				glfwSetCursor(window, arrow);
+				break;
+			case WindowCursor.hResize:
+				glfwSetCursor(window, hResize);
+				break;
+			case WindowCursor.vResize:
+				glfwSetCursor(window, vResize);
+				break;
+			case WindowCursor.iBeam:
+				glfwSetCursor(window, iBeam);
+				break;
 		}
 	}
 
