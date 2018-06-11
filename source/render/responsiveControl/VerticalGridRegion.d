@@ -14,6 +14,7 @@ class VerticalGridRegion : ResponsiveRegion {
 		float height = getPosition(Side.top);
 		foreach(RenderObject o; elements) {
 			ResponsiveElement e = cast(ResponsiveElement)o;
+			//TODO: add grid layout
 		}
 	}
 }

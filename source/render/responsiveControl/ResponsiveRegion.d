@@ -11,7 +11,7 @@ import std.math;
 import render.Color;
 import std.stdio;
 
-enum AnchorType {percentage, region, ratio};
+enum AnchorType {percentage, region, ratio, pixel };
 
 enum Side {left = -1, top = 2, right = 1, bottom = -2};
 
@@ -75,11 +75,12 @@ class AnchorRatio : AnchorPoint {
 			enforce(ratio > 0, "Invalid ratio value");
 		}
 		this.ratio = ratio;
+		type = AnchorType.ratio;
 		super(lock, assigned);
 	}
 
 	nothrow override float getPos(ResponsiveRegion r) {
-		static if (DEBUG) {
+		static if (DEBUG) {				//No other ratios on the region
 			assert(r.getAnchor(abs(assignedAnchor % 2) + 1).type != AnchorType.ratio);
 			assert(r.getAnchor(-abs(assignedAnchor % 2) - 1).type != AnchorType.ratio);
 			assert(r.getAnchor(-assignedAnchor).type != AnchorType.ratio);
@@ -95,8 +96,35 @@ class AnchorRatio : AnchorPoint {
 			float range = r.getPosition(Side.right) - r.getPosition(Side.left);
 			range *= ratio;
 			float p = r.getPosition(-assignedAnchor) + assignedAnchor / 2 * range;
-			if ((p < -r.windowHeight / 2 || p > r.windowHeight / 2) && locked)
+			if (locked && (p < -r.windowHeight / 2 || p > r.windowHeight / 2))
 				r.setHidden();
+			return p;
+		}
+	}
+}
+class AnchorPixel : AnchorPoint {
+	
+	float pixels;
+
+	this(float pixels, bool lock, Side assigned) {
+		this.pixels = pixels;
+		super(lock, assigned);
+		type = AnchorType.pixel;
+	}
+
+	nothrow override float getPos(ResponsiveRegion reg) {
+		static if (DEBUG) {			//Can not have opposing sides both sizing pixels
+			assert(reg.getAnchor(-assignedAnchor).type != AnchorType.ratio);
+		}
+		if (assignedAnchor % 2) {
+			float p = reg.getPosition(-assignedAnchor) + assignedAnchor * pixels;
+			if (locked && (p < -reg.windowWidth / 2 || p > reg.windowWidth / 2))
+				reg.setHidden();
+			return p;
+		} else {
+			float p = reg.getPosition(-assignedAnchor) + assignedAnchor / 2 * pixels;
+			if (locked && (p < -reg.windowHeight / 2 || p > reg.windowWidth / 2))
+				reg.setHidden();
 			return p;
 		}
 	}
@@ -106,7 +134,6 @@ interface DragAnchor {
 	nothrow RegionBoarder linkRegion(ResponsiveRegion);
 	nothrow bool updateValue(float value, int width, int height);
 }
-
 class DragRatio : AnchorRatio, DragAnchor {
 	
 	RegionBoarder board;
@@ -127,6 +154,7 @@ class DragRatio : AnchorRatio, DragAnchor {
 	}
 
 	nothrow bool updateValue(float val, int width, int height) {
+		//TODO: Implement or Remove
 		return true;
 	}
 }
@@ -149,11 +177,11 @@ class DragPercentage : AnchorPercentage, DragAnchor {
 	nothrow bool updateValue(float val, int width, int height) {
 		float per;
 		if (assignedAnchor % 2) {	//horizontal
-			if (val <= -width / 2f || val >= width / 2f)
+			if (val < -width / 2f || val > width / 2f)
 				return false;
 			per = val / width * 2f;
 		} else {
-			if (val <= -height / 2f || val >= height / 2f)
+			if (val < -height / 2f || val > height / 2f)
 				return false;
 			per = val / height * 2f;
 		}
@@ -162,16 +190,60 @@ class DragPercentage : AnchorPercentage, DragAnchor {
 				if (per > min)
 					return false;
 			} else if (assignedAnchor > 0) {
-				if (per > min)
+				if (per < min)
 					return false;
 			}
 		}
 			
 		percentage = per;
-		board.window.setSize(width, height);
+		board.window.setSize(width, height);	//resize the window regions
 		return true;
 	}
 
+}
+class DragPixel : AnchorPixel, DragAnchor {
+	
+	RegionBoarder board;
+	ResponsiveRegion reg;
+	float min;
+
+	this(float pixels, Side assigned, RegionBoarder boarder, float minimum = float.infinity) {
+		super(pixels, false, assigned);
+		board = boarder;
+		min = minimum;
+		board.setAnchor(this);
+	}
+
+	nothrow RegionBoarder linkRegion(ResponsiveRegion r) {
+		reg = r;
+		return board;
+	}
+
+	nothrow bool updateValue(float val, int width, int height) {
+		float pix = assignedAnchor * (val - reg.getPosition(-assignedAnchor));
+
+		if (assignedAnchor % 2) {
+			if (val < -width / 2f || val > width / 2f)
+				return false;
+		} else {
+			if (val < -height / 2f || val > height / 2f)
+				return false;
+		}
+
+		if (min != float.infinity) {
+			if (assignedAnchor < 0) {
+				if (pix > min)
+					return false;
+			} else if (assignedAnchor > 0) {
+				if (pix < min)
+					return false;
+			}
+		}
+
+		pixels = pix;
+		board.window.setSize(width, height);
+		return true;
+	}
 }
 
 
@@ -184,6 +256,8 @@ class ResponsiveRegion {
 	public bool hidden;
 
 	protected RenderObject[] elements;
+
+	protected RenderObject[] fixedElements;
 
 	protected AnchorPoint leftAnchor, topAnchor, rightAnchor, bottomAnchor;
 
@@ -252,6 +326,9 @@ class ResponsiveRegion {
 
 	public nothrow RenderObject[] getRenderObjects() {
 		return elements;
+	}
+	public nothrow RenderObject[] getFixedRenderObjects() {
+		return fixedElements;
 	}
 
 	public void setBackground(RenderObject o) {
@@ -326,10 +403,37 @@ class ResponsiveRegion {
 	+/
 	public void removeObject(int index) {
 		elements = elements.remove(index);
-		//sortElements();
 	}
+
 	public void clearObjects() {
 		elements = [];
+	}
+
+	/++
+	Adds a RenderObject to the fixed element list
+	+/
+	public void addFixedObject(RenderObject o) {
+		fixedElements ~= o;
+	}
+
+	/++
+	Removes the fixed Object if it exists
+	+/
+	public void removeFixedObject(RenderObject o) {
+		int i = countUntil(fixedElements, o);
+		if (i != -1)
+			removeFixedObject(i);
+	}
+
+	/++
+	Removes the fixed object at the index
+	+/
+	public void removeFixedObject(int index) {
+		elements = elements.remove(index);
+	}
+
+	public void clearFixedObjects() {
+		fixedElements = [];
 	}
 
 	/++
@@ -359,6 +463,9 @@ class ResponsiveRegion {
 		}
 		foreach (RenderObject e; elements) {
 			e.render();
+		}
+		foreach(RenderObject o; fixedElements) {
+			o.render();
 		}
 		if (leftB !is null)
 			leftB.render();

@@ -7,6 +7,7 @@ import render.screenComponents;
 import render.responsiveControl;
 import render.Fonts;
 import std.uuid;
+import std.stdio;
 
 class RenderText : RenderObject, ResponsiveElement {
 
@@ -19,15 +20,16 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	const static char* vertexShaderSource = 
 		"#version 330 core
-		layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
+		layout (location = 0) in vec3 vertex; // <vec2 pos, vec2 tex>
+		layout (location = 1) in vec2 texCoord;
 		out vec2 TexCoords;
 
 		uniform mat4 proj;
 
 		void main()
 		{
-		gl_Position = proj * vec4(vertex.xy, 0.0, 1.0);
-		TexCoords = vertex.zw;
+		gl_Position = proj * vec4(vertex, 1.0);
+		TexCoords = texCoord;
 		}";
 	const static char* fragmentShaderSource = 
 		"#version 330 core
@@ -54,9 +56,11 @@ class RenderText : RenderObject, ResponsiveElement {
 		glGenBuffers(1, &VBO);
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, GLfloat.sizeof * 6 * 4, null, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, GLfloat.sizeof * 6 * 5, null, GL_DYNAMIC_DRAW);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * GLfloat.sizeof, cast(void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * GLfloat.sizeof, cast(void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * GLfloat.sizeof, cast(void*)(3 * float.sizeof));
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		if (!(windowID in textPrograms))
@@ -84,7 +88,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	}
 
 
-	protected GLfloat[4][6] vert;
+	protected GLfloat[5][6] vert;
 
 	static GLuint[UUID] textPrograms;
 
@@ -197,8 +201,12 @@ class RenderText : RenderObject, ResponsiveElement {
 	private static bool[UUID] orthoUpdated;
 
 	override nothrow void render() {
+		if (!visible)
+			return;
+
 		glUseProgram(textPrograms[windowID]);
 		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);
+		glUniform1f(glGetUniformLocation(textPrograms[windowID], "depth"), depth);
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -208,18 +216,18 @@ class RenderText : RenderObject, ResponsiveElement {
 			Character ch = Characters[c];
 
 			float xP = xPos + ch.xBearing * scale + xOffset;
-			float yP = yPos - (ch.ySize - ch.yBearing) * scale;
+			float yP = yPos  - (ch.ySize - ch.yBearing) * scale;
 			float w = ch.xSize * scale;
 			float h = ch.ySize * scale;
 
 			vert = [
-				[xP, yP+h,	0.0, 0.0],
-				[xP, yP,	0.0, 1.0],
-				[xP+w, yP,	1.0, 1.0],
+				[xP, yP+h, depth,		0.0, 0.0],
+				[xP, yP, depth,		0.0, 1.0],
+				[xP+w, yP, depth,		1.0, 1.0],
 
-				[xP, yP+h,	0.0, 0.0],
-				[xP+w, yP,	1.0, 1.0],
-				[xP+w, yP+h, 1.0, 0.0]
+				[xP, yP+h, depth,		0.0, 0.0],
+				[xP+w, yP, depth,		1.0, 1.0],
+				[xP+w, yP+h, depth,	1.0, 0.0]
 			];
 
 			glBindTexture(GL_TEXTURE_2D, ch.TextureID);

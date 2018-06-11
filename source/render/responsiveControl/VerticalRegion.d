@@ -20,7 +20,7 @@ class VerticalRegion : ResponsiveRegion {
 		float top = getPosition(Side.top);
 		float currentWidth = getPosition(Side.right) - getPosition(Side.left);
 		setFittingHeights();
-		foreach(RenderObject o; elements) {
+		foreach(RenderObject o; elements) {			//TODO: fix alignment for Right Side
 			ResponsiveElement e = cast(ResponsiveElement)o;
 			if (e.isStretchy()) {
 				o.setScale(currentWidth / 2f, o.getHeight());

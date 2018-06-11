@@ -1,24 +1,26 @@
 module render.screenComponents.ContentButton;
 
 import render.screenComponents;
-import render.window.WindowObject;
 import render.responsiveControl;
+import render.window.WindowObject;
 import render.Color;
 
 class RenderContentButton : RenderButton, ResponsiveElement {
 
-	RenderText displayText;
-	RenderScalingIcon icon;
+	protected RenderText displayText;
+	protected RenderScalingIcon icon;
 
 	int sidePadding = 10, topPadding = 10;
 
 	float defaultWidth, defaultHeight;
 
-	this(float width, float height, Color background, string label, WindowObject win) {
+	this(float width, float height, Color background, string label, WindowObject win, void delegate() nothrow click = null) {
 		displayText = new RenderText(label, 0, 0, 1f, win);
 		super(width, height, background, win);
 		defaultWidth = width;
 		defaultHeight = height;
+		if (click !is null)
+			setClick(click);
 	}
 	this(float width, float height, Color background, string iconTexture, int iconSide, WindowObject win) {
 		icon = new RenderScalingIcon(width, height, 0f, iconTexture, win);		//TODO: logic for height and width
@@ -46,16 +48,24 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	}
 
 	public override nothrow void setScale(float width, float height) {
-		super.setScale(width, height);
 		if (displayText !is null)
 			displayText.setMaxScale(width * 2 - sidePadding * 2, (height * 1.5f > height * 2 - topPadding * 2) ? (height * 1.5f) : (height * 2 - topPadding * 2));
 		if (icon !is null)
 			icon.setScale(height, height);		//need to update for scaling based on text size
+		super.setScale(width, height);
 	}
 
 	public override nothrow void setScaleAndPosition(float width, float height, float x, float y) {
 		setScale(width, height);
 		setPosition(x, y);
+	}
+
+	public override nothrow void setDepth(float depth) {
+		super.setDepth(depth);
+		if (displayText !is null)
+			displayText.setDepth(depth - .05f);
+		if (icon !is null)
+			icon.setDepth(depth - .05f);
 	}
 
 	public nothrow bool isStretchy() {return true;}
@@ -89,6 +99,8 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 
 
 	public override void render() {
+		if (!visible)
+			return;
 		super.render();
 		if (icon !is null)
 			icon.render();

@@ -140,7 +140,7 @@ abstract class WindowObject {
 			foreach(RegionBoarder b; r.boarders)
 				if (b.checkHover(x, y))
 					return;
-			foreach(RenderObject o; r.getRenderObjects()) {
+			foreach(RenderObject o; r.getRenderObjects() ~ r.getFixedRenderObjects()) {
 				if (auto a = cast(Hoverable)o)
 					a.checkHover(x, y);
 				if (auto a = cast(Draggable)o)
@@ -154,7 +154,7 @@ abstract class WindowObject {
 		foreach(ResponsiveRegion r; regions) {
 			foreach(RegionBoarder b; r.boarders)
 				b.mouseReleased();
-			foreach(RenderObject o; r.getRenderObjects())
+			foreach(RenderObject o; r.getRenderObjects() ~ r.getFixedRenderObjects())
 				if (auto a = cast(Clickable)o)
 					a.mouseReleased();
 		}
@@ -166,11 +166,22 @@ abstract class WindowObject {
 			foreach(RegionBoarder b; r.boarders)
 				if (b.checkClick(x, y, button))
 					return;
-			foreach(RenderObject o; r.getRenderObjects())
+			foreach(RenderObject o; r.getRenderObjects() ~ r.getFixedRenderObjects())
 				if (auto b = cast(Clickable)o)
 					if (b.checkClick(x, y, button))
 						return;
 		}
+	}
+
+	public nothrow void mouseScroll(float x, float y) {
+		foreach(ResponsiveRegion r; regions)
+			foreach(RenderObject o; r.getRenderObjects() ~ r.getFixedRenderObjects())
+				if(o.within(cursorXPos, cursorYPos))
+					if (auto s = cast(Scrollable)o) {
+						s.scroll(x, y);
+						return;
+					}
+
 	}
 
 
@@ -179,7 +190,7 @@ abstract class WindowObject {
 		foreach(ResponsiveRegion r; regions) {
 			foreach(RegionBoarder b; r.boarders)
 				b.onDestroy();
-			foreach(RenderObject o; r.getRenderObjects())
+			foreach(RenderObject o; r.getRenderObjects() ~ r.getFixedRenderObjects())
 				o.onDestroy();
 		}
 	}

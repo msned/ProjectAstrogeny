@@ -59,6 +59,9 @@ nothrow void glfwCursorPositionCallback(GLFWwindow* window, double xPos, double 
 }
 
 extern(C)
-nothrow void glfwScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	
+nothrow void glfwScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+	auto winO = window in windowObjects;
+	if (winO !is null) {
+		winO.mouseScroll(xOffset, yOffset);
+	}
 }
