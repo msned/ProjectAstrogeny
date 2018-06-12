@@ -4,20 +4,24 @@ import render.window.WindowObject;
 import render.screenComponents;
 import render.Color;
 import render.TextureUtil;
+import render.responsiveControl;
+import derelict.opengl;
 
 class RenderDropdown : RenderContentButton {
 
 	private bool displaying;
-	uint up, down;
+	GLuint up, down;
 	RenderScrollList list;
 	
+
 	this(float width, float height, Color background, string label, RenderScrollList scroll, WindowObject win) {
-		icon = new RenderScalingIcon(width, height, 0f, "down_arrow.png", win);
+		icon = new RenderScalingIcon(minimumIconSize, minimumIconSize, 0f, "down_arrow.png", win);
 		icon.setColor(Colors.Creation);
 		down = LoadTexture("down_arrow.png", win.windowID);
 		up = LoadTexture("up_arrow.png", win.windowID);
 		list = scroll;
 		super(width, height, background, label, win);
+		iconSide = Side.left;
 		list.setVisible(false);
 		setClick(&toggleDropdown);
 	}

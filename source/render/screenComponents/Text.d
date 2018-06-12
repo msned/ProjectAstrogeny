@@ -12,7 +12,7 @@ import std.stdio;
 class RenderText : RenderObject, ResponsiveElement {
 
 	string displayText;
-	float scale;
+	public float scale;
 
 	float minTextScale = .1f;
 
@@ -126,7 +126,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	public nothrow float getMaxScale(float width, float height) {
 		float xScale, yScale;
 		int maxY = 0;
-		long xTotal = 0;
+		int xTotal = 0;
 		foreach(char c; displayText) {
 			Character ch = Characters[c];
 			if (ch.ySize > maxY)

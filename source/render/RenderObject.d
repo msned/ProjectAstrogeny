@@ -9,6 +9,7 @@ import render.Fonts;
 import render.Color;
 import std.signals;
 import std.conv;
+import Settings;
 
 class RenderObject {
 
@@ -194,7 +195,7 @@ class RenderObject {
 	}
 
 	this (float xPos, float yPos, float depth, float width, float height, string textureName, WindowObject windowObj) {
-		setScale(width, height);
+		setScale(width * GUIScale, height * GUIScale);
 		this(xPos, yPos, depth, textureName, windowObj);
 	}
 
@@ -270,12 +271,6 @@ class RenderObject {
 
 	protected static nothrow void initProj(UUID winID) {
 		projMatrices[winID] = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
-	}
-
-	static nothrow void safeWriteln(string input) {
-		try {
-			writeln(input);
-		} catch (Exception e) {}
 	}
 
 	public static nothrow void delegate(GLdouble, GLdouble, UUID)[][UUID] orthoUpdates;

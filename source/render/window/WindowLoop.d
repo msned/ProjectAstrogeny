@@ -10,6 +10,7 @@ import std.range;
 import std.stdio;
 import core.thread;
 import GameState;
+import Settings;
 
 __gshared WindowObject[] windowList;
 
@@ -26,7 +27,8 @@ public void WindowLoop() {
 				break;
 			}
 		}
-		glfwSwapInterval(1);
+		if (VSync)
+			glfwSwapInterval(1);
 
 		foreach(i; removeList){
 			RemoveWindow(i);

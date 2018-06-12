@@ -17,7 +17,7 @@ enum Side {left = -1, top = 2, right = 1, bottom = -2};
 
 abstract class AnchorPoint {
 	AnchorType type;
-	bool locked;
+	bool locked;	//Locked determines whether the region will be hidden if the anchor point can't fit on screen
 	Side assignedAnchor;
 	
 	this(bool lock, Side assigned) {
@@ -106,8 +106,11 @@ class AnchorPixel : AnchorPoint {
 	
 	float pixels;
 
+	/++
+	Anchors a specific number of pixels from the other side of the region
+	+/
 	this(float pixels, bool lock, Side assigned) {
-		this.pixels = pixels;
+		this.pixels = pixels * GUIScale;
 		super(lock, assigned);
 		type = AnchorType.pixel;
 	}
@@ -123,7 +126,7 @@ class AnchorPixel : AnchorPoint {
 			return p;
 		} else {
 			float p = reg.getPosition(-assignedAnchor) + assignedAnchor / 2 * pixels;
-			if (locked && (p < -reg.windowHeight / 2 || p > reg.windowWidth / 2))
+			if (locked && (p < -reg.windowHeight / 2 || p > reg.windowHeight / 2))
 				reg.setHidden();
 			return p;
 		}
@@ -257,6 +260,8 @@ class ResponsiveRegion {
 
 	protected RenderObject[] elements;
 
+	protected RenderObject[] renderElements;
+
 	protected RenderObject[] fixedElements;
 
 	protected AnchorPoint leftAnchor, topAnchor, rightAnchor, bottomAnchor;
@@ -295,6 +300,7 @@ class ResponsiveRegion {
 			boarders ~= bottomB;
 		}
 		sizeBoarders();
+		sortElements();
 	}
 
 	protected nothrow void sizeBoarders() {
@@ -391,6 +397,17 @@ class ResponsiveRegion {
 	}
 
 	/++
+	Adds an array of RenderObjects that implement ResonsiveElement
+	+/
+	public void addObjects(RenderObject [] o) {
+		static if (DEBUG) {
+			foreach(RenderObject c; o)
+				enforce(cast(ResponsiveElement)c, "All added objects must be of type ResponsiveElement");
+		}
+		elements ~= o;
+	}
+
+	/++
 	Removes the object if it exists
 	+/
 	public void removeObject(RenderObject o) {
@@ -439,13 +456,15 @@ class ResponsiveRegion {
 	/++
 	Sorts the RenderObject element array with highest depth first
 	++/
-	public void sortElements() {
-		for(int i = elements.length - 1; i > 0; i--) {		//bubble sort for in-place space efficiency and best case for a mostly sorted list
+	public nothrow void sortElements() {
+		renderElements.length = elements.length;
+		renderElements[] = elements;
+		for(int i = renderElements.length - 1; i > 0; i--) {		//bubble sort for in-place space efficiency and best case for a mostly sorted list
 			for(int j = 0; j < i; j++) {
-				if (elements[j].getDepth() < elements[j+1].getDepth()) {
-					RenderObject tmp = elements[j+1];
-					elements[j+1] = elements[j];
-					elements[j] = tmp;
+				if (renderElements[j].getDepth() < renderElements[j+1].getDepth()) {
+					RenderObject tmp = renderElements[j+1];
+					renderElements[j+1] = renderElements[j];
+					renderElements[j] = tmp;
 				}
 			}
 		}
@@ -454,14 +473,10 @@ class ResponsiveRegion {
 	public nothrow void renderObjects() {
 		if (hidden)
 			return;
-		if (renderBackground) {
+		if (renderBackground)
 			background.render();
-			//glScissor(cast(int)abs(leftBound + windowWidth / 2f), cast(int)abs(windowHeight / 2f + bottomBound), cast(int)abs(rightBound - leftBound), cast(int)abs(topBound - bottomBound));
-			//glClearColor(Colors.Golden_Dragons.red, Colors.Golden_Dragons.green, Colors.Golden_Dragons.blue, 1f);
-			//glClear(GL_COLOR_BUFFER_BIT);
-			//glScissor(0, 0, cast(int)windowWidth, cast(int)windowHeight);
-		}
-		foreach (RenderObject e; elements) {
+
+		foreach (RenderObject e; renderElements) {
 			e.render();
 		}
 		foreach(RenderObject o; fixedElements) {
@@ -475,11 +490,10 @@ class ResponsiveRegion {
 			rightB.render();
 		if (bottomB !is null)
 			bottomB.render();
-
 	}
 
 	/++
-	Scales and shifts the elements to fill the bounds given
+	Scales and shifts the elements to fill the bounds given, called on window resizes, returns true on success
 	+/
 	public nothrow bool updateElements(float width, float height) {
 		windowWidth = width;

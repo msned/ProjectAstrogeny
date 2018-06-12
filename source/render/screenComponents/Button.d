@@ -7,17 +7,19 @@ import std.stdio;
 
 class RenderButton : RenderObject, Clickable {
 
-	protected nothrow void delegate() click;
-	protected nothrow void delegate() rClick;
+	protected nothrow void delegate()[] click;
+	protected nothrow void delegate()[] rClick;
 
 	public nothrow bool checkClick(float x, float y, int button) {
 		if (within(x, y)) {
 				if (button == 0) {
 					if (click !is null)
-						click();
+						foreach(void delegate() nothrow c; click)
+							c();
 				} else if (button == 1) {
 					if (rClick !is null)
-						rClick();
+						foreach(void delegate() nothrow r; rClick)
+							r();
 				}
 				return true;
 			}
@@ -43,10 +45,10 @@ class RenderButton : RenderObject, Clickable {
 	}
 
 	public void setClick(void delegate() nothrow c) {
-		click = c;
+		click ~= c;
 	}
 	public void setRClick(void delegate() nothrow rC) {
-		rClick = rC;
+		rClick ~= rC;
 	}
 	
 }

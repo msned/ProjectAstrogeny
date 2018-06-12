@@ -11,7 +11,7 @@ import render.Fonts;
 import Input;
 import std.uuid;
 import std.stdio;
-import std.conv;
+import Settings;
 
 WindowObject[GLFWwindow*] windowObjects;
 
@@ -36,9 +36,9 @@ abstract class WindowObject {
 	GLFWwindow* getGLFW() { return window; }
 
 	this(string name, int x = 960, int y = 540) {
-		window = glfwCreateWindow(x, y, cast(char*)name, null, null);
-		sizeX = x;
-		sizeY = y;
+		sizeX = cast(int)(x * GUIScale);
+		sizeY = cast(int)(y * GUIScale);
+		window = glfwCreateWindow(sizeX, sizeY, cast(char*)name, null, null);
 		windowName = name;
 		windowID = randomUUID();
 		//GLFW setup
@@ -64,6 +64,10 @@ abstract class WindowObject {
 		RenderInit();
 		FontInit();
 		loadRenderObjects();
+		foreach(ResponsiveRegion r; regions)
+			r.postInit(sizeX, sizeY);
+		sortRegions();
+
 		updateResponsiveElements();
 		glfwMakeContextCurrent(old);
 	}
@@ -82,10 +86,6 @@ abstract class WindowObject {
 	public nothrow void renderObjects() {
 		glViewport(0, 0, sizeX, sizeY);
 		glScissor(0, 0, sizeX, sizeY);
-		//TODO: Depreciate direct object rendering
-		foreach(RenderObject o; objects) {
-			o.render();
-		}
 
 		foreach(ResponsiveRegion r; regions)
 			r.renderObjects();
@@ -213,6 +213,12 @@ abstract class WindowObject {
 		}
 	}
 
+}
+
+nothrow void writelnNothrow(T)(T s) {
+	try {
+		writeln(s);
+	} catch (Exception e) {}
 }
 
 extern (C)

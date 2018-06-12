@@ -11,8 +11,12 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	protected RenderScalingIcon icon;
 
 	int sidePadding = 10, topPadding = 10;
+	Side iconSide;
 
 	float defaultWidth, defaultHeight;
+
+	protected float minimumFontSize = .15f;
+	protected float minimumIconSize = 10f;
 
 	this(float width, float height, Color background, string label, WindowObject win, void delegate() nothrow click = null) {
 		displayText = new RenderText(label, 0, 0, 1f, win);
@@ -22,36 +26,61 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 		if (click !is null)
 			setClick(click);
 	}
-	this(float width, float height, Color background, string iconTexture, int iconSide, WindowObject win) {
-		icon = new RenderScalingIcon(width, height, 0f, iconTexture, win);		//TODO: logic for height and width
+	this(float width, float height, Color background, string iconTexture, Side iconSide, WindowObject win) {
+		icon = new RenderScalingIcon(minimumIconSize, minimumIconSize, 0f, iconTexture, win);
 		super(width, height, background, win);
 		defaultWidth = width;
 		defaultHeight = height;
+		this.iconSide = iconSide;
+		justIcon = true;
 	}
-	this(float width, float height, Color background, string label, string iconTexture, int iconSide, WindowObject win) {
+	this(float width, float height, Color background, string label, string iconTexture, Side iconSide, WindowObject win) {
 		displayText = new RenderText(label, 0, 0, 1f, win);
 		displayText.setMaxScale(width, height);
 
-		icon = new RenderScalingIcon(width, height, 0f, iconTexture, win);		//TODO: logic for height and width
+		icon = new RenderScalingIcon(minimumIconSize, minimumIconSize, 0f, iconTexture, win);
 		super(width, height, background, win);
 		defaultWidth = width;
 		defaultHeight = height;
+		this.iconSide = iconSide;
 	}
+
+	private bool justIcon = false;
 
 
 	public override nothrow void setPosition(float x = 0, float y = 0) {
 		super.setPosition(x, y);
-		if (displayText !is null)
-			displayText.setPosition(x - displayText.getTextLength() / 2, y - displayText.getTextHeight() / 2);		//Update logic to handle icons and text side by side
-		if (icon !is null)
-			icon.setPosition(x - displayText.getTextLength() / 2 - sidePadding - icon.getWidth(), y);
+		if (justIcon) {
+			icon.setPosition(x, y);
+		} else {
+			if (displayText !is null)
+				displayText.setPosition(x - displayText.getTextLength() / 2 - ((icon !is null) ? (iconSide * (icon.getWidth() + sidePadding / 2f)) : (0)), y - displayText.getTextHeight() / 2);		//Update logic to handle icons and text side by side
+			if (icon !is null)
+				icon.setPosition(x + iconSide * (displayText.getTextLength() / 2 + sidePadding / 2f), y);
+		}
 	}
 
 	public override nothrow void setScale(float width, float height) {
-		if (displayText !is null)
-			displayText.setMaxScale(width * 2 - sidePadding * 2, (height * 1.5f > height * 2 - topPadding * 2) ? (height * 1.5f) : (height * 2 - topPadding * 2));
-		if (icon !is null)
-			icon.setScale(height, height);		//need to update for scaling based on text size
+		if (icon !is null) {
+			if (width < height) {
+				icon.setScale(width, width);
+			} else {
+				icon.setScale(height, height);
+			}
+		}
+		if (displayText !is null) {
+			if (icon !is null) {
+				float sl = displayText.getMaxScale(width * 2 - sidePadding * 3 - icon.getWidth() * 2, (height * 1.5f > height * 2 - topPadding * 2) ? (height * 1.5f) : (height * 2 - topPadding * 2));
+				if (sl < minimumFontSize) {
+					justIcon = true;
+				} else {
+					justIcon = false;
+					displayText.scale = sl;
+				}
+			} else {
+				displayText.setMaxScale(width * 2 - sidePadding * 2, (height * 1.5f > height * 2 - topPadding * 2) ? (height * 1.5f) : (height * 2 - topPadding * 2));
+			}
+		}
 		super.setScale(width, height);
 	}
 
@@ -73,9 +102,12 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	public nothrow float getMinWidth() {
 		if (icon is null) {
 			if (displayText !is null)
-				return displayText.getMinWidth();
+				return displayText.getMinWidth() / 2f + sidePadding;
 		} else {
-			return icon.getMinWidth();
+			if (displayText !is null)
+				return displayText.getMinWidth() / 2f + icon.getMinWidth() + sidePadding;
+			else
+				return icon.getMinWidth() + sidePadding;
 		}
 		return 0;
 	}
@@ -104,8 +136,9 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 		super.render();
 		if (icon !is null)
 			icon.render();
-		if (displayText !is null)
-			displayText.render();
+		if (!justIcon)
+			if (displayText !is null)
+				displayText.render();
 	}
 	
 }

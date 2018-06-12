@@ -15,7 +15,7 @@ void FontInit() {
 	if (FT_New_Face(ft, "fonts/georgia.ttf", 0, &face))
 		throw new Exception("Font failed to load");
 
-	FT_Set_Pixel_Sizes(face, 0, fontSize);
+	FT_Set_Pixel_Sizes(face, 0, FontSize);
 	for(GLubyte c = 0; c < 128; c++) {
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 			writeln("failed to load character: %c", c);

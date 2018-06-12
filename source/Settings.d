@@ -7,4 +7,10 @@ const bool DEBUG = true;
 
 //Game Settings
 //======================================//
-int fontSize = 128;
+//Graphics
+float GUIScale = 1f;
+bool VSync = true;
+int FontSize = 128;
+//Audio
+float masterVolume = 1f;
+//Controls

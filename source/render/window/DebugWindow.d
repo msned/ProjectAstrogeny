@@ -17,7 +17,7 @@ class DebugWindow : WindowObject {
 		regions ~= left;
 		ResponsiveRegion topRight = new VerticalGridRegion(new AnchorRegion(left, Side.left), new AnchorPercentage(1f, Side.top), new AnchorPercentage(1f, Side.right), new DragPercentage(.75f, Side.bottom, new RegionBoarder(false, this), .9f));
 		regions ~= topRight;
-		ResponsiveRegion right = new VerticalRegion(new AnchorRegion(left, Side.left), new AnchorRegion(topRight, Side.top), new AnchorPercentage(1f, Side.right), new AnchorPercentage(-1f, Side.bottom), Side.left);
+		ResponsiveRegion right = new VerticalRegion(new AnchorRegion(left, Side.left), new AnchorRegion(topRight, Side.top), new AnchorPercentage(1f, Side.right), new AnchorPercentage(-1f, Side.bottom), Side.right);
 		regions ~= right;
 
 		RenderScrollList lst = new RenderScrollList(40f, 20f, this);
@@ -28,7 +28,7 @@ class DebugWindow : WindowObject {
 		right.addObject(new RenderDropdown(40f, 20f, Colors.Dark_Creek, "Drops", lst, this));
 		right.addFixedObject(lst);
 
-		right.addObject(new RenderScalingIcon(40f, 40f, .5f, "file_new.png", this));
+		right.addObject(new RenderScalingIcon(40f, 40f, .6f, "file_new.png", this));
 
 		//Sort regions by decreasing priority
 		left.addObject(new RenderContentButton(80, 40, Colors.Rose, "Welcome", this));
@@ -54,11 +54,6 @@ class DebugWindow : WindowObject {
 		topBack.setColor(Colors.Golden_Dragons);
 		topBack.setDepth(.9f);
 		topRight.setBackground(topBack);
-
-		foreach(ResponsiveRegion r; regions)
-			r.postInit(sizeX, sizeY);
-
-		sortRegions();
 	}
 
 	private nothrow void scrollC(float val) {
@@ -70,7 +65,7 @@ class DebugWindow : WindowObject {
 
 
 	public override nothrow void characterInput(uint i) {
-
+		//No implementation from Input yet
 	}
 	
 }

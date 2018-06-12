@@ -14,6 +14,12 @@ class RenderScalingIcon : RenderObject, ResponsiveElement {
 		minHeight = height;
 	}
 
+	public override nothrow void render() {
+		if (width < minWidth || height < minHeight)
+			return;
+		super.render();
+	}
+
 	public nothrow bool isStretchy() {return false; }
 
 	public nothrow float getMinWidth() {

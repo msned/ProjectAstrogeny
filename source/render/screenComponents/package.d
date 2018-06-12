@@ -1,6 +1,7 @@
 module render.screenComponents;
 
 public import
+	render.screenComponents.Selectable,
 	render.screenComponents.Text,
 	render.screenComponents.Button,
 	render.screenComponents.Slider,
@@ -12,6 +13,8 @@ public import
 	render.screenComponents.ContentButton,
 	render.screenComponents.ScalingIcon,
 	render.screenComponents.Scrollable,
-	render.screenComponents.ScrollList;
+	render.screenComponents.Spacer,
+	render.screenComponents.ScrollList,
+	render.screenComponents.ToggleSwitch;
 
 public import render.RenderObject;

@@ -9,23 +9,26 @@ class VerticalRegion : ResponsiveRegion {
 
 	Side alignment;
 
-	this(AnchorPoint left, AnchorPoint top, AnchorPoint right, AnchorPoint bottom, Side alignment, int pri = 0) {
-		super(left, top, right, bottom, pri);
-		this.alignment = alignment;
+	this(AnchorPoint left, AnchorPoint top, AnchorPoint right, AnchorPoint bottom, Side alignment = Side.left, int pri = 0) {
 		static if (DEBUG)
 			enforce(alignment == Side.left || alignment == Side.right, "Alignment is only valid for left or right");
+		super(left, top, right, bottom, pri);
+		this.alignment = alignment;
+	}
+	this(VerticalRegion reg) {
+		this(reg.getAnchor(Side.left), reg.getAnchor(Side.top), reg.getAnchor(Side.right), reg.getAnchor(Side.bottom), reg.alignment, reg.priority);
 	}
 	
 	override protected nothrow void arrangeElements() {
 		float top = getPosition(Side.top);
 		float currentWidth = getPosition(Side.right) - getPosition(Side.left);
 		setFittingHeights();
-		foreach(RenderObject o; elements) {			//TODO: fix alignment for Right Side
+		foreach(RenderObject o; elements) {
 			ResponsiveElement e = cast(ResponsiveElement)o;
 			if (e.isStretchy()) {
 				o.setScale(currentWidth / 2f, o.getHeight());
 			}
-			o.setPosition(o.getWidth() - alignment * getPosition(alignment), top - o.getHeight());
+			o.setPosition(getPosition(alignment) - alignment * o.getWidth(), top - o.getHeight());
 			top -= o.getHeight() * 2;
 		}
 	}
@@ -35,6 +38,17 @@ class VerticalRegion : ResponsiveRegion {
 	+/
 	private nothrow void setFittingHeights() {
 		float height = getPosition(Side.top) - getPosition(Side.bottom);
+
+		float minHeight = 0, defaultHeight = 0;
+		foreach(RenderObject o; elements) {
+			auto e = cast(ResponsiveElement)o;
+			minHeight += e.getMinHeight();
+			defaultHeight += e.getDefaultHeight();
+			o.setScale(e.getDefaultWidth(), e.getDefaultHeight());
+		}
+		if (defaultHeight <= height / 2)
+			return;
+
 		RenderObject[] h = new RenderObject[elements.length];
 		h[] = elements;
 		for(int i = 0; i < h.length - 1; i++) { //Selection sort by difference between default and minimum height in decending order
@@ -48,13 +62,7 @@ class VerticalRegion : ResponsiveRegion {
 			h[i] = o;
 		}
 
-		float minHeight = 0, defaultHeight = 0;
-		foreach(RenderObject o; h) {
-			auto e = cast(ResponsiveElement)o;
-			minHeight += e.getMinHeight();
-			defaultHeight += e.getDefaultHeight();
-			o.setScale(e.getDefaultWidth(), e.getDefaultHeight());
-		}
+		//Algorithm also used in HorizontalRegion
 
 		int minIndex = h.length - 1;
 		while (defaultHeight > height / 2) {
