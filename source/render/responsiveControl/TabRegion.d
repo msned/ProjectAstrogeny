@@ -106,9 +106,4 @@ class TabRegion : ResponsiveRegion {
 				return false;
 		return true;
 	}
-
-
-
-
-
 }

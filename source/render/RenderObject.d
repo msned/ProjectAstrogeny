@@ -78,14 +78,14 @@ class RenderObject {
 		return height;
 	}
 
-	public void setColor(float red, float green, float blue) {
+	public nothrow void setColor(float red, float green, float blue) {
 		vertices[3] = vertices[11] = vertices[19] = vertices[27] = red;
 		vertices[4] = vertices[12] = vertices[20] = vertices[28] = green;
 		vertices[5] = vertices[13] = vertices[21] = vertices[29] = blue;
 		updateVertices = true;
 	}
 
-	public void setColor(Color c) {
+	public nothrow void setColor(Color c) {
 		setColor(c.red, c.green, c.blue);
 	}
 

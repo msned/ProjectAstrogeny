@@ -25,7 +25,7 @@ class DebugWindow : WindowObject {
 							try {writeln("first clicked");} catch (Exception e) {}
 							}), 
 						 new RenderContentButton(40f, 10f, Colors.Creation, "small", this)]);
-		right.addObject(new RenderDropdown(40f, 20f, Colors.Dark_Creek, "Drops", lst, this));
+		right.addObject(new RenderDropdown(40f, 20f, Colors.Dark_Creek, "Drops", this, lst));
 		right.addFixedObject(lst);
 
 		right.addObject(new RenderScalingIcon(40f, 40f, .6f, "file_new.png", this));

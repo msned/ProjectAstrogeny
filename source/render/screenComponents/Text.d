@@ -6,6 +6,7 @@ import render.window.WindowObject;
 import render.screenComponents;
 import render.responsiveControl;
 import render.Fonts;
+import render.Color;
 import std.uuid;
 import std.stdio;
 
@@ -45,9 +46,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		color = vec4(textColor, 1.0) * sampled;
 		} ";
 
-	this(string displayText, float x, float y, float scale, WindowObject windowObj) {
-		super.xPos = x;
-		super.yPos = y;
+	this(string displayText, float scale, WindowObject windowObj) {
 		this.scale = scale;
 		this.defaultScale = scale;
 		this.displayText = displayText;
@@ -74,6 +73,18 @@ class RenderText : RenderObject, ResponsiveElement {
 		}
 	}
 
+	this(string displayText, float x, float y, float scale, WindowObject windowObj) {
+		xPos = x;
+		yPos = y;
+		this(displayText, scale, windowObj);
+	}
+	this(string displayText, float width, float height, WindowObject windowObj) {
+		this.width = width;
+		this.height = height;
+		this(displayText, 1f, windowObj);
+		setMaxScale(width * 2, height * 2);
+	}
+
 	private static bool[UUID] registeredOrtho;
 
 	protected float colorR = 210 /255f, colorG = 118 /255f, colorB = 94 /255f;
@@ -82,9 +93,13 @@ class RenderText : RenderObject, ResponsiveElement {
 	Sets the color of the text to RGB values from 0 to 255
 	++/
 	public override void setColor(float r, float g, float b) {
-		colorR = r / 255;
-		colorG = g / 255;
-		colorB = b / 255;
+		colorR = r;
+		colorG = g;
+		colorB = b;
+	}
+
+	public override void setColor(Color c) {
+		setColor(c.red, c.green, c.blue);
 	}
 
 
@@ -120,6 +135,24 @@ class RenderText : RenderObject, ResponsiveElement {
 		return getTextLength(scale);
 	}
 
+	public override nothrow float getWidth() {
+		return getTextLength() / 2f;
+	}
+	public override nothrow float getHeight() {
+		return getTextHeight() / 2f;
+	}
+
+	public override nothrow void setPosition(float x = 0, float y = 0) {
+		super.setPosition(x - getWidth(), y - getHeight());
+	}
+
+	float boundingWidth, boundingHeight;
+
+	public nothrow void setText(string text) {
+		displayText = text;
+		setMaxScale(boundingWidth, boundingHeight);
+	}
+
 	/++
 	Returns the largest scale for which the text will fit within the given size contraints
 	+/
@@ -140,6 +173,8 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	public nothrow void setMaxScale(float width, float height) {
 		scale = getMaxScale(width, height);
+		boundingWidth = width;
+		boundingHeight = height;
 	}
 
 	public nothrow float getMinWidth() {
@@ -154,7 +189,6 @@ class RenderText : RenderObject, ResponsiveElement {
 	public nothrow float getDefaultHeight() {
 		return getTextHeight(defaultScale);
 	}
-
 
 	public nothrow bool isStretchy() { return false; }
 

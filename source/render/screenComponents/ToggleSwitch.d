@@ -11,30 +11,45 @@ class RenderToggleSwitch : RenderButton, ResponsiveElement {
 	
 	bool toggleState = false;
 
+	Color onColor, offColor = Colors.Mystic;
+
 	float size;
 
 	GLuint off, on;
 
-	this(float width, Color color, WindowObject win) {
+	private nothrow void delegate(bool) toggles;
+
+	this(float width, Color color, void delegate(bool) nothrow toggle, WindowObject win, bool initValue = false) {
 		super(width, width, "switch_off.png", win);
 		size = width;
-		setColor(color);
+		this.onColor = color;
+		setColor(offColor);
 		off = LoadTexture("switch_off.png", win.windowID);
 		on = LoadTexture("switch_on.png", win.windowID);
+		if (initValue) {
+			texture = on;
+			setColor(onColor);
+		}
+		toggleState = initValue;
 		setClick(&toggleSwitch);
+		toggles = toggle;
 	}
 
 	public nothrow void setToggle(bool t) {
 		toggleState = t;
 		if (toggleState) {
 			texture = on;
+			setColor(onColor);
 		} else {
 			texture = off;
+			setColor(offColor);
 		}
 	}
 
 	private nothrow void toggleSwitch() {
-		
+		setToggle(!toggleState);
+		if (toggles !is null)
+			toggles(toggleState);
 	}
 
 	public nothrow bool isStretchy() {return false; }

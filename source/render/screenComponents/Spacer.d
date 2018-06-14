@@ -6,7 +6,7 @@ import render.window.WindowObject;
 
 class RenderSpacer : RenderObject, ResponsiveElement {
 	
-	this(float width, float height, WindowObject win) {
+	this(float width, float height) {
 		setScale(width, height);
 		setDepth(1f);
 	}

@@ -41,7 +41,7 @@ void main() {
 	running = true;
 	auto mainthread = new Thread(&mainLoop).start();
 
-	WindowObject deb = AddWindow(new DebugWindow());
+	//WindowObject deb = AddWindow(new DebugWindow());
 	WindowObject settings = AddWindow(new SettingsWindow());
 
 	WindowLoop();

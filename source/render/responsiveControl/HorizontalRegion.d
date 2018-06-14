@@ -21,19 +21,22 @@ class HorizontalRegion : ResponsiveRegion {
 
 	float spacing = 2f;
 
-	protected override nothrow void arrangeElements() {
+	protected override nothrow void arrangeElements() { 
 		float width = getPosition(Side.right) - getPosition(Side.left);
 		float height = getPosition(Side.top) - getPosition(Side.bottom);
 		float total = 0;
-		foreach(RenderObject o; elements)
-			total += o.getWidth() * 2;
+		foreach(RenderObject o; elements) {
+			auto e = cast(ResponsiveElement)o;
+			total += e.getDefaultWidth() * 2;
+		}
 		if (total <= width) {	//fill from the left
 			total = getPosition(Side.left);
 			foreach(RenderObject o; elements) {
-				if ((cast(ResponsiveElement)o).isStretchy())
-					o.setScaleAndPosition(o.getWidth(), height / 2f, total + o.getWidth(), getPosition(alignment) - (alignment / 2f) * (height / 2f));
+				auto c = cast(ResponsiveElement)o;
+				if (c.isStretchy())
+					o.setScaleAndPosition(c.getDefaultWidth(), height / 2f, total + c.getDefaultWidth(), getPosition(alignment) - (alignment / 2f) * (height / 2f));
 				else
-					o.setPosition(total + o.getWidth(), getPosition(alignment) - (alignment / 2f * o.getHeight()));
+					o.setPosition(total + c.getDefaultWidth(), getPosition(alignment) - (alignment / 2f * c.getDefaultHeight()));
 				total += o.getWidth() * 2 + spacing;
 			}
 		} else {				//fill the whole region 
@@ -66,11 +69,11 @@ class HorizontalRegion : ResponsiveRegion {
 				for(int i = minIndex; i >= 0; i--) {
 					if ((cast(ResponsiveElement)h[minIndex]).getDifferenceWidth() >= wid) {
 						defaultWidth -= h[i].getWidth();
-						h[i].setScale(h[i].getWidth() - wid, h[i].getHeight());
+						h[i].setScale(h[i].getWidth() - wid, height / 2f);
 						defaultWidth += h[i].getWidth();
 					} else {
 						defaultWidth -= h[i].getWidth();
-						h[i].setScale(h[i].getWidth() - (cast(ResponsiveElement)h[minIndex]).getDifferenceWidth(), h[i].getHeight());
+						h[i].setScale(h[i].getWidth() - (cast(ResponsiveElement)h[minIndex]).getDifferenceWidth(), height / 2f);
 						defaultWidth += h[i].getWidth();
 					}
 				}
@@ -78,6 +81,16 @@ class HorizontalRegion : ResponsiveRegion {
 					break;
 			}
 
+			total = getPosition(Side.left);
+			foreach(RenderObject o; elements) {
+				o.setPosition(total + o.getWidth(), getPosition(alignment) - (alignment / 2f * o.getHeight()));
+				total += o.getWidth() * 2 + spacing;
+			}
+
 		}
+	}
+
+	public override void renderObjects() {
+		super.renderObjects();
 	}
 }

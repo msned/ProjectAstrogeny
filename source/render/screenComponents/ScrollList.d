@@ -16,9 +16,7 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 	private WindowObject window;
 	
 	this(float width, float height, WindowObject win) {
-		super("blank.png", win);
-		setColor(Colors.Mystic);
-		setDepth(.06f);
+		super(0, 0, 0.06f, width, height, "blank.png", win);
 		window = win;
 	}
 
@@ -74,10 +72,12 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		if (!visible)
 			return false;
 
-		foreach(RenderObject o; items)
-			if (auto a = cast(Clickable)o)
-				if (a.checkClick(x, y, button))
-					return true;
+		if (x < xPos + width && x > xPos - width && y < yPos + height && y > yPos - height) {
+			foreach(RenderObject o; items)
+				if (auto a = cast(Clickable)o)
+					if (a.checkClick(x, y, button))
+						return true;
+		}
 		return false;
 	}
 
@@ -102,7 +102,7 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		glGetIntegerv(GL_SCISSOR_BOX, &oldScissor[0]);
 		glScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
 
-		super.render();
+		//super.render();
 		foreach(RenderObject o; items)
 			o.render();
 

@@ -54,7 +54,7 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 			icon.setPosition(x, y);
 		} else {
 			if (displayText !is null)
-				displayText.setPosition(x - displayText.getTextLength() / 2 - ((icon !is null) ? (iconSide * (icon.getWidth() + sidePadding / 2f)) : (0)), y - displayText.getTextHeight() / 2);		//Update logic to handle icons and text side by side
+				displayText.setPosition(x - ((icon !is null) ? (iconSide * (icon.getWidth() + sidePadding / 2f)) : (0)), y);		//Update logic to handle icons and text side by side
 			if (icon !is null)
 				icon.setPosition(x + iconSide * (displayText.getTextLength() / 2 + sidePadding / 2f), y);
 		}
@@ -95,6 +95,13 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 			displayText.setDepth(depth - .05f);
 		if (icon !is null)
 			icon.setDepth(depth - .05f);
+	}
+
+	public nothrow void setText(string s) {
+		if (displayText is null)
+			return;
+		displayText.setText(s);
+		setScale(width, height);
 	}
 
 	public nothrow bool isStretchy() {return true;}

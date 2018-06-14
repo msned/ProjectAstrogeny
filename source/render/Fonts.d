@@ -12,7 +12,7 @@ FT_Face face;
 void FontInit() {
 	if (FT_Init_FreeType(&ft))
 		throw new Exception("FreeType failed to load");
-	if (FT_New_Face(ft, "fonts/georgia.ttf", 0, &face))
+	if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ FontName ~ ".ttf"), 0, &face))
 		throw new Exception("Font failed to load");
 
 	FT_Set_Pixel_Sizes(face, 0, FontSize);
@@ -38,6 +38,21 @@ void FontInit() {
 			face.glyph.advance.x
 		};
 		Characters[c] = ch;
+	}
+
+	FT_Done_FreeType(ft);
+}
+
+string GetFontType() {
+	switch(FontName) {
+		case "rockwell":
+			return "Regular";
+		case "rockwell_light":
+			return "Light";
+		case "rockwell_bold":
+			return "Bold";
+		default:
+			return FontName;
 	}
 }
 

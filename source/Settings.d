@@ -8,9 +8,10 @@ const bool DEBUG = true;
 //Game Settings
 //======================================//
 //Graphics
-float GUIScale = 1f;
+float GUIScale = 1.00f;
 bool VSync = true;
+string FontName = "rockwell";
 int FontSize = 128;
 //Audio
-float masterVolume = 1f;
+float MasterVolume = 1f;
 //Controls

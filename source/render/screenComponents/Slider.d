@@ -14,21 +14,30 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 	float value;
 	private bool currentlyDragging, vertical;
 
-	float endPadding = 10f;
+	private float endPadding = 10f;
 
-	nothrow void function(float) updateValue;
+	private float knobOverflow = 8f;
 
-	this(bool vertical, float minWidth, float minHeight, void function(float) nothrow updateValue, WindowObject win, float initValue = 0f) {
+	nothrow void delegate(float) updateValue;
+
+	bool stretchy = false;
+
+	this(bool vertical, float minWidth, float minHeight, void delegate(float) nothrow updateValue, WindowObject win, float initValue = 0f, bool stretchy = false) {
 		this.vertical = vertical;
 		this.minWidth = minWidth;
 		this.minHeight = minHeight;
 		this.updateValue = updateValue;
+		this.stretchy = stretchy;
+		this.value = initValue;
+		if (vertical)
+			knob = new RenderObject(getXPos(), getYPos(), 0f, minWidth + knobOverflow, 5f, "blank.png", win);
+		else
+			knob = new RenderObject(getXPos(), getYPos(), 0f, 5f, minHeight + knobOverflow, "blank.png", win);
+		knob.setColor(Colors.Rose);
+		setColor(Colors.Mystic);
 		super("blank.png", win);
 		setDepth(0.1f);
 		setScale(minWidth, minHeight);
-		knob = new RenderObject(getXPos(), getYPos(), 0f, 10, 10, "blank.png", win);
-		knob.setColor(Colors.Rose);
-		setValue(initValue);
 	}
 
 	private nothrow void setValue(float val) {
@@ -43,7 +52,7 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 			knob.setPosition(value * (width * 2 - endPadding * 2) + (getXPos() - width + endPadding), getYPos());
 		}
 		if (updateValue !is null)
-			updateValue(val);
+			updateValue(value);
 	}
 
 	public nothrow float getDefaultWidth() {
@@ -61,6 +70,15 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 
 	public nothrow void mouseReleased() {
 		currentlyDragging = false;
+	}
+
+	public override nothrow void setPosition(float x = 0, float y = 0) {
+		super.setPosition(x, y);
+		if (vertical) {
+			knob.setPosition(getXPos(), value * (height * 2 - endPadding * 2) + (getYPos() - height + endPadding));
+		} else {
+			knob.setPosition(value * (width * 2 - endPadding * 2) + (getXPos() - width + endPadding), getYPos());
+		}
 	}
 
 	public nothrow bool checkPosition(float x, float y) {
@@ -93,6 +111,8 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 	}
 
 	public nothrow bool checkClick(float x, float y, int button) {
+		if (button != 0)
+			return false;
 		if (vertical) {
 			if (within(x, y, width, height - endPadding)) {
 				currentlyDragging = true;
@@ -111,14 +131,13 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 	public nothrow void scroll(float x, float y) {
 		if (vertical) {
 			setValue(value + y / scrollDivider);
-		}
-		else {
-			setValue(value + x / scrollDivider);
+		} else {
+			setValue(value + y / scrollDivider);
 		}
 	}
 
 	bool isStretchy() {
-		return false;
+		return stretchy;
 	}
 
 	public override void render() {
