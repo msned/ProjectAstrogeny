@@ -11,6 +11,8 @@ const double[2][gases.max + 1] boilingPoints = [ gases.Hydrogen:[-252.879, 1], g
 const enum ats {Meth, CarbonDI, Oxygen};
 //Types of planets
 const enum planet_type {GasGiant, IceGiant, GasDwarf, Terrestrial};
+//Naturally occuring minerals and metals that are valuable resources
+const enum nat_resource {Ice=0, Silicon, Iron, Magnesium, Carbon, Sulfur, Nickel, Aluminum, Sodium, Titanium, Phosphorus, Potassium};
 
 /** Radius of sun*/
 immutable double solarRad = 695700;
@@ -68,12 +70,15 @@ class Atmosphere {
  */
 class Planet {
 	private:
-		/** mass of planet, average density, redius of planet in E, gravity in Gs,
+		/** mass of planet, average density, radius of planet in AU, gravity in Gs,
 		 * length of full rotation in earth years, velocity in m/s, angle from sun
 		 */
 		double mass, density, orbitRad, gravAccel, year, escapeVelocity;
 		Atmosphere atmos;
 		planet_type type;
+		double[nat_resource.max + 1] prominentRes;
+		double[nat_resource.max + 1] traceRes;
+
 	public:
 		this(planet_type type, Atmosphere atmos, double mass, double density, double orbitRad, double gravAccel, 
 			 double year, double escapeVelocity){
