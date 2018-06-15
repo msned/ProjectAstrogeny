@@ -12,10 +12,10 @@ FT_Face face;
 void FontInit() {
 	if (FT_Init_FreeType(&ft))
 		throw new Exception("FreeType failed to load");
-	if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ FontName ~ ".ttf"), 0, &face))
+	if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ GameSettings.FontName ~ ".ttf"), 0, &face))
 		throw new Exception("Font failed to load");
 
-	FT_Set_Pixel_Sizes(face, 0, FontSize);
+	FT_Set_Pixel_Sizes(face, 0, GameSettings.FontSize);
 	for(GLubyte c = 0; c < 128; c++) {
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 			writeln("failed to load character: %c", c);
@@ -44,7 +44,7 @@ void FontInit() {
 }
 
 string GetFontType() {
-	switch(FontName) {
+	switch(GameSettings.FontName) {
 		case "rockwell":
 			return "Regular";
 		case "rockwell_light":
@@ -52,7 +52,7 @@ string GetFontType() {
 		case "rockwell_bold":
 			return "Bold";
 		default:
-			return FontName;
+			return GameSettings.FontName;
 	}
 }
 

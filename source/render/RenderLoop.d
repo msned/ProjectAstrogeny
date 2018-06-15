@@ -26,7 +26,7 @@ public nothrow bool RenderInit() {
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(&MessageCallback, cast(void*)0);
 	glEnable(GL_SCISSOR_TEST);
-	if (VSync)
+	if (GameSettings.VSync)
 		glfwSwapInterval(1);
 	else
 		glfwSwapInterval(0);

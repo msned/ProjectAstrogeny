@@ -1,0 +1,2 @@
+- Throw if Bits!N is initialised with a value that is too big for N
+- Negative tests for when exceptions should be thrown

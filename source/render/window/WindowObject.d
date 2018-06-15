@@ -36,8 +36,8 @@ abstract class WindowObject {
 	GLFWwindow* getGLFW() { return window; }
 
 	this(string name, int x = 540, int y = 540) {
-		sizeX = cast(int)(x * GUIScale);
-		sizeY = cast(int)(y * GUIScale);
+		sizeX = cast(int)(x * GameSettings.GUIScale);
+		sizeY = cast(int)(y * GameSettings.GUIScale);
 		window = glfwCreateWindow(sizeX, sizeY, cast(char*)name, null, null);
 		windowName = name;
 		windowID = randomUUID();

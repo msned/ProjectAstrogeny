@@ -110,7 +110,7 @@ class AnchorPixel : AnchorPoint {
 	Anchors a specific number of pixels from the other side of the region
 	+/
 	this(float pixels, bool lock, Side assigned) {
-		this.pixels = pixels * GUIScale;
+		this.pixels = pixels * GameSettings.GUIScale;
 		super(lock, assigned);
 		type = AnchorType.pixel;
 	}

@@ -27,7 +27,7 @@ public void WindowLoop() {
 				break;
 			}
 		}
-		if (VSync)
+		if (GameSettings.VSync)
 			glfwSwapInterval(1);
 
 		foreach(i; removeList){

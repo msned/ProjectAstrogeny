@@ -6,6 +6,7 @@ import render.window.WindowObject;
 import render.Color;
 import std.conv;
 import Settings;
+import save.util.JSONLoading;
 import render.Fonts;
 
 class SettingsWindow : WindowObject {
@@ -42,25 +43,25 @@ class SettingsWindow : WindowObject {
 			controlGraphics.addObject(new RenderSpacer(1f, 5f));
 			labelGraphics.addObject(new RenderSpacer(1f, 10f));
 			valueGraphics.addObject(new RenderSpacer(1f, 15f));
-			RenderText vText = new RenderText(to!string(VSync), 100,  10, this);
+			RenderText vText = new RenderText(to!string(GameSettings.VSync), 100,  10, this);
 			vText.setColor(Colors.Plum);
 			valueGraphics.addObject(vText);
 			controlGraphics.addObject(new RenderToggleSwitch(30f, Colors.Patina, (bool val) {
-				VSync = val;
+				GameSettings.VSync = val;
 				vText.setText(to!string(val));
-			}, this, VSync));
+			}, this, GameSettings.VSync));
 			labelGraphics.addObject(new RenderText("V-Sync", 100, 15, this));
 
 			controlGraphics.addObject(new RenderSpacer(1f, 7f));
 			labelGraphics.addObject(new RenderSpacer(1f, 10f));
 			valueGraphics.addObject(new RenderSpacer(1f, 15f));
-			RenderText gText = new RenderText(getString(GUIScale, 4), 100, 10, this);
+			RenderText gText = new RenderText(getString(GameSettings.GUIScale, 4), 100, 10, this);
 			gText.setColor(Colors.Plum);
 			valueGraphics.addObject(gText);
 			RenderSlider gui = new RenderSlider(false, 20f, 5f, (float val) {
-				GUIScale = val * 10;
-				gText.setText(getString(GUIScale, 4));
-			}, this, GUIScale / 10, true);
+				GameSettings.GUIScale = val * 10;
+				gText.setText(getString(GameSettings.GUIScale, 4));
+			}, this, GameSettings.GUIScale / 10, true);
 			gui.scrollDivider = 80;
 			controlGraphics.addObject(gui);
 			labelGraphics.addObject(new RenderText("GUI Scale*", 100, 15, this));
@@ -72,17 +73,17 @@ class SettingsWindow : WindowObject {
 			RenderScrollList rList = new RenderScrollList(40f, 35f, this);
 			rList.setElements(
 				[new RenderContentButton(40f, 20f, Colors.Oil_Blue, "Light", this, () {
-					FontName = "rockwell_light";
+					GameSettings.FontName = "rockwell_light";
 					try {FontInit();} catch (Exception e){}
 					fDr.setText("Light");
 				}),
 				new RenderContentButton(40f, 20f, Colors.Oil_Blue, "Regular", this, () {
-					FontName = "rockwell";
+					GameSettings.FontName = "rockwell";
 					try {FontInit(); } catch (Exception e){}
 					fDr.setText("Regular");
 				}),
 				new RenderContentButton(40f, 20f, Colors.Oil_Blue, "Bold", this, () {
-					FontName = "rockwell_bold";
+					GameSettings.FontName = "rockwell_bold";
 					try {FontInit();} catch (Exception e){}
 					fDr.setText("Bold");
 				})]);
@@ -97,13 +98,13 @@ class SettingsWindow : WindowObject {
 			controlAudio.addObject(new RenderSpacer(1f, 18f));
 			labelAudio.addObject(new RenderSpacer(1f, 15f));
 			valueAudio.addObject(new RenderSpacer(1f, 15f));
-			RenderText mText = new RenderText(getString(MasterVolume, 4), 100, 10, this);
+			RenderText mText = new RenderText(getString(GameSettings.MasterVolume, 4), 100, 10, this);
 			mText.setColor(Colors.Plum);
 			valueAudio.addObject(mText);
 			RenderSlider master = new RenderSlider(false, 20f, 5f, (float val) {
-				MasterVolume = val;
-				mText.setText(getString(MasterVolume, 4));
-			}, this, MasterVolume, true);
+				GameSettings.MasterVolume = val;
+				mText.setText(getString(GameSettings.MasterVolume, 4));
+			}, this, GameSettings.MasterVolume, true);
 			master.scrollDivider = 100;
 			controlAudio.addObject(master);
 			labelAudio.addObject(new RenderText("Master Volume", 100, 15, this));
@@ -121,6 +122,11 @@ class SettingsWindow : WindowObject {
 		labelBack.setDepth(.9f);
 		//labelAudio.setBackground(labelBack);
 
+	}
+
+	public override void onDestroy() {
+		super.onDestroy();
+		SaveSettings();
 	}
 
 	private nothrow string getString(T)(T value, int maxLength = 0) {

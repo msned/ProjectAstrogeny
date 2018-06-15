@@ -1,0 +1,22 @@
+{
+	"authors": [
+		"Atila Neves"
+	],
+	"description": "Concepts for D",
+	"importPaths": [
+		"source/"
+	],
+	"name": "concepts",
+	"version": "0.0.7",
+	"license": "BSD",
+	"sourcePaths": [
+		"source/"
+	],
+	"configurations": [
+		{
+			"name": "library",
+			"targetType": "library"
+		}
+	],
+	"copyright": "Copyright © 2016, atila"
+}

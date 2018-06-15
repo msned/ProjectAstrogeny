@@ -1,0 +1,10 @@
+bin
+*.a
+*.o
+.dub
+.reggae
+*.ninja
+.ninja*
+compile_commands.json
+ut
+utl

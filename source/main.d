@@ -8,15 +8,13 @@ import derelict.opengl;
 import derelict.util.exception : ShouldThrow;
 import derelict.freetype;
 import render.window.WindowLoop;
-import render.RenderLoop;
-import render.RenderObject;
-import render.screenComponents;
 import GameState;
 import render.window.WindowObject;
 import render.window.DebugWindow;
 import render.window.SettingsWindow;
-import render.TextureUtil;
-import render.Fonts;
+import save.util.JSONLoading;
+import save.util.SaveLoading;
+import save.GameSave;
 
 ShouldThrow missingSymCall(string symbolName) {
 	if(	symbolName == "FT_Stream_OpenBzip2" ||
@@ -30,13 +28,22 @@ ShouldThrow missingSymCall(string symbolName) {
 }
 
 //GLContext context;
-void main() {
+void main(string[] args) {
 	DerelictGLFW3.load();
 	DerelictGL3.load();
 	DerelictFT.missingSymbolCallback = &missingSymCall;
 	DerelictFT.load();
 	if (!glfwInit())
 		return;
+
+	LoadSettings();
+
+	if (args.length > 1) {
+		writeln(args[1]);
+		writeln("Loaded Save: ", LoadSave(args[1]).saveName);
+	}
+
+	StoreSave(NewGameSaveFile("testerino"));
 
 	running = true;
 	auto mainthread = new Thread(&mainLoop).start();

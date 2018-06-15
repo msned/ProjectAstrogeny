@@ -1,0 +1,60 @@
+{
+	"authors": [
+		"Atila Neves"
+	],
+	"description": "Binary serialisation library for D",
+	"importPaths": [
+		"src/"
+	],
+	"targetPath": "bin",
+	"name": "cerealed",
+	"dependencies": {
+		"concepts": "~>0.0.6"
+	},
+	"license": "BSD 3-clause",
+	"version": "0.6.9",
+	"sourcePaths": [
+		"src/"
+	],
+	"configurations": [
+		{
+			"name": "library",
+			"targetType": "library"
+		},
+		{
+			"targetName": "ut",
+			"name": "unittest",
+			"dependencies": {
+				"unit-threaded": "~>0.7.0"
+			},
+			"mainSourceFile": "bin/ut.d",
+			"sourcePaths": [
+				"tests"
+			],
+			"targetType": "executable",
+			"preBuildCommands": [
+				"dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"
+			]
+		},
+		{
+			"targetName": "utl",
+			"name": "ut",
+			"dependencies": {
+				"unit-threaded": "~>0.7.0"
+			},
+			"mainSourceFile": "bin/ut.d",
+			"sourcePaths": [
+				"tests"
+			],
+			"targetType": "executable",
+			"preBuildCommands": [
+				"dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"
+			],
+			"versions": [
+				"unitThreadedLight"
+			]
+		}
+	],
+	"homepage": "https://github.com/atilaneves/cerealed",
+	"targetType": "library"
+}

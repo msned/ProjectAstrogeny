@@ -1,0 +1,118 @@
+{
+	"authors": [
+		"Atila Neves"
+	],
+	"-ddoxFilterArgs": [
+		"--unittest-examples",
+		"--min-protection=Protected"
+	],
+	"description": "Advanced multi-threaded unit testing framework with minimal to no boilerplate using built-in unittest blocks",
+	"-ddoxTool": "scod",
+	"importPaths": [
+		"source/"
+	],
+	"name": "unit-threaded",
+	"version": "0.7.46",
+	"license": "BSD 3-clause",
+	"sourcePaths": [
+		"source/"
+	],
+	"configurations": [
+		{
+			"name": "library",
+			"targetType": "library"
+		},
+		{
+			"targetName": "ut_pass",
+			"name": "unittest",
+			"sourceFiles": [
+				"example/example_pass.d"
+			],
+			"mainSourceFile": "example/example_pass.d",
+			"sourcePaths": [
+				"source",
+				"tests/unit_threaded",
+				"tests/examples/pass"
+			],
+			"targetType": "executable",
+			"versions": [
+				"testing_unit_threaded"
+			]
+		},
+		{
+			"importPaths": [
+				"source"
+			],
+			"name": "unittest-only",
+			"targetType": "executable",
+			"versions": [
+				"testing_unit_threaded"
+			],
+			"sourcePaths": [
+				"source",
+				"tests/unit_threaded"
+			]
+		},
+		{
+			"targetName": "ut_pass",
+			"name": "unittest-unthreaded",
+			"sourceFiles": [
+				"example/example_pass.d"
+			],
+			"mainSourceFile": "example/example_pass.d",
+			"sourcePaths": [
+				"source",
+				"tests/unit_threaded",
+				"tests/examples/pass"
+			],
+			"targetType": "executable",
+			"versions": [
+				"testing_unit_threaded",
+				"unitUnthreaded"
+			]
+		},
+		{
+			"targetName": "ut_pass",
+			"name": "unittest-light",
+			"sourceFiles": [
+				"example/example_pass.d"
+			],
+			"mainSourceFile": "example/example_pass.d",
+			"sourcePaths": [
+				"source",
+				"tests/unit_threaded",
+				"tests/examples/pass"
+			],
+			"targetType": "executable",
+			"versions": [
+				"testing_unit_threaded",
+				"unitThreadedLight"
+			]
+		},
+		{
+			"targetName": "ut_fail",
+			"name": "unittest-fail",
+			"sourceFiles": [
+				"example/example_fail.d"
+			],
+			"mainSourceFile": "example/example_fail.d",
+			"sourcePaths": [
+				"tests/examples/pass",
+				"tests/examples/fail/"
+			],
+			"targetType": "executable",
+			"versions": [
+				"testing_unit_threaded"
+			]
+		},
+		{
+			"name": "gen_ut_main",
+			"targetType": "executable",
+			"targetName": "gen_ut_main",
+			"mainSourceFile": "gen/gen_ut_main.d"
+		}
+	],
+	"homepage": "https://github.com/atilaneves/unit-threaded",
+	"targetType": "library",
+	"copyright": "Copyright © 2013, Atila Neves"
+}

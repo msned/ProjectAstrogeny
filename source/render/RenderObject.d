@@ -195,7 +195,7 @@ class RenderObject {
 	}
 
 	this (float xPos, float yPos, float depth, float width, float height, string textureName, WindowObject windowObj) {
-		setScale(width * GUIScale, height * GUIScale);
+		setScale(width * GameSettings.GUIScale, height * GameSettings.GUIScale);
 		this(xPos, yPos, depth, textureName, windowObj);
 	}
 

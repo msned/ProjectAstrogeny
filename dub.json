@@ -8,7 +8,10 @@
 		"derelict-gl3": {"version": "~>2.0.0-beta.6", "path": "packages/derelict-gl3-2.0.0-beta.6/derelict-gl3"},
 		"derelict-glfw3": {"version": "~>4.0.0-beta.1", "path": "packages/derelict-glfw3-4.0.0-beta.1/derelict-glfw3"},
 		"imageformats": {"version": "~>7.0.0", "path": "packages/imageformats-7.0.0/imageformats"},
-		"derelict-ft": {"version": "~>2.0.0-beta.4", "path": "packages/derelict-ft-2.0.0-beta.4/derelict-ft"}
+		"derelict-ft": {"version": "~>2.0.0-beta.4", "path": "packages/derelict-ft-2.0.0-beta.4/derelict-ft"},
+		"cerealed": {"version": "~>0.6.9", "path": "packages/cerealed-0.6.9/cerealed"},
+		"concepts": {"version": "0.0.7", "path": "packages/concepts-0.0.7/concepts"},
+		"unit-threaded": {"version": "0.7.46", "path": "packages/unit-threaded-0.7.46/unit-threaded"}
 	},
 	"description": "A minimal D application.",
 	"copyright": "Copyright © 2018, Jereman",
