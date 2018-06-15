@@ -6,8 +6,10 @@ import std.stdio;
 import std.uuid;
 import render.window.WindowObject;
 import render.Fonts;
+import render.Color;
 import std.signals;
 import std.conv;
+import Settings;
 
 class RenderObject {
 
@@ -48,17 +50,19 @@ class RenderObject {
 
 	protected float[32] vertices = [
 		// positions				// colors				// texture coords
-		10f,	-10f, 0.0f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f, // bottom right
-		10f,	10f, 0.0f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, // top right
-        -10f,	10f, 0.0f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f, // top left
-        -10f,  -10f, 0.0f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f  // bottom left 
+		10f,	-10f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f, // bottom right
+		10f,	10f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, // top right
+        -10f,	10f, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f, // top left
+        -10f,  -10f, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f  // bottom left 
     ];
 	private uint[6] indices = [
 		0,1,3,
 		1,2,3
 	];
 
-	protected float xPos = 0, yPos = 0, depth = 0;
+	protected bool visible = true;
+
+	protected float xPos = 0, yPos = 0, depth = .5f;
 	protected float width = 30f, height = 30f;
 
 	public nothrow float getXPos() {
@@ -74,11 +78,35 @@ class RenderObject {
 		return height;
 	}
 
-	public void setColor(float red, float green, float blue) {
+	public nothrow void setColor(float red, float green, float blue) {
 		vertices[3] = vertices[11] = vertices[19] = vertices[27] = red;
 		vertices[4] = vertices[12] = vertices[20] = vertices[28] = green;
 		vertices[5] = vertices[13] = vertices[21] = vertices[29] = blue;
 		updateVertices = true;
+	}
+
+	public nothrow void setColor(Color c) {
+		setColor(c.red, c.green, c.blue);
+	}
+
+	public nothrow bool getVisible() {
+		return visible;
+	}
+	public nothrow void setVisible(bool v) {
+		visible = v;
+	}
+
+	/++
+	Returns true if the passed x and y coordinates are within the bounds of the rectangle of the RenderObject
+	+/
+	public nothrow bool within(float x, float y) {
+		return (x > this.getXPos() - this.getWidth() && x < this.getXPos() + this.getWidth() &&
+				y >  this.getYPos() - this.getHeight() && y < this.getYPos() + this.getHeight());
+	}
+
+	public nothrow bool within(float x, float y, float width, float height) {
+		return (x > this.getXPos() - width && x < this.getXPos() + width &&
+				y >  this.getYPos() - height && y < this.getYPos() + height);
 	}
 
 	/++
@@ -126,10 +154,11 @@ class RenderObject {
 		setPosition(xPos, yPos);
 	}
 
+
 	public nothrow void setScaleAndPosition(float width, float height, float x, float y) {
-		this.width = width;
-		this.height = height;
-		setPosition(x, y);
+		xPos = x;
+		yPos = y;
+		setScale(width, height);
 	}
 
 	public nothrow void setDepth(float depth) {
@@ -140,7 +169,7 @@ class RenderObject {
 		this.depth = depth;
 		updateVertices = true;
 	}
-	public float getDepth() {
+	public nothrow float getDepth() {
 		return depth;
 	}
 
@@ -158,6 +187,7 @@ class RenderObject {
 		this(windowObj);
 	}
 
+
 	this(float xPos, float yPos, float depth, string textureName, WindowObject windowObj) {
 		this(textureName, windowObj);
 		setPosition(xPos, yPos);
@@ -165,7 +195,7 @@ class RenderObject {
 	}
 
 	this (float xPos, float yPos, float depth, float width, float height, string textureName, WindowObject windowObj) {
-		setScale(width, height);
+		setScale(width * GUIScale, height * GUIScale);
 		this(xPos, yPos, depth, textureName, windowObj);
 	}
 
@@ -243,12 +273,6 @@ class RenderObject {
 		projMatrices[winID] = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 	}
 
-	static nothrow void safeWriteln(string input) {
-		try {
-			writeln(input);
-		} catch (Exception e) {}
-	}
-
 	public static nothrow void delegate(GLdouble, GLdouble, UUID)[][UUID] orthoUpdates;
 
 	public nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {
@@ -290,7 +314,8 @@ class RenderObject {
 	}
 
 	public nothrow void render() {
-
+	if (!visible)
+		return;
 		if (nineSlice) {
 			nineSliceRender();
 		} else {
@@ -309,9 +334,3 @@ class RenderObject {
 		
 	}
 }
-
-class ProjectionEvent {
-	mixin Signal!(GLdouble, GLdouble, UUID);
-}
-
-ProjectionEvent updateProjection;

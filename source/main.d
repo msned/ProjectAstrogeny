@@ -14,7 +14,7 @@ import render.screenComponents;
 import GameState;
 import render.window.WindowObject;
 import render.window.DebugWindow;
-import render.window.TestWindow;
+import render.window.SettingsWindow;
 import render.TextureUtil;
 import render.Fonts;
 
@@ -41,8 +41,8 @@ void main() {
 	running = true;
 	auto mainthread = new Thread(&mainLoop).start();
 
-	WindowObject first = AddWindow(new TestWindow("Project Astrogeny"));
-	WindowObject deb = AddWindow(new DebugWindow());
+	//WindowObject deb = AddWindow(new DebugWindow());
+	WindowObject settings = AddWindow(new SettingsWindow());
 
 	WindowLoop();
 }

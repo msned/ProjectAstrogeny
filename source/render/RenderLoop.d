@@ -5,6 +5,7 @@ import render.TextureUtil;
 import derelict.glfw3.glfw3;
 import std.stdio;
 import std.conv;
+import Settings;
 
 /++
 	Initializes the OpenGL settings, returns success
@@ -22,10 +23,13 @@ public nothrow bool RenderInit() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
-	glEnable( GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(&MessageCallback, cast(void*)0);
 	glEnable(GL_SCISSOR_TEST);
-	glfwSwapInterval(1);
+	if (VSync)
+		glfwSwapInterval(1);
+	else
+		glfwSwapInterval(0);
 	return true;
 }
 

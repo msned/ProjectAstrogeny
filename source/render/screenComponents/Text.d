@@ -6,26 +6,31 @@ import render.window.WindowObject;
 import render.screenComponents;
 import render.responsiveControl;
 import render.Fonts;
+import render.Color;
 import std.uuid;
+import std.stdio;
 
 class RenderText : RenderObject, ResponsiveElement {
 
 	string displayText;
-	float scale;
+	public float scale;
 
 	float minTextScale = .1f;
 
+	float defaultScale;
+
 	const static char* vertexShaderSource = 
 		"#version 330 core
-		layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
+		layout (location = 0) in vec3 vertex; // <vec2 pos, vec2 tex>
+		layout (location = 1) in vec2 texCoord;
 		out vec2 TexCoords;
 
 		uniform mat4 proj;
 
 		void main()
 		{
-		gl_Position = proj * vec4(vertex.xy, 0.0, 1.0);
-		TexCoords = vertex.zw;
+		gl_Position = proj * vec4(vertex, 1.0);
+		TexCoords = texCoord;
 		}";
 	const static char* fragmentShaderSource = 
 		"#version 330 core
@@ -41,19 +46,20 @@ class RenderText : RenderObject, ResponsiveElement {
 		color = vec4(textColor, 1.0) * sampled;
 		} ";
 
-	this(string displayText, float x, float y, float scale, WindowObject windowObj) {
-		super.xPos = x;
-		super.yPos = y;
+	this(string displayText, float scale, WindowObject windowObj) {
 		this.scale = scale;
+		this.defaultScale = scale;
 		this.displayText = displayText;
 		windowID = windowObj.windowID;
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, GLfloat.sizeof * 6 * 4, null, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, GLfloat.sizeof * 6 * 5, null, GL_DYNAMIC_DRAW);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * GLfloat.sizeof, cast(void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * GLfloat.sizeof, cast(void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * GLfloat.sizeof, cast(void*)(3 * float.sizeof));
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		if (!(windowID in textPrograms))
@@ -67,6 +73,18 @@ class RenderText : RenderObject, ResponsiveElement {
 		}
 	}
 
+	this(string displayText, float x, float y, float scale, WindowObject windowObj) {
+		xPos = x;
+		yPos = y;
+		this(displayText, scale, windowObj);
+	}
+	this(string displayText, float width, float height, WindowObject windowObj) {
+		this.width = width;
+		this.height = height;
+		this(displayText, 1f, windowObj);
+		setMaxScale(width * 2, height * 2);
+	}
+
 	private static bool[UUID] registeredOrtho;
 
 	protected float colorR = 210 /255f, colorG = 118 /255f, colorB = 94 /255f;
@@ -75,13 +93,17 @@ class RenderText : RenderObject, ResponsiveElement {
 	Sets the color of the text to RGB values from 0 to 255
 	++/
 	public override void setColor(float r, float g, float b) {
-		colorR = r / 255;
-		colorG = g / 255;
-		colorB = b / 255;
+		colorR = r;
+		colorG = g;
+		colorB = b;
+	}
+
+	public override void setColor(Color c) {
+		setColor(c.red, c.green, c.blue);
 	}
 
 
-	protected GLfloat[4][6] vert;
+	protected GLfloat[5][6] vert;
 
 	static GLuint[UUID] textPrograms;
 
@@ -109,13 +131,35 @@ class RenderText : RenderObject, ResponsiveElement {
 		return getTextHeight(scale);
 	}
 
+	public nothrow float getTextLength() {
+		return getTextLength(scale);
+	}
+
+	public override nothrow float getWidth() {
+		return getTextLength() / 2f;
+	}
+	public override nothrow float getHeight() {
+		return getTextHeight() / 2f;
+	}
+
+	public override nothrow void setPosition(float x = 0, float y = 0) {
+		super.setPosition(x - getWidth(), y - getHeight());
+	}
+
+	float boundingWidth, boundingHeight;
+
+	public nothrow void setText(string text) {
+		displayText = text;
+		setMaxScale(boundingWidth, boundingHeight);
+	}
+
 	/++
 	Returns the largest scale for which the text will fit within the given size contraints
 	+/
 	public nothrow float getMaxScale(float width, float height) {
 		float xScale, yScale;
 		int maxY = 0;
-		long xTotal = 0;
+		int xTotal = 0;
 		foreach(char c; displayText) {
 			Character ch = Characters[c];
 			if (ch.ySize > maxY)
@@ -129,6 +173,8 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	public nothrow void setMaxScale(float width, float height) {
 		scale = getMaxScale(width, height);
+		boundingWidth = width;
+		boundingHeight = height;
 	}
 
 	public nothrow float getMinWidth() {
@@ -137,6 +183,13 @@ class RenderText : RenderObject, ResponsiveElement {
 	public nothrow float getMinHeight() {
 		return getTextHeight(minTextScale);
 	}
+	public nothrow float getDefaultWidth() {
+		return getTextLength(defaultScale);
+	}
+	public nothrow float getDefaultHeight() {
+		return getTextHeight(defaultScale);
+	}
+
 	public nothrow bool isStretchy() { return false; }
 
 	public override nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {
@@ -182,8 +235,12 @@ class RenderText : RenderObject, ResponsiveElement {
 	private static bool[UUID] orthoUpdated;
 
 	override nothrow void render() {
+		if (!visible)
+			return;
+
 		glUseProgram(textPrograms[windowID]);
 		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);
+		glUniform1f(glGetUniformLocation(textPrograms[windowID], "depth"), depth);
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -193,18 +250,18 @@ class RenderText : RenderObject, ResponsiveElement {
 			Character ch = Characters[c];
 
 			float xP = xPos + ch.xBearing * scale + xOffset;
-			float yP = yPos - (ch.ySize - ch.yBearing) * scale;
+			float yP = yPos  - (ch.ySize - ch.yBearing) * scale;
 			float w = ch.xSize * scale;
 			float h = ch.ySize * scale;
 
 			vert = [
-				[xP, yP+h,	0.0, 0.0],
-				[xP, yP,	0.0, 1.0],
-				[xP+w, yP,	1.0, 1.0],
+				[xP, yP+h, depth,		0.0, 0.0],
+				[xP, yP, depth,		0.0, 1.0],
+				[xP+w, yP, depth,		1.0, 1.0],
 
-				[xP, yP+h,	0.0, 0.0],
-				[xP+w, yP,	1.0, 1.0],
-				[xP+w, yP+h, 1.0, 0.0]
+				[xP, yP+h, depth,		0.0, 0.0],
+				[xP+w, yP, depth,		1.0, 1.0],
+				[xP+w, yP+h, depth,	1.0, 0.0]
 			];
 
 			glBindTexture(GL_TEXTURE_2D, ch.TextureID);
