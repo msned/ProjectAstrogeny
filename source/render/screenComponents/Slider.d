@@ -4,6 +4,7 @@ import render.responsiveControl;
 import render.screenComponents;
 import render.window.WindowObject;
 import render.Color;
+import Settings;
 
 class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 
@@ -24,8 +25,8 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 
 	this(bool vertical, float minWidth, float minHeight, void delegate(float) nothrow updateValue, WindowObject win, float initValue = 0f, bool stretchy = false) {
 		this.vertical = vertical;
-		this.minWidth = minWidth;
-		this.minHeight = minHeight;
+		this.minWidth = minWidth * GameSettings.GUIScale;
+		this.minHeight = minHeight * GameSettings.GUIScale;
 		this.updateValue = updateValue;
 		this.stretchy = stretchy;
 		this.value = initValue;

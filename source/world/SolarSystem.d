@@ -4,11 +4,15 @@ import world.generation.Planet_gen;
 import world.generation.Star_gen;
 import std.random;
 import std.math;
+import std.uuid;
 
 /**
  * Class object for each system
  */
 class SolarSystem{
+	
+	UUID systemID;
+
 	private:
 		Star sun;
 		Planet[] planets;
@@ -16,6 +20,7 @@ class SolarSystem{
 		this(Star sun, Planet[] planets){
 			this.sun = sun;
 			this.planets = planets;
+			systemID = randomUUID();
 		}
 }
 

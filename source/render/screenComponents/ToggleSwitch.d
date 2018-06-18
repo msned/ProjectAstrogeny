@@ -21,7 +21,7 @@ class RenderToggleSwitch : RenderButton, ResponsiveElement {
 
 	this(float width, Color color, void delegate(bool) nothrow toggle, WindowObject win, bool initValue = false) {
 		super(width, width, "switch_off.png", win);
-		size = width;
+		size = getWidth();
 		this.onColor = color;
 		setColor(offColor);
 		off = LoadTexture("switch_off.png", win.windowID);

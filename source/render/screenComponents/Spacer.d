@@ -3,11 +3,12 @@ module render.screenComponents.Spacer;
 import render.responsiveControl;
 import render.screenComponents;
 import render.window.WindowObject;
+import Settings;
 
 class RenderSpacer : RenderObject, ResponsiveElement {
 	
 	this(float width, float height) {
-		setScale(width, height);
+		setScale(width * GameSettings.GUIScale, height * GameSettings.GUIScale);
 		setDepth(1f);
 	}
 

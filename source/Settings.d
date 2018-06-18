@@ -1,10 +1,11 @@
 module Settings;
 
-//Constant values for testing/debug
+//
+//constant values for testing/debug
 //======================================//
-const bool DEBUG = true;
+immutable bool DEBUG = true;
 
-const string VERSION = "0.0.2";
+immutable string VERSION = "0.0.2";
 
 class GameSettings {
 static:

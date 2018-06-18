@@ -12,9 +12,10 @@ import GameState;
 import render.window.WindowObject;
 import render.window.DebugWindow;
 import render.window.SettingsWindow;
-import save.util.JSONLoading;
-import save.util.SaveLoading;
+import save.SaveData;
 import save.GameSave;
+import ships;
+import save.util.JSONLoading;
 
 ShouldThrow missingSymCall(string symbolName) {
 	if(	symbolName == "FT_Stream_OpenBzip2" ||
@@ -37,13 +38,14 @@ void main(string[] args) {
 		return;
 
 	LoadSettings();
+	gameSaveMutex = new shared Mutex();
 
 	if (args.length > 1) {
 		writeln(args[1]);
-		writeln("Loaded Save: ", LoadSave(args[1]).saveName);
+		LoadGameFiles(args[1]);
 	}
 
-	StoreSave(NewGameSaveFile("testerino"));
+	NewGameFiles("testerino");
 
 	running = true;
 	auto mainthread = new Thread(&mainLoop).start();
@@ -51,11 +53,21 @@ void main(string[] args) {
 	//WindowObject deb = AddWindow(new DebugWindow());
 	WindowObject settings = AddWindow(new SettingsWindow());
 
+	/*
+	gameSaveMutex.lock();
+	GameSave g = getGameSave();
+	g.ships.addShip(new ShipBase());
+	gameSaveMutex.unlock();
+	*/
+
 	WindowLoop();
 }
 
 
 void mainLoop() {
+	const(GameSave)* g = readonlyGameSave();
+	foreach(const ShipBase s; g.ships.shipList)
+		writeln(s.shipID);
 	while(running) {
 		
 	}

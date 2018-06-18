@@ -12,6 +12,8 @@ import Input;
 import std.uuid;
 import std.stdio;
 import Settings;
+import ships;
+import save;
 
 WindowObject[GLFWwindow*] windowObjects;
 

@@ -4,19 +4,24 @@ import std.file;
 import cerealed;
 import save.GameSave;
 
-const string defaultSaveLocation = "";
-const string saveSuffix = ".Astr";
+immutable string defaultSaveLocation = "";
+immutable string saveSuffix = ".Astr";
 
-GameSaveFile LoadSave(string savePath) {
+T LoadSave(T)(string savePath) {
 	if (exists(savePath)) {
 		auto dec = Decerealiser(cast(byte[])read(savePath));
-		return dec.value!GameSaveFile();
+		T f = dec.value!T();
+		static if (__traits(hasMember, T, "postSerialize"))
+			f.postSerialize();
+		return f;
 	}
 	return null;
 }
 
-void StoreSave(GameSaveFile sv) {
+void StoreSave(T)(T sv, string name, string path = defaultSaveLocation) {
+	static if (__traits(hasMember, T, "preSerialize"))
+		sv.preSerialize();
 	auto enc = Cerealiser();
 	enc  ~= sv;
-	write(defaultSaveLocation ~ sv.saveName ~ saveSuffix, enc.bytes);
+	write(path ~ name ~ saveSuffix, enc.bytes);
 }

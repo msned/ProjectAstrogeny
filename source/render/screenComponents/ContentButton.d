@@ -21,8 +21,8 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	this(float width, float height, Color background, string label, WindowObject win, void delegate() nothrow click = null) {
 		displayText = new RenderText(label, 0, 0, 1f, win);
 		super(width, height, background, win);
-		defaultWidth = width;
-		defaultHeight = height;
+		defaultWidth = getWidth();
+		defaultHeight = getHeight();
 		if (click !is null)
 			setClick(click);
 	}

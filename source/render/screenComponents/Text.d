@@ -9,6 +9,7 @@ import render.Fonts;
 import render.Color;
 import std.uuid;
 import std.stdio;
+import Settings;
 
 class RenderText : RenderObject, ResponsiveElement {
 
@@ -78,9 +79,9 @@ class RenderText : RenderObject, ResponsiveElement {
 		yPos = y;
 		this(displayText, scale, windowObj);
 	}
-	this(string displayText, float width, float height, WindowObject windowObj) {
-		this.width = width;
-		this.height = height;
+	this(string displayText, float w, float h, WindowObject windowObj) {
+		width = w * GameSettings.GUIScale;
+		height = h * GameSettings.GUIScale;
 		this(displayText, 1f, windowObj);
 		setMaxScale(width * 2, height * 2);
 	}
