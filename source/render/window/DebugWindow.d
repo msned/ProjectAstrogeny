@@ -34,6 +34,7 @@ class DebugWindow : WindowObject {
 		left.addObject(new RenderContentButton(80, 40, Colors.Rose, "Welcome", this));
 		left.addObject(new RenderContentButton(20, 20, Colors.Clues, "Test", this));
 		left.addObject(new RenderContentButton(10, 10, Colors.Patina, "Edit", "file_edit.png", Side.left, this));
+		left.addObject(new RenderTextBox("A long time ago in a galaxy far, far away...\nSuperfluous beings existed.", 40, 60, .3f, this));
 
 		topRight.addObject(new RenderSlider(true, 20, 140, (float val) {
 			try {

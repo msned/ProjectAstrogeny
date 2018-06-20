@@ -11,7 +11,7 @@ class RenderToggleSwitch : RenderButton, ResponsiveElement {
 	
 	bool toggleState = false;
 
-	Color onColor, offColor = Colors.Mystic;
+	Color onColor, offColor = Colors.Blue3;
 
 	float size;
 

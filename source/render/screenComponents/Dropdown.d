@@ -7,7 +7,7 @@ import render.TextureUtil;
 import render.responsiveControl;
 import derelict.opengl;
 
-class RenderDropdown : RenderContentButton {
+class RenderDropdown : RenderContentButton, Inputable {
 
 	private bool displaying;
 	GLuint up, down;
@@ -16,7 +16,7 @@ class RenderDropdown : RenderContentButton {
 
 	this(float width, float height, Color background, string label, WindowObject win, RenderScrollList scroll = null) {
 		icon = new RenderScalingIcon(minimumIconSize, minimumIconSize, 0f, "down_arrow.png", win);
-		icon.setColor(Colors.Creation);
+		icon.setColor(Colors.Blue1);
 		down = LoadTexture("down_arrow.png", win.windowID);
 		up = LoadTexture("up_arrow.png", win.windowID);
 		if (scroll !is null)
@@ -24,6 +24,7 @@ class RenderDropdown : RenderContentButton {
 		super(width, height, background, label, win);
 		iconSide = Side.left;
 		setClick(&toggleDropdown);
+		registerFocus(&focusLost);
 	}
 
 	public nothrow void setList(RenderScrollList lst) {
@@ -58,5 +59,10 @@ class RenderDropdown : RenderContentButton {
 
 	public override void render() {
 		super.render();
+	}
+
+	public nothrow void focusLost() {
+		if (displaying)
+			toggleDropdown();
 	}
 }

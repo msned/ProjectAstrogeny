@@ -17,7 +17,8 @@ __gshared WindowObject[] windowList;
 public void WindowLoop() {
 	Array!int removeList;
 	while (running){
-		glfwSwapInterval(0);
+		if (GameSettings.VSync && windowList.length > 1)
+			glfwSwapInterval(0);
 		foreach(i, current; windowList) {
 			OpenglPreRender();
 			current.renderElements();
@@ -27,7 +28,7 @@ public void WindowLoop() {
 				break;
 			}
 		}
-		if (GameSettings.VSync)
+		if (GameSettings.VSync && windowList.length > 1)
 			glfwSwapInterval(1);
 
 		foreach(i; removeList){
@@ -47,5 +48,5 @@ WindowObject AddWindow(WindowObject o) {
 void RemoveWindow(int index) {
 	windowList[index].onDestroy();
 	glfwDestroyWindow(windowList[index].getGLFW());
-	windowList = remove(windowList, index);
+	windowList = windowList.remove(index);
 }

@@ -8,6 +8,7 @@ import std.conv;
 import Settings;
 import save.util.JSONLoading;
 import render.Fonts;
+import derelict.glfw3;
 
 class SettingsWindow : WindowObject {
 	
@@ -44,11 +45,12 @@ class SettingsWindow : WindowObject {
 			labelGraphics.addObject(new RenderSpacer(1f, 10f));
 			valueGraphics.addObject(new RenderSpacer(1f, 15f));
 			RenderText vText = new RenderText(to!string(GameSettings.VSync), 100,  10, this);
-			vText.setColor(Colors.Plum);
+			vText.setColor(Colors.Titanium_White);
 			valueGraphics.addObject(vText);
-			controlGraphics.addObject(new RenderToggleSwitch(30f, Colors.Patina, (bool val) {
+			controlGraphics.addObject(new RenderToggleSwitch(30f, Colors.Blue1, (bool val) {
 				GameSettings.VSync = val;
 				vText.setText(to!string(val));
+				glfwSwapInterval(cast(int)val);
 			}, this, GameSettings.VSync));
 			labelGraphics.addObject(new RenderText("V-Sync", 100, 15, this));
 
@@ -56,7 +58,7 @@ class SettingsWindow : WindowObject {
 			labelGraphics.addObject(new RenderSpacer(1f, 10f));
 			valueGraphics.addObject(new RenderSpacer(1f, 15f));
 			RenderText gText = new RenderText(getString(GameSettings.GUIScale, 4), 100, 10, this);
-			gText.setColor(Colors.Plum);
+			gText.setColor(Colors.Titanium_White);
 			valueGraphics.addObject(gText);
 			RenderSlider gui = new RenderSlider(false, 20f, 5f, (float val) {
 				GameSettings.GUIScale = val * 10;
@@ -69,20 +71,20 @@ class SettingsWindow : WindowObject {
 			controlGraphics.addObject(new RenderSpacer(1f, 10f));
 			labelGraphics.addObject(new RenderSpacer(1f, 10f));
 			valueGraphics.addObject(new RenderSpacer(1f, 25f));
-			RenderDropdown fDr = new RenderDropdown(40f, 20f, Colors.Dark_Creek, GetFontType(), this);
+			RenderDropdown fDr = new RenderDropdown(40f, 20f, Colors.Blue3, GetFontType(), this);
 			RenderScrollList rList = new RenderScrollList(40f, 35f, this);
 			rList.setElements(
-				[new RenderContentButton(40f, 20f, Colors.Oil_Blue, "Light", this, () {
+				[new RenderContentButton(40f, 20f, Colors.Blue4, "Light", this, () {
 					GameSettings.FontName = "rockwell_light";
 					try {FontInit();} catch (Exception e){}
 					fDr.setText("Light");
 				}),
-				new RenderContentButton(40f, 20f, Colors.Oil_Blue, "Regular", this, () {
+				new RenderContentButton(40f, 20f, Colors.Blue4, "Regular", this, () {
 					GameSettings.FontName = "rockwell";
 					try {FontInit(); } catch (Exception e){}
 					fDr.setText("Regular");
 				}),
-				new RenderContentButton(40f, 20f, Colors.Oil_Blue, "Bold", this, () {
+				new RenderContentButton(40f, 20f, Colors.Blue4, "Bold", this, () {
 					GameSettings.FontName = "rockwell_bold";
 					try {FontInit();} catch (Exception e){}
 					fDr.setText("Bold");
@@ -99,7 +101,7 @@ class SettingsWindow : WindowObject {
 			labelAudio.addObject(new RenderSpacer(1f, 15f));
 			valueAudio.addObject(new RenderSpacer(1f, 15f));
 			RenderText mText = new RenderText(getString(GameSettings.MasterVolume, 4), 100, 10, this);
-			mText.setColor(Colors.Plum);
+			mText.setColor(Colors.Titanium_White);
 			valueAudio.addObject(mText);
 			RenderSlider master = new RenderSlider(false, 20f, 5f, (float val) {
 				GameSettings.MasterVolume = val;
@@ -111,7 +113,7 @@ class SettingsWindow : WindowObject {
 		}
 
 		//assigning tab buttons to the tabs
-		tabs.addObjects(cast(RenderObject[])tabLabels.setupTabButtons(tabValues.setupTabButtons(tabControls.setupTabButtons([new RenderContentButton(60, 30, Colors.Blue, "Graphics", this), new RenderContentButton(60, 30, Colors.Rose, "Audio", this), new RenderContentButton(50, 30, Colors.Alyx_Blue, "Controls", this)]))));
+		tabs.addObjects(cast(RenderObject[])tabLabels.setupTabButtons(tabValues.setupTabButtons(tabControls.setupTabButtons([new RenderContentButton(60, 30, Colors.Blue3, "Graphics", this), new RenderContentButton(60, 30, Colors.Blue3, "  Audio  ", this), new RenderContentButton(50, 30, Colors.Blue3, "Controls", this)]))));
 
 		RenderObject valueBack = new RenderObject("blank.png", this);
 		valueBack.setColor(Colors.Light_Patina);

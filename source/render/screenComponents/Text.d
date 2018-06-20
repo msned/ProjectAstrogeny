@@ -88,7 +88,7 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	private static bool[UUID] registeredOrtho;
 
-	protected float colorR = 210 /255f, colorG = 118 /255f, colorB = 94 /255f;
+	protected float colorR = Colors.Blue1.red, colorG = Colors.Blue1.green, colorB = Colors.Blue1.blue;
 
 	/++
 	Sets the color of the text to RGB values from 0 to 255
@@ -104,7 +104,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	}
 
 
-	protected GLfloat[5][6] vert;
+	protected GLfloat[5][6][] vert;
 
 	static GLuint[UUID] textPrograms;
 
@@ -112,7 +112,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	Returns the number of pixels needed to render the current string of text at the given scale
 	++/
 	public nothrow float getTextLength(float scale) {
-		long total = 0;
+		int total = 0;
 		foreach(char c; displayText) {
 			Character ch = Characters[c];
 			total += ch.Advance >> 6;
@@ -145,6 +145,7 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	public override nothrow void setPosition(float x = 0, float y = 0) {
 		super.setPosition(x - getWidth(), y - getHeight());
+		newArray = true;
 	}
 
 	float boundingWidth, boundingHeight;
@@ -176,6 +177,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		scale = getMaxScale(width, height);
 		boundingWidth = width;
 		boundingHeight = height;
+		newArray = true;
 	}
 
 	public nothrow float getMinWidth() {
@@ -201,6 +203,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		glUniformMatrix4fv(glGetUniformLocation(textPrograms[winID], "proj"), 1, GL_FALSE, &projMatrices[winID][0]);
 		if (winID in shaderPrograms)
 			glUseProgram(shaderPrograms[winID]);
+
 	}
 
 
@@ -233,7 +236,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		glDeleteShader(fragmentShader);
 	}
 
-	private static bool[UUID] orthoUpdated;
+	private bool newArray = true;
 
 	override nothrow void render() {
 		if (!visible)
@@ -241,13 +244,29 @@ class RenderText : RenderObject, ResponsiveElement {
 
 		glUseProgram(textPrograms[windowID]);
 		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);
-		glUniform1f(glGetUniformLocation(textPrograms[windowID], "depth"), depth);
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+		if (newArray) {
+			arrangeText();
+			newArray = false;
+		}
+		
+		foreach(int i, char c; displayText) {
+			if (c == '\n')
+				continue;
+			glBindTexture(GL_TEXTURE_2D, Characters[c].TextureID);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vert[i].sizeof, vert[i].ptr);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+		glUseProgram(shaderPrograms[windowID]);
+	}
+
+	protected nothrow void arrangeText() {
+		vert = new GLfloat[5][6][displayText.length];
 		float xOffset = 0;
-		foreach(char c; displayText) {
+		foreach(int i, char c; displayText) {
 			Character ch = Characters[c];
 
 			float xP = xPos + ch.xBearing * scale + xOffset;
@@ -255,7 +274,7 @@ class RenderText : RenderObject, ResponsiveElement {
 			float w = ch.xSize * scale;
 			float h = ch.ySize * scale;
 
-			vert = [
+			vert[i] = [
 				[xP, yP+h, depth,		0.0, 0.0],
 				[xP, yP, depth,		0.0, 1.0],
 				[xP+w, yP, depth,		1.0, 1.0],
@@ -265,13 +284,8 @@ class RenderText : RenderObject, ResponsiveElement {
 				[xP+w, yP+h, depth,	1.0, 0.0]
 			];
 
-			glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vert.sizeof, &vert[0]);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-
 			xOffset += (ch.Advance >> 6) * scale;
 		}
-		glUseProgram(shaderPrograms[windowID]);
 	}
 
 }

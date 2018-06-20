@@ -173,6 +173,7 @@ abstract class WindowObject {
 					if (b.checkClick(x, y, button))
 						return;
 		}
+		ClearFocus();
 	}
 
 	public nothrow void mouseScroll(float x, float y) {

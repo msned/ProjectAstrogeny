@@ -6,6 +6,7 @@ import derelict.glfw3.glfw3;
 import std.stdio;
 import std.conv;
 import Settings;
+import render.Color;
 
 /++
 	Initializes the OpenGL settings, returns success
@@ -21,6 +22,8 @@ public nothrow bool RenderInit() {
 	}
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
+	glEnable(GL_LINE_SMOOTH);
+	glLineWidth(4f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEBUG_OUTPUT);
@@ -34,7 +37,7 @@ public nothrow bool RenderInit() {
 }
 
 nothrow void OpenglPreRender() {
-	glClearColor(29 / 255f, 70 / 255f, 94 / 255f, 1f);
+	glClearColor(Colors.Blue5.red, Colors.Blue5.green, Colors.Blue5.blue, 1f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_DEPTH_BUFFER_BIT);
 }

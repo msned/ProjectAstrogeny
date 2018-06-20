@@ -15,6 +15,7 @@ public import
 	render.screenComponents.Scrollable,
 	render.screenComponents.Spacer,
 	render.screenComponents.ScrollList,
+	render.screenComponents.TextBox,
 	render.screenComponents.ToggleSwitch;
 
 public import render.RenderObject;

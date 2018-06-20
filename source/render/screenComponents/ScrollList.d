@@ -31,8 +31,8 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 	float elementSpacing = 4f;
 
 	private nothrow void shiftElements() {
-		float dist = yPos + height + scrollAmount;
-		totalLength = -elementSpacing;
+		float dist = yPos + height + scrollAmount - elementSpacing;
+		totalLength = 0;
 		foreach(RenderObject o; items) {
 			o.setScaleAndPosition(width, o.getHeight(), getXPos(), dist - o.getHeight());
 			o.setDepth(getDepth() - .01f);

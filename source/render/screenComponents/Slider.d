@@ -34,8 +34,8 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 			knob = new RenderObject(getXPos(), getYPos(), 0f, minWidth + knobOverflow, 5f, "blank.png", win);
 		else
 			knob = new RenderObject(getXPos(), getYPos(), 0f, 5f, minHeight + knobOverflow, "blank.png", win);
-		knob.setColor(Colors.Rose);
-		setColor(Colors.Mystic);
+		knob.setColor(Colors.Blue1);
+		setColor(Colors.Blue3);
 		super("blank.png", win);
 		setDepth(0.1f);
 		setScale(minWidth, minHeight);
