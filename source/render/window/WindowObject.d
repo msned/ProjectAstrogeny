@@ -5,12 +5,14 @@ import derelict.glfw3.glfw3;
 import core.sync.mutex;
 import render.RenderObject;
 import render.RenderLoop;
+import render.window.WindowLoop;
 import render.screenComponents;
 import render.responsiveControl;
 import render.Fonts;
 import Input;
 import std.uuid;
 import std.stdio;
+import std.datetime;
 import Settings;
 import ships;
 import save;
@@ -23,19 +25,19 @@ abstract class WindowObject {
 	protected GLFWwindow* window;
 
 	public UUID windowID;
-
-	RenderObject[] objects;
-
 	ResponsiveRegion[] regions;
 
 	public int sizeX, sizeY;
 	public string windowName;
 
 	public float cursorXPos, cursorYPos;
+	private static GLFWcursor* hResize, vResize, iBeam, arrow;
 
-	static GLFWcursor* hResize, vResize, iBeam, arrow;
+	public void delegate(long) nothrow [] animationCalls;
 
-	GLFWwindow* getGLFW() { return window; }
+	public Inputable[] inputs;
+
+	public nothrow GLFWwindow* getGLFW() { return window; }
 
 	this(string name, int x = 540, int y = 540) {
 		sizeX = cast(int)(x * GameSettings.GUIScale);
@@ -62,6 +64,7 @@ abstract class WindowObject {
 		RenderObject.orthoUpdates[windowID] = [];
 		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
+		glfwSwapInterval(globalSwapInterval);
 		//Render Setup
 		RenderInit();
 		FontInit();
@@ -72,16 +75,28 @@ abstract class WindowObject {
 
 		updateResponsiveElements();
 		glfwMakeContextCurrent(old);
+		oldTime = Clock.currTime.stdTime;
 	}
 
 	public nothrow void renderElements() {
 		glfwMakeContextCurrent(window);
 		OpenglPreRender();
+		animateObjects();
 		renderObjects();
 		glfwSwapBuffers(window);
 	}
 
-	public nothrow abstract void characterInput(uint i);
+	public nothrow void characterInput(uint c) {
+		foreach(Inputable i; inputs)
+			if (i.isFocused())
+				i.charInput(c);
+	}
+
+	public nothrow void keyInput(int key, int mod) {
+		foreach(Inputable i; inputs)
+			if (i.isFocused())
+				i.keyInput(key, mod);
+	}
 
 	protected abstract void loadRenderObjects();
 
@@ -91,6 +106,15 @@ abstract class WindowObject {
 
 		foreach(ResponsiveRegion r; regions)
 			r.renderObjects();
+	}
+
+	long oldTime;
+	protected nothrow void animateObjects() {
+		long t;
+		try {t = Clock.currTime.stdTime; } catch (Exception e) {assert(0); }
+		foreach(void delegate(long) nothrow d; animationCalls)
+			d((t - oldTime) / 10000);
+		oldTime = t;
 	}
 
 	protected nothrow void updateResponsiveElements() {

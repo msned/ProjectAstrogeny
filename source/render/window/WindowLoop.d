@@ -14,6 +14,8 @@ import Settings;
 
 __gshared WindowObject[] windowList;
 
+int globalSwapInterval = 1;
+
 public void WindowLoop() {
 	Array!int removeList;
 	while (running){
@@ -23,7 +25,7 @@ public void WindowLoop() {
 			OpenglPreRender();
 			current.renderElements();
 			glfwPollEvents();
-			if (glfwWindowShouldClose(current.getGLFW())){
+			if (glfwWindowShouldClose(current.getGLFW())) {
 				removeList.insertBack(i);
 				break;
 			}
@@ -40,13 +42,23 @@ public void WindowLoop() {
 	}
 }
 
-WindowObject AddWindow(WindowObject o) {
+public WindowObject AddWindow(WindowObject o) {
 	windowList ~= o;
 	return o;
 }
 
-void RemoveWindow(int index) {
+public void RemoveWindow(int index) {
 	windowList[index].onDestroy();
 	glfwDestroyWindow(windowList[index].getGLFW());
 	windowList = windowList.remove(index);
+}
+
+public nothrow void UpdateSwapInterval(int newInterval) {
+	GLFWwindow* current = glfwGetCurrentContext();
+	foreach(WindowObject o; windowList) {
+		glfwMakeContextCurrent(o.getGLFW());
+		glfwSwapInterval(newInterval);
+	}
+	glfwMakeContextCurrent(current);
+	globalSwapInterval = newInterval;
 }

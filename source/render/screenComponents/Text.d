@@ -122,10 +122,15 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	public nothrow float getTextHeight(float scale) {
 		int maxY = 0;
-		foreach(char c; displayText)
-			if (Characters[c].ySize > maxY)
-				maxY = Characters[c].ySize;
-		return maxY * scale;
+		int minY = 0;
+		foreach(char c; displayText) {
+			Character ch = Characters[c];
+			if (ch.yBearing > maxY)
+				maxY = ch.yBearing;
+			if (ch.yBearing - ch.ySize < minY)
+				minY = ch.yBearing - ch.ySize;
+		}
+		return (maxY - minY) * scale;
 	}
 
 	public nothrow float getTextHeight() {
@@ -144,7 +149,14 @@ class RenderText : RenderObject, ResponsiveElement {
 	}
 
 	public override nothrow void setPosition(float x = 0, float y = 0) {
-		super.setPosition(x - getWidth(), y - getHeight());
+		int maxY = 0;
+		foreach(char c; displayText) {
+			Character ch = Characters[c];
+			if (ch.yBearing > maxY)
+				maxY = ch.yBearing;
+		}
+		this.xPos = x - getWidth();
+		this.yPos = y - maxY * scale / 2;
 		newArray = true;
 	}
 
@@ -161,15 +173,18 @@ class RenderText : RenderObject, ResponsiveElement {
 	public nothrow float getMaxScale(float width, float height) {
 		float xScale, yScale;
 		int maxY = 0;
+		int minY = 0;
 		int xTotal = 0;
 		foreach(char c; displayText) {
 			Character ch = Characters[c];
-			if (ch.ySize > maxY)
-				maxY = ch.ySize;
+			if (ch.yBearing > maxY)
+				maxY = ch.yBearing;
+			if (ch.yBearing - ch.ySize < minY)
+				minY = ch.yBearing - ch.ySize;
 			xTotal += ch.Advance >> 6;
 		}
 		xScale = width / xTotal;
-		yScale = height / maxY;
+		yScale = height / (maxY - minY);
 		return (xScale < yScale) ? (xScale) : (yScale);
 	}
 
@@ -236,7 +251,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		glDeleteShader(fragmentShader);
 	}
 
-	private bool newArray = true;
+	protected bool newArray = true;
 
 	override nothrow void render() {
 		if (!visible)
@@ -270,7 +285,7 @@ class RenderText : RenderObject, ResponsiveElement {
 			Character ch = Characters[c];
 
 			float xP = xPos + ch.xBearing * scale + xOffset;
-			float yP = yPos  - (ch.ySize - ch.yBearing) * scale;
+			float yP = yPos - (ch.ySize - ch.yBearing) * scale;
 			float w = ch.xSize * scale;
 			float h = ch.ySize * scale;
 

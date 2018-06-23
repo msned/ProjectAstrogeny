@@ -8,7 +8,7 @@ import Settings;
 
 const string settingsName = "Settings.cfg";
 
-void LoadSettings() {
+void LoadSettingsFile() {
 	if (exists(settingsName)) {
 		string s = cast(string)read(settingsName);
 		JSONValue set = parseJSON(s);
@@ -22,11 +22,11 @@ void LoadSettings() {
 			}
 		}
 	} else {
-		SaveSettings();
+		SaveSettingsFile();
 	}
 }
 
-void SaveSettings() {
+void SaveSettingsFile() {
 	JSONValue set = ["Version" : VERSION];
 	static foreach(i, m; __traits(allMembers, GameSettings)) {
 		static if (hasStaticMember!(GameSettings, m) && !isCallable!(mixin("GameSettings." ~ m))) {

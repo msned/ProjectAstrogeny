@@ -1,6 +1,7 @@
 module render.screenComponents;
 
 public import
+	render.screenComponents.Animatable,
 	render.screenComponents.Selectable,
 	render.screenComponents.Text,
 	render.screenComponents.Button,
@@ -10,6 +11,7 @@ public import
 	render.screenComponents.Dropdown,
 	render.screenComponents.Inputable,
 	render.screenComponents.Hoverable,
+	render.screenComponents.TypeBox,
 	render.screenComponents.ContentButton,
 	render.screenComponents.ScalingIcon,
 	render.screenComponents.Scrollable,

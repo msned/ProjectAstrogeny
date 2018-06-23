@@ -6,6 +6,7 @@ import std.stdio;
 import core.sync.mutex;
 import std.exception;
 import save;
+import Settings;
 
 private __gshared GameSave loadedSave;
 public shared Mutex gameSaveMutex;
@@ -59,4 +60,14 @@ public const(GameSave)* readonlyGameSave() {
 public GameSave getGameSave() {
 	enforce(gameSaveMutex.tryLock(), "lock is required before obtaining GameSave");
 	return loadedSave;
+}
+
+public void LoadGameSettings() {
+	LoadSettingsFile();
+	import render.window.WindowLoop;
+	globalSwapInterval = cast(int)GameSettings.VSync;
+}
+
+public void SaveGameSettings() {
+	SaveSettingsFile();
 }

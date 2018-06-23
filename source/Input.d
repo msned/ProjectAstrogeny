@@ -8,7 +8,11 @@ import std.stdio;
 
 extern(C)
 nothrow void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	
+	auto winO = window in windowObjects;
+	if (winO !is null) {
+		if (action == GLFW_PRESS)
+			winO.keyInput(key, mods);
+	}
 }
 
 extern(C)

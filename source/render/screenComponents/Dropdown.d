@@ -47,6 +47,7 @@ class RenderDropdown : RenderContentButton, Inputable {
 	}
 
 	private nothrow void toggleDropdown() {
+		focusGained();
 		displaying = !displaying;
 		if (displaying) {
 			icon.texture = up;
@@ -57,8 +58,16 @@ class RenderDropdown : RenderContentButton, Inputable {
 		}
 	}
 
-	public override void render() {
-		super.render();
+	public override nothrow void charInput(uint i) {
+		
+	}
+
+	public override nothrow void keyInput(int key, int mod) {
+		
+	}
+
+	public override nothrow bool isFocused() {
+		return displaying;
 	}
 
 	public nothrow void focusLost() {

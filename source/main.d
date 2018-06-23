@@ -15,7 +15,6 @@ import render.window.SettingsWindow;
 import save.SaveData;
 import save.GameSave;
 import ships;
-import save.util.JSONLoading;
 
 ShouldThrow missingSymCall(string symbolName) {
 	if(	symbolName == "FT_Stream_OpenBzip2" ||
@@ -37,7 +36,7 @@ void main(string[] args) {
 	if (!glfwInit())
 		return;
 
-	LoadSettings();
+	LoadGameSettings();
 	gameSaveMutex = new shared Mutex();
 
 	if (args.length > 1) {
@@ -65,9 +64,6 @@ void main(string[] args) {
 
 
 void mainLoop() {
-	const(GameSave)* g = readonlyGameSave();
-	foreach(const ShipBase s; g.ships.shipList)
-		writeln(s.shipID);
 	while(running) {
 		
 	}

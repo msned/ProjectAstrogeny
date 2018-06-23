@@ -35,6 +35,9 @@ class DebugWindow : WindowObject {
 		left.addObject(new RenderContentButton(20, 20, Colors.Clues, "Test", this));
 		left.addObject(new RenderContentButton(10, 10, Colors.Patina, "Edit", "file_edit.png", Side.left, this));
 		left.addObject(new RenderTextBox("A long time ago in a galaxy far, far away...\nSuperfluous beings existed.", 40, 60, .3f, this));
+		RenderTypeBox input = new RenderTypeBox("Hayo: ", 10, 20, .2f, this, 5, 1);
+		input.lockScroll = true;
+		left.addObject(input);
 
 		topRight.addObject(new RenderSlider(true, 20, 140, (float val) {
 			try {
@@ -61,12 +64,6 @@ class DebugWindow : WindowObject {
 		try {
 			writeln(val);
 		} catch (Exception e) {}
-	}
-
-
-
-	public override nothrow void characterInput(uint i) {
-		//No implementation from Input yet
 	}
 	
 }

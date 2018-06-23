@@ -12,19 +12,32 @@ class RenderTextBox : RenderText, Scrollable {
 
 	float defaultWidth, defaultHeight;
 	bool stretchy;
+	float scrollAmount = 0, textLength;
+	private WindowObject window;
+	bool lockScroll;
 
 	this(string displayText, float width, float height, float scale, WindowObject obj, bool stretchy = true) {
 		super(displayText, scale, obj);
 		this.width = width * GameSettings.GUIScale;
 		this.height = height * GameSettings.GUIScale;
 		this.stretchy = stretchy;
+		window = obj;
 		defaultHeight = height;
 		defaultWidth = width;
 		//setColor(Colors.Midnight_Black);
 	}
 
+
+	private float scrollMult = 5f;
 	public nothrow void scroll(float x, float y) {
-		
+		if (!visible || lockScroll)
+			return;
+		scrollAmount += y * scrollMult;
+		if (scrollAmount < -(textLength - height * 2))
+			scrollAmount = -textLength + height * 2;
+		else if (scrollAmount > 0)
+			scrollAmount = 0;
+		arrangeText();
 	}
 
 	public override nothrow float getWidth() {
@@ -45,6 +58,11 @@ class RenderTextBox : RenderText, Scrollable {
 	public override nothrow float getDefaultWidth() {
 		return defaultWidth;
 	}
+	public override nothrow void setPosition(float x = 0, float y = 0) {
+		this.xPos = x;
+		this.yPos = y;
+		newArray = true;
+	}
 	public override nothrow bool isStretchy() {
 		return stretchy;
 	}
@@ -56,7 +74,7 @@ class RenderTextBox : RenderText, Scrollable {
 		vert = new GLfloat[5][6][displayText.length];
 		int index = 0;
 		float xOffset = 0;
-		float yOffset = 0;
+		float yOffset = scrollAmount;
 		string[] words;
 		try {
 			words = displayText.split(' ');
@@ -90,8 +108,8 @@ class RenderTextBox : RenderText, Scrollable {
 					xOffset = 0;
 				}
 
-				float xP = xPos + ch.xBearing * scale + xOffset;
-				float yP = yPos  - (ch.ySize - ch.yBearing) * scale - yOffset;
+				float xP = xPos + ch.xBearing * scale + xOffset - width;
+				float yP = yPos - (ch.ySize - ch.yBearing) * scale - yOffset + height - Characters['|'].ySize * scale;
 				float w = ch.xSize * scale;
 				float h = ch.ySize * scale;
 
@@ -109,10 +127,19 @@ class RenderTextBox : RenderText, Scrollable {
 				xOffset += (ch.Advance >> 6) * scale;
 			}
 		}
-		
+		textLength = yOffset + Characters['|'].ySize * scale * lineSpacing - scrollAmount;		
 	}
 
 	override void render() {
+		if (!visible)
+			return;
+
+		GLint[4] oldScissor;
+		glGetIntegerv(GL_SCISSOR_BOX, &oldScissor[0]);
+		glScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
+
 		super.render();
+
+		glScissor(oldScissor[0], oldScissor[1], oldScissor[2], oldScissor[3]);
 	}
 }

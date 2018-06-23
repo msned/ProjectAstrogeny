@@ -6,9 +6,10 @@ import render.window.WindowObject;
 import render.Color;
 import std.conv;
 import Settings;
-import save.util.JSONLoading;
+import render.window.WindowLoop;
 import render.Fonts;
 import derelict.glfw3;
+import save.SaveData;
 
 class SettingsWindow : WindowObject {
 	
@@ -50,7 +51,7 @@ class SettingsWindow : WindowObject {
 			controlGraphics.addObject(new RenderToggleSwitch(30f, Colors.Blue1, (bool val) {
 				GameSettings.VSync = val;
 				vText.setText(to!string(val));
-				glfwSwapInterval(cast(int)val);
+				UpdateSwapInterval(cast(int)val);
 			}, this, GameSettings.VSync));
 			labelGraphics.addObject(new RenderText("V-Sync", 100, 15, this));
 
@@ -128,7 +129,7 @@ class SettingsWindow : WindowObject {
 
 	public override void onDestroy() {
 		super.onDestroy();
-		SaveSettings();
+		SaveGameSettings();
 	}
 
 	private nothrow string getString(T)(T value, int maxLength = 0) {
@@ -142,9 +143,5 @@ class SettingsWindow : WindowObject {
 			return to!string(value);
 		} catch (Exception e) {}
 		return "";
-	}
-
-	protected override nothrow void characterInput(uint i) {
-		//not implemented in Input yet
 	}
 }
