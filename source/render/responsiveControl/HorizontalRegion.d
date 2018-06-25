@@ -89,8 +89,4 @@ class HorizontalRegion : ResponsiveRegion {
 
 		}
 	}
-
-	public override void renderObjects() {
-		super.renderObjects();
-	}
 }

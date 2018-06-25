@@ -9,4 +9,8 @@ class ShipBase {
 	this() {
 		shipID = randomUUID();
 	}
+
+	public void tick() {
+		
+	}
 }

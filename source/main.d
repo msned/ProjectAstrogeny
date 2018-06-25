@@ -12,6 +12,8 @@ import GameState;
 import render.window.WindowObject;
 import render.window.DebugWindow;
 import render.window.SettingsWindow;
+import render.window.ChartWindow;
+import logic.LogicLoop;
 import save.SaveData;
 import save.GameSave;
 import ships;
@@ -47,24 +49,11 @@ void main(string[] args) {
 	NewGameFiles("testerino");
 
 	running = true;
-	auto mainthread = new Thread(&mainLoop).start();
+	auto mainthread = new Thread(&MainLoop).start();
 
 	WindowObject deb = AddWindow(new DebugWindow());
 	WindowObject settings = AddWindow(new SettingsWindow());
-
-	/*
-	gameSaveMutex.lock();
-	GameSave g = getGameSave();
-	g.ships.addShip(new ShipBase());
-	gameSaveMutex.unlock();
-	*/
+	WindowObject cht = AddWindow(new ChartWindow());
 
 	WindowLoop();
-}
-
-
-void mainLoop() {
-	while(running) {
-		
-	}
 }

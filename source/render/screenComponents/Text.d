@@ -61,7 +61,6 @@ class RenderText : RenderObject, ResponsiveElement {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * GLfloat.sizeof, cast(void*)0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * GLfloat.sizeof, cast(void*)(3 * float.sizeof));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		if (!(windowID in textPrograms))
 			loadTextShader();
@@ -212,13 +211,12 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	public override nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {
 		initProj(winID);
-		projMatrices[winID][0]  = 2.0f/(width);
-		projMatrices[winID][5]  = 2.0f/(height);
+		projMatrices[winID][0] = 2.0f/(width);
+		projMatrices[winID][5] = 2.0f/(height);
 		glUseProgram(textPrograms[windowID]);
 		glUniformMatrix4fv(glGetUniformLocation(textPrograms[winID], "proj"), 1, GL_FALSE, &projMatrices[winID][0]);
 		if (winID in shaderPrograms)
 			glUseProgram(shaderPrograms[winID]);
-
 	}
 
 
@@ -258,7 +256,7 @@ class RenderText : RenderObject, ResponsiveElement {
 			return;
 
 		glUseProgram(textPrograms[windowID]);
-		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);
+		glUniform3f(glGetUniformLocation(textPrograms[windowID], "textColor"), colorR, colorG, colorB);	//TODO: set flag for updating uniforms
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -275,10 +273,11 @@ class RenderText : RenderObject, ResponsiveElement {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vert[i].sizeof, vert[i].ptr);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
-		glUseProgram(shaderPrograms[windowID]);
+		if (windowID in shaderPrograms)
+			glUseProgram(shaderPrograms[windowID]);
 	}
 
-	protected nothrow void arrangeText() {
+	protected nothrow bool arrangeText() {
 		vert = new GLfloat[5][6][displayText.length];
 		float xOffset = 0;
 		foreach(int i, char c; displayText) {
@@ -301,6 +300,7 @@ class RenderText : RenderObject, ResponsiveElement {
 
 			xOffset += (ch.Advance >> 6) * scale;
 		}
+		return true;
 	}
 
 }
