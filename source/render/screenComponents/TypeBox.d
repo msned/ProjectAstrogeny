@@ -70,11 +70,16 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 	public override nothrow void charInput(uint c) {
 		if (!focused)
 			return;
+		string oldTxt = displayText.dup;
 		ubyte[] text = cast(ubyte[])displayText.dup;
 		text = text[0 .. cursorIndex] ~ cast(ubyte)c ~ text[cursorIndex .. $];
 		text[++cursorIndex] = '|';
 		displayText = cast(string)text.idup;
-		arrangeText();
+		if (!arrangeText()) {
+			displayText = oldTxt;
+			cursorIndex--;
+			arrangeText();
+		}
 
 	}
 
@@ -88,11 +93,16 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 			case GLFW_KEY_BACKSPACE:
 				if (cursorIndex <= protectedChars + 1)
 					break;
+				string oldTxt = displayText.dup;
 				ubyte[] text = cast(ubyte[])displayText.dup;
 				text = text[0 .. cursorIndex - 1] ~ text[cursorIndex .. $];
 				text[--cursorIndex] = '|';
 				displayText = cast(string)text.idup;
-				arrangeText();
+				if (!arrangeText()) {
+					displayText = oldTxt;
+					arrangeText();
+					cursorIndex++;
+				}
 				break;
 			case GLFW_KEY_LEFT:
 				if (cursorIndex <= protectedChars + 1 || cursorIndex == 0)

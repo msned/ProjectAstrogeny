@@ -15,12 +15,14 @@ class RenderTextBox : RenderText, Scrollable {
 	float scrollAmount = 0, textLength;
 	private WindowObject window;
 	bool lockScroll;
+	int lineLimit;
 
-	this(string displayText, float width, float height, float scale, WindowObject obj, bool stretchy = true) {
+	this(string displayText, float width, float height, float scale, WindowObject obj, int lineLimit = 0, bool stretchy = true) {
 		super(displayText, scale, obj);
 		this.width = width * GameSettings.GUIScale;
 		this.height = height * GameSettings.GUIScale;
 		this.stretchy = stretchy;
+		this.lineLimit = lineLimit;
 		window = obj;
 		defaultHeight = height;
 		defaultWidth = width;
@@ -69,13 +71,22 @@ class RenderTextBox : RenderText, Scrollable {
 
 	float lineSpacing = 1.1;
 
-	protected override nothrow void arrangeText() {
+	const static string nextLine = "
+		yOffset += Characters['|'].ySize * scale * lineSpacing;
+		xOffset = 0;
+		if (lineLimit && ++line > lineLimit)
+			return false;
+		";
+
+	protected override nothrow bool arrangeText() {
 
 		vert = new GLfloat[5][6][displayText.length];
 		int index = 0;
+		int line = 1;
 		float xOffset = 0;
 		float yOffset = scrollAmount;
 		string[] words;
+
 		try {
 			words = displayText.split(' ');
 		} catch (Exception e) {
@@ -91,21 +102,18 @@ class RenderTextBox : RenderText, Scrollable {
 			}
 			total *= scale;
 			if (xOffset + total > width * 2 && total < width * 2) {
-				yOffset += Characters['|'].ySize * scale * lineSpacing;
-				xOffset = 0;
+				mixin(nextLine);
 			}
 			foreach(char c; s) {
 				if (c == '\n') {
-					yOffset += Characters['|'].ySize * scale * lineSpacing;
-					xOffset = 0;
+					mixin(nextLine);
 					index++;
 					continue;
 				}
 				Character ch = Characters[c];
 
 				if (xOffset + (ch.Advance >> 6) * scale >= width * 2) {
-					yOffset += Characters['|'].ySize * scale * lineSpacing;
-					xOffset = 0;
+					mixin(nextLine);
 				}
 
 				float xP = xPos + ch.xBearing * scale + xOffset - width;
@@ -127,7 +135,8 @@ class RenderTextBox : RenderText, Scrollable {
 				xOffset += (ch.Advance >> 6) * scale;
 			}
 		}
-		textLength = yOffset + Characters['|'].ySize * scale * lineSpacing - scrollAmount;		
+		textLength = yOffset + Characters['|'].ySize * scale * lineSpacing - scrollAmount;
+		return true;
 	}
 
 	override void render() {

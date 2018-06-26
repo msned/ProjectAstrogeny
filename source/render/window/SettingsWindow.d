@@ -10,6 +10,7 @@ import render.window.WindowLoop;
 import render.Fonts;
 import derelict.glfw3;
 import save.SaveData;
+import render.window.DisplayUtils;
 
 class SettingsWindow : WindowObject {
 	
@@ -130,18 +131,5 @@ class SettingsWindow : WindowObject {
 	public override void onDestroy() {
 		super.onDestroy();
 		SaveGameSettings();
-	}
-
-	private nothrow string getString(T)(T value, int maxLength = 0) {
-		try {
-			if (maxLength) {
-				string s = to!string(value);
-				if (s.length > maxLength)
-					return s[0 .. maxLength];
-				return s;
-			}
-			return to!string(value);
-		} catch (Exception e) {}
-		return "";
 	}
 }
