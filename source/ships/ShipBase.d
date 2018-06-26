@@ -4,13 +4,65 @@ import std.uuid;
 
 class ShipBase {
 	
-	UUID shipID;
+	private:
+		string name;
+		UUID shipID;
+	
+	public:
+		this() {
+			shipID = randomUUID();
+		}
 
-	this() {
-		shipID = randomUUID();
-	}
-
-	public void tick() {
+		void tick() {
 		
-	}
+		}
+}
+
+/**
+ *
+ */
+class ShipHull {
+
+}
+
+/**
+*
+*/
+class ShipHold {
+
+}
+
+/**
+*
+*/
+class CargoHold : ShipHold{
+
+}
+
+/**
+*
+*/
+class OccupantHold : ShipHold{
+
+}
+
+/**
+*
+*/
+class Sensor{
+
+}
+
+/**
+*
+*/
+class armanent{
+
+}
+
+/**
+*
+*/
+class lifeSupport{
+
 }
