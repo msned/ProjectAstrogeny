@@ -1,18 +1,13 @@
 module world.generation.Planet_gen;
 import world.generation.Star_gen;
+import Resources;
 import std.random;
 import std.math;
 
-/** Enum for standard atmosphereic gases*/
-const enum gases {Hydrogen=0, Helium, Methane, Water, Ammonia, Neon, Nitrogen, Carbon_Monoxide, Nitrogen_Oxide, Oxygen, Hydrogen_Sulfide, Argon, Carbon_Dioxide, Nitrogen_Dioxide, Sulfur_Dioxide, Chlorine, Fluorine, Bromine, Iodine};
-//enum for boiling points and greenhousefactor
-const double[2][gases.max + 1] boilingPoints = [ gases.Hydrogen:[-252.879, 1], gases.Helium:[-268.9289, 0], gases.Methane:[-161.49, 1], gases.Water:[100, 1], gases.Ammonia:[-33.34, 1], gases.Neon:[-246.046, 0], gases.Nitrogen:[-195.795, 0], gases.Carbon_Monoxide:[-191.55, 1], gases.Nitrogen_Oxide:[-152, 1], gases.Oxygen:[-182.962, 0], gases.Hydrogen_Sulfide:[-60, 1], gases.Argon:[-185.848, 0], gases.Carbon_Dioxide:[-56.6, 1], gases.Nitrogen_Dioxide:[21.2, 1], gases.Sulfur_Dioxide:[-10, 1], gases.Chlorine:[-34.04, 1], gases.Fluorine:[-188.11,1], gases.Bromine:[58.8, 1], gases.Iodine:[184.32, 1]];
 //types of atmosphere
 const enum ats {Meth, CarbonDI, Oxygen};
 //Types of planets
 const enum planet_type {GasGiant, IceGiant, GasDwarf, Terrestrial};
-//Naturally occuring minerals and metals that are valuable resources
-const enum nat_resource {Ice=0, Silicon, Iron, Magnesium, Carbon, Sulfur, Nickel, Aluminum, Sodium, Titanium, Phosphorus, Potassium};
 
 /** Radius of sun*/
 immutable double solarRad = 695700;
@@ -26,7 +21,8 @@ class Atmosphere {
 	private:
 		double pressure, hydrosphereExtent, greenhouseFactor, albedo, surfaceTemperature;
 		bool hydrosphere, hasAtmos, toxic;
-		double[gases.max + 1] atmosComposition;
+		Gas[] atmosGases;
+		double[Gas] atmosComposition;
 	public:
 		this(double albedo){
 			this.albedo = albedo;
@@ -40,11 +36,16 @@ class Atmosphere {
 			hydrosphere = val;
 		}
 
-		double[gases.max + 1] getGasComp(){
+		Gas[] getGasComp(){
+			return atmosGases;
+		}
+
+		double[Gas] getGasSize(){
 			return atmosComposition;
 		}
 
-		void addGas(int gas, double percent){
+		void addGas(Gas gas, double percent){
+			atmosGases[atmosGases.sizeof] = gas;
 			atmosComposition[gas] = percent;
 		}
 
@@ -72,12 +73,14 @@ class Planet {
 	private:
 		/** mass of planet, average density, radius of planet in AU, gravity in Gs,
 		 * length of full rotation in earth years, velocity in m/s, angle from sun
+		 *
+		 * Angle is location from top down look at solar system from the first quadrant X axis
 		 */
-		double mass, density, orbitRad, gravAccel, year, escapeVelocity;
+		double mass, density, orbitRad, gravAccel, year, escapeVelocity, orbitAngle;
 		Atmosphere atmos;
 		planet_type type;
-		double[nat_resource.max + 1] prominentRes;
-		double[nat_resource.max + 1] traceRes;
+		min_metals[] prominentRes;
+		min_metals[] traceRes;
 
 	public:
 		this(planet_type type, Atmosphere atmos, double mass, double density, double orbitRad, double gravAccel, 
@@ -91,11 +94,22 @@ class Planet {
 				this.gravAccel = gravAccel;
 				this.year = year;
 				this.escapeVelocity = escapeVelocity;
+				orbitAngle = uniform(0, 359);
 		}
 
 		double getRadius(){
 			return orbitRad;
 		}
+
+		double getAngle(){
+			return orbitAngle;
+		}
+		
+		/*
+		void updateLocation(double period){
+			
+		}
+		*/
 }
 
 /**
@@ -241,46 +255,46 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 	if(type == planet_type.GasGiant || type == planet_type.GasDwarf){
 		//Add helium first
 		currATM = (uniform(5, 30) / 100.0);
-		atmos.addGas(gases.Helium, currATM);
+		atmos.addGas(gases[1], currATM);
 		totalATM += currATM;
 
 		//then trace gases
 		int numTrace = uniform(1, 5);
 		for(int i = 0; i < numTrace; i++){
 			int num = uniform(5, 18);
-			atmos.addGas(num, .01);
+			atmos.addGas(gases[num], .01);
 			totalATM += .01;
 		}
 
 		//Make the rest Hydrogen
 		currATM = 1 - totalATM;
-		atmos.addGas(gases.Hydrogen, currATM);
+		atmos.addGas(gases[0], currATM);
 	}
 	else if(type == planet_type.IceGiant){
 		//Start with helium
 		currATM = uniform(10, 25) / 100.0;
-		atmos.addGas(gases.Helium, currATM);
+		atmos.addGas(gases[1], currATM);
 		totalATM += currATM;
 
 		//Add some methane
 		currATM = uniform(1, 3) / 100.0;
-		atmos.addGas(gases.Methane, currATM);
+		atmos.addGas(gases[2], currATM);
 		totalATM += currATM;
 
 		//Then some water and ammonia
 
 		currATM = uniform(0, 10) / 1000.0;
-		atmos.addGas(gases.Water, currATM);
+		atmos.addGas(gases[3], currATM);
 		totalATM += currATM;
 
 		
 		currATM = uniform(0, 10) / 1000.0;
-		atmos.addGas(gases.Ammonia, currATM);
+		atmos.addGas(gases[4], currATM);
 		totalATM += currATM;
 
 		//The rest is hydrogen
 		currATM = 1 - totalATM;
-		atmos.addGas(gases.Hydrogen, currATM);
+		atmos.addGas(gases[0], currATM);
 	}
 	else{
 		double massRatio = mass;
@@ -313,7 +327,7 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 				}
 
 				currATM = uniform(5, 40) / 100.0;
-				atmos.addGas(gases.Methane, currATM * planetsATM);
+				atmos.addGas(gases[2], currATM * planetsATM);
 				totalATM += currATM;
 			}
 			else if(atmosType == ats.CarbonDI){
@@ -326,7 +340,7 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 				}
 
 				currATM = uniform(5, 90) / 100.0;
-				atmos.addGas(gases.Carbon_Dioxide, currATM * planetsATM);
+				atmos.addGas(gases[7], currATM * planetsATM);
 				totalATM += currATM;
 			}
 			else{
@@ -339,7 +353,7 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 				}
 
 				currATM = uniform(5, 40) / 100.0;
-				atmos.addGas(gases.Oxygen, currATM * planetsATM);
+				atmos.addGas(gases[9], currATM * planetsATM);
 				totalATM += currATM;
 
 				if(uniform(0,1) == 0){
@@ -360,12 +374,12 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 						Trace = 1;
 					}
 				}
-				atmos.addGas(gasTrace, .01);
+				atmos.addGas(gases[gasTrace], .01);
 				totalATM += .01;
 			}
 
 			currATM = 1- totalATM;
-			atmos.addGas(gases.Nitrogen, currATM * planetsATM);
+			atmos.addGas(gases[6], currATM * planetsATM);
 		}
 	}
 	//Setting the temperature
@@ -379,11 +393,12 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 	}
 	else{
 		atmos.setPressure(totalATM);
-		double[gases.max + 1] comp = atmos.getGasComp();
+		Gas[] comp = atmos.getGasComp();
+		double[Gas] makeup =  atmos.getGasSize();
 
-		foreach (index, value; comp){
-			if(boilingPoints[index][0] <= gasTemp){
-				GreenhousePressure += boilingPoints[index][1] * value;
+		foreach (index; comp){
+			if(index.getBoilingPoint() <= gasTemp && index.isGreenH()){
+				GreenhousePressure += makeup[index];
 			}
 		}
 
