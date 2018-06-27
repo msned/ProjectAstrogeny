@@ -39,7 +39,7 @@ class TabRegion : ResponsiveRegion {
 	}
 
 	private void delegate() nothrow makeClick(int index, RenderButton ths, RenderButton[] others) {
-		return (){
+		return () {
 			foreach(RenderButton r; others) {
 				if (auto c = cast(Selectable)r)
 					c.setSelected(false);

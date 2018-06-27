@@ -23,7 +23,8 @@ public nothrow bool RenderInit() {
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINE_SMOOTH);
-	glLineWidth(4f);
+	glEnable(GL_MULTISAMPLE);
+	glLineWidth(4f * GameSettings.GUIScale);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEBUG_OUTPUT);

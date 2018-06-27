@@ -19,8 +19,9 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 		focused = false;
 		win.animationCalls ~= &animationUpdate;
 		win.inputs ~= this;
-		cursorIndex = protectedChars + 1;
+		cursorIndex = protectedChars;
 		this.protectedChars = protectedChars;
+		registerFocus(&focusLost);
 	}
 
 	int animationAmount = 500;
@@ -31,21 +32,8 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 			animationCounter += interval;
 			if (animationCounter > animationAmount) {
 				animationCounter = 0;
-				ubyte[] text = cast(ubyte[])displayText.dup;
-				if (cursorOn) {
-					if (cursorIndex < displayText.length - 1)
-						text = text[0 .. cursorIndex] ~ '|' ~ text[cursorIndex + 1 .. $];
-					else
-						text = text[0 .. cursorIndex] ~ '|';
-				} else {
-					if (cursorIndex < displayText.length - 1)
-						text = text[0 .. cursorIndex] ~ ' ' ~ text[cursorIndex + 1 .. $];
-					else
-						text = text[0 .. cursorIndex] ~ ' ';
-				}
-				displayText = cast(string)text.idup;
-				arrangeText();
 				cursorOn = !cursorOn;
+				flashCursor();
 			}
 		} else {
 			if (cursorOn) {
@@ -58,13 +46,39 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 		}
 	}
 
+	private nothrow void flashCursor() {
+		ubyte[] text = cast(ubyte[])displayText.dup;
+		if (cursorOn) {
+			if (cursorIndex < displayText.length - 1)
+				text = text[0 .. cursorIndex] ~ '|' ~ text[cursorIndex + 1 .. $];
+			else
+				text = text[0 .. cursorIndex] ~ '|';
+		} else {
+			if (cursorIndex < displayText.length - 1)
+				text = text[0 .. cursorIndex] ~ ' ' ~ text[cursorIndex + 1 .. $];
+			else
+				text = text[0 .. cursorIndex] ~ ' ';
+		}
+		displayText = cast(string)text.idup;
+		arrangeText();
+	}
+
 	protected nothrow void updateValue() {
-		writelnNothrow("updated to: " ~ displayText);
+		focused = false;
+		cursorOn = true;
+		animationUpdate(0);
 	}
 
 	protected nothrow void setFocus() {
+		focusGained();
 		cursorOn = true;
 		focused = true;
+		flashCursor();
+	}
+
+	public nothrow void focusLost() {
+		if (focused)
+			updateValue();
 	}
 
 	public override nothrow void charInput(uint c) {
@@ -91,7 +105,7 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 				updateValue();
 				break;
 			case GLFW_KEY_BACKSPACE:
-				if (cursorIndex <= protectedChars + 1)
+				if (cursorIndex <= protectedChars)
 					break;
 				string oldTxt = displayText.dup;
 				ubyte[] text = cast(ubyte[])displayText.dup;
@@ -105,7 +119,7 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 				}
 				break;
 			case GLFW_KEY_LEFT:
-				if (cursorIndex <= protectedChars + 1 || cursorIndex == 0)
+				if (cursorIndex <= protectedChars || cursorIndex == 0)
 					break;
 				ubyte[] text = cast(ubyte[])displayText.dup;
 				text.swapAt(cursorIndex - 1, cursorIndex);
@@ -134,13 +148,6 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 
 	public nothrow void mouseReleased() {
 
-	}
-
-	public nothrow void focusLost() {
-		if (focused) {
-			updateValue();
-			focused = false;
-		}
 	}
 
 	public nothrow bool checkClick(float x, float y, int button) {

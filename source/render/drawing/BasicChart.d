@@ -7,10 +7,11 @@ import derelict.opengl;
 import std.uuid;
 import render.Color;
 import Settings;
+import std.conv;
 
 class RenderBasicChart : RenderObject, ResponsiveElement {
 
-	private float[] data;
+	private float[] dataX, dataY;
 
 	const static char* vertexShaderSource = 
 		"#version 330 core
@@ -37,6 +38,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 		this.width = width;
 		this.height = height;
 		windowID = win.windowID;
+		window = win;
 		initRender(win);
 	}
 
@@ -46,6 +48,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 	];
 
 	private static bool[UUID] registeredOrtho;
+	private WindowObject window;
 
 	protected void initRender(WindowObject windowObj) {
 		glGenVertexArrays(1, &VAO);
@@ -107,8 +110,13 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 			glUseProgram(shaderPrograms[winID]);
 	}
 
-	public nothrow void setData(float[] dat) {
-		data = dat;
+	public nothrow void setData(float[] datX, float[] datY) {
+		if (DEBUG) {
+			assert(datX.length == datY.length);
+		}
+		dataX = datX;
+		dataY = datY;
+		updateVertices = true;
 	}
 
 	public nothrow float getMinWidth() {
@@ -137,8 +145,9 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 
 	float[6][] lines;
 	float[6][] marks;
+	RenderText[] labels;
 
-	float bound = 20f;
+	float bound = 50f;
 
 	public override nothrow void render() {
 		if (!visible)
@@ -146,22 +155,68 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 
 		if (updateVertices) {
 			marks = [];
-			float minValue = cast(float)long.max, maxValue = cast(float)long.min;
-			foreach(float v; data) {
+			lines = [];
+			labels = [];
+			float minValue = cast(float)long.max, maxValue = cast(float)long.min;		//Might need to be updated to work with larger values than longs
+			float minW = cast(float)long.max, maxW = cast(float)long.min;
+			foreach(float v; dataY) {
 				if (v < minValue)
 					minValue = v;
-				else if (v > maxValue)
+				if (v > maxValue)
 					maxValue = v;
 			}
-			float startcornerX = -width/2f + bound * GameSettings.GUIScale, startcornerY = -height/2f + bound * GameSettings.GUIScale, endcornerY = height/2f - bound * GameSettings.GUIScale;
-			float incr = labelIncrement(minValue, maxValue);
-			for(int i = 0; i < NTICK; i++) {
-				
+			foreach(float v; dataX) {
+				if (v < minW)
+					minW = v;
+				if (v > maxW)
+					maxW = v;
 			}
-			marks ~= [
-				startcornerX, startcornerY, .5f,
+			float startcornerX = xPos -width + bound * GameSettings.GUIScale, startcornerY = yPos -height + bound * GameSettings.GUIScale, 
+				  endcornerY = yPos + height - bound * GameSettings.GUIScale, endcornerX = xPos + width - bound * GameSettings.GUIScale;
+			labelIncrement(minValue, maxValue, minW, maxW);
+			marks ~= [	//Vertical Axis
+				startcornerX, startcornerY - 2f * GameSettings.GUIScale, .5f,
 				startcornerX, endcornerY, .5f
 			];
+			marks ~= [	//Horizontal Axis
+				startcornerX - 2f * GameSettings.GUIScale, startcornerY, .5f,
+				endcornerX, startcornerY, .5f
+			];
+			float hashX = (endcornerX - startcornerX) / NTICK, hashY = (endcornerY - startcornerY) / NTICK, hashLength = 10f * GameSettings.GUIScale;
+			try {
+				labels ~= new RenderText(to!string(minY), xPos - width + 5, startcornerY, .125f * GameSettings.GUIScale, window);
+				labels ~= new RenderText(to!string(minX), startcornerX, yPos - height + 5, .125f * GameSettings.GUIScale, window);
+			} catch (Exception e) { assert(0); }
+			for(int i = 1; i <= NTICK; i++) {
+				marks ~= [[
+					startcornerX - hashLength, startcornerY + i * hashY, .45f,
+					startcornerX + hashLength, startcornerY + i * hashY, .45f
+				], [
+					startcornerX + i * hashX, startcornerY - hashLength, .45f,
+					startcornerX + i * hashX, startcornerY + hashLength, .45f
+				]];
+				try {
+					labels ~= new RenderText(to!string((minY + i * incrY).quantize(incrY)), xPos - width + 5, startcornerY + i * hashY - 4 * GameSettings.GUIScale, .125f * GameSettings.GUIScale, window);
+					labels ~= new RenderText(to!string((minX + i * incrX).quantize(incrX)), startcornerX + i * hashX - 4 * GameSettings.GUIScale, yPos - height + 5, .125f * GameSettings.GUIScale, window);
+				} catch (Exception e) { assert(0); }
+			}
+
+			float xRange = maxX - minX, yRange = maxY -  minY;
+
+			float xPos = startcornerX + (endcornerX - startcornerX) * (dataX[0] - minX) / xRange;
+			float yPos = startcornerY + (endcornerY - startcornerY) * (dataY[0] - minY) / yRange;
+			for(int i = 1; i < dataX.length; i++) {
+				float xPos2 = startcornerX + (endcornerX - startcornerX) * (dataX[i] - minX) / xRange;
+				float yPos2 = startcornerY + (endcornerY - startcornerY) * (dataY[i] - minY) / yRange;
+				lines ~= [
+					xPos, yPos, .4f,
+					xPos2, yPos2, .4f
+				];
+				xPos = xPos2;
+				yPos = yPos2;
+			}
+
+			updateVertices = false;
 		}
 
 		glUseProgram(chartPrograms[windowID]);
@@ -169,14 +224,6 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-		lines = [[
-			-20f, 40f, .5f,
-			20f, -33f, .5f
-		], [
-			40f, 0f, .5f,
-			0f, 10f, .5f
-		]];
 
 		foreach(float[6] vs; lines) {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vs.sizeof, vs.ptr);
@@ -186,9 +233,13 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vs.sizeof, vs.ptr);
 			glDrawArrays(GL_LINES, 0, 2);
 		}
+		foreach(RenderText t; labels) {
+			t.render();
+		}
 		if (windowID in shaderPrograms)
 			glUseProgram(shaderPrograms[windowID]);
 	}
+
 
 	/* Graph Calculation Methods 
 	============================================
@@ -196,20 +247,23 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 
 	import std.math;
 
-	int NTICK = 10;
-	float MINY, MAXY;
+	const static int NTICK = 10;
+	float minY, maxY, incrY, minX, maxX, incrX;
 
 	/*
 	* Algorithm borrowed from Paul Heckbert
 	* http://www.realtimerendering.com/resources/GraphicsGems/gems/Label.c
 	* Converted by Jeremy Collier
 	*/
-	private nothrow float labelIncrement(float min, float max) {
-		float range = nicenum(max - min, false);
-		float d = nicenum(range / (NTICK - 1), true);
-		MINY = floor(min/d)*d;
-		MAXY = ceil(max/d)*d;
-		return d;
+	private nothrow void labelIncrement(float mY, float xY, float mX, float xX) {
+		float range = nicenum(xY - mY, false);
+		incrY = nicenum(range / (NTICK - 1), true);
+		minY = floor(mY/incrY)*incrY;
+		maxY = minY + incrY * NTICK;
+		range = nicenum(xX - mX, false);
+		incrX = nicenum(range / (NTICK - 1), true);
+		minX = floor(mX/incrX)*incrX;
+		maxX = minX + incrX * NTICK;
 	}
 
 	private nothrow float nicenum(float x, bool round) {

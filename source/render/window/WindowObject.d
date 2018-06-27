@@ -42,6 +42,7 @@ abstract class WindowObject {
 	this(string name, int x = 540, int y = 540) {
 		sizeX = cast(int)(x * GameSettings.GUIScale);
 		sizeY = cast(int)(y * GameSettings.GUIScale);
+		glfwWindowHint(GLFW_SAMPLES, 4);
 		window = glfwCreateWindow(sizeX, sizeY, cast(char*)name, null, null);
 		windowName = name;
 		windowID = randomUUID();
@@ -205,7 +206,7 @@ abstract class WindowObject {
 			foreach(RenderObject o; r.getRenderObjects() ~ r.getFixedRenderObjects())
 				if(o.within(cursorXPos, cursorYPos))
 					if (auto s = cast(Scrollable)o) {
-						s.scroll(x, y);
+						s.scroll(x, y, null);
 						return;
 					}
 

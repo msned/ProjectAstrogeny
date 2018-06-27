@@ -13,6 +13,7 @@ import render.window.WindowObject;
 import render.window.DebugWindow;
 import render.window.SettingsWindow;
 import render.window.ChartWindow;
+import render.window.ChartTestWindow;
 import logic.LogicLoop;
 import save.SaveData;
 import save.GameSave;
@@ -46,14 +47,14 @@ void main(string[] args) {
 		LoadGameFiles(args[1]);
 	}
 
-	//NewGameFiles("testerino");
+	NewGameFiles("testerino");
 
 	running = true;
 	auto mainthread = new Thread(&MainLoop).start();
 
-	WindowObject deb = AddWindow(new DebugWindow());
+	//WindowObject deb = AddWindow(new DebugWindow());
 	WindowObject settings = AddWindow(new SettingsWindow());
-	WindowObject cht = AddWindow(new ChartWindow());
+	WindowObject cht = AddWindow(new ChartTestWindow());
 
 	WindowLoop();
 }

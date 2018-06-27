@@ -12,6 +12,7 @@ public import
 	render.screenComponents.Inputable,
 	render.screenComponents.Hoverable,
 	render.screenComponents.TypeBox,
+	render.screenComponents.TypeBoxValue,
 	render.screenComponents.ContentButton,
 	render.screenComponents.ScalingIcon,
 	render.screenComponents.Scrollable,

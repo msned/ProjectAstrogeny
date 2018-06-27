@@ -81,8 +81,10 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		return false;
 	}
 
+	Scrollable[] linkedScroll;
+
 	private float scrollMult = 5f;
-	public nothrow void scroll(float x, float y) {
+	public nothrow void scroll(float x, float y, Scrollable caller = null) {
 		if (!visible)
 			return;
 
@@ -92,6 +94,13 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		else if (scrollAmount > totalLength - height * 2)
 			scrollAmount = totalLength - height * 2;
 		shiftElements();
+
+		if (linkedScroll !is null && linkedScroll.length > 0)
+			try {
+			foreach(Scrollable s; linkedScroll)
+				if (s != caller)
+					s.scroll(x, y, this);
+			} catch (Exception e) { assert(0); }
 	}
 
 	public override nothrow void render() {
@@ -102,7 +111,6 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		glGetIntegerv(GL_SCISSOR_BOX, &oldScissor[0]);
 		glScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
 
-		//super.render();
 		foreach(RenderObject o; items)
 			o.render();
 

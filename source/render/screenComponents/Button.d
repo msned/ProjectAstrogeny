@@ -5,13 +5,14 @@ import render.window.WindowObject;
 import render.Color;
 import std.stdio;
 
-class RenderButton : RenderObject, Clickable {
+class RenderButton : RenderObject, Clickable, Inputable {
 
 	protected nothrow void delegate()[] click;
 	protected nothrow void delegate()[] rClick;
 
 	public nothrow bool checkClick(float x, float y, int button) {
 		if (within(x, y)) {
+				focusGained();
 				if (button == 0) {
 					if (click !is null)
 						foreach(void delegate() nothrow c; click)
@@ -49,6 +50,15 @@ class RenderButton : RenderObject, Clickable {
 	}
 	public void setRClick(void delegate() nothrow rC) {
 		rClick ~= rC;
+	}
+
+	public nothrow void keyInput(int i, int j) {}
+	public nothrow void charInput(uint i) {}
+	public nothrow void focusLost() {
+
+	}
+	public nothrow bool isFocused() {
+		return false;
 	}
 	
 }

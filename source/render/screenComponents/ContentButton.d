@@ -136,7 +136,6 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 		return defaultHeight;
 	}
 
-
 	public override void render() {
 		if (!visible)
 			return;

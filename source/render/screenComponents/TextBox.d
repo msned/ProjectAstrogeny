@@ -17,6 +17,8 @@ class RenderTextBox : RenderText, Scrollable {
 	bool lockScroll;
 	int lineLimit;
 
+	RenderObject background;
+
 	this(string displayText, float width, float height, float scale, WindowObject obj, int lineLimit = 0, bool stretchy = true) {
 		super(displayText, scale, obj);
 		this.width = width * GameSettings.GUIScale;
@@ -26,12 +28,16 @@ class RenderTextBox : RenderText, Scrollable {
 		window = obj;
 		defaultHeight = height;
 		defaultWidth = width;
-		//setColor(Colors.Midnight_Black);
+	}
+
+	public void setBackground(Color c) {
+		background = new RenderObject(xPos, yPos, .9f, width, height, "blank.png", window);
+		background.setColor(c);
 	}
 
 
 	private float scrollMult = 5f;
-	public nothrow void scroll(float x, float y) {
+	public nothrow void scroll(float x, float y, Scrollable caller = null) {
 		if (!visible || lockScroll)
 			return;
 		scrollAmount += y * scrollMult;
@@ -61,10 +67,25 @@ class RenderTextBox : RenderText, Scrollable {
 		return defaultWidth;
 	}
 	public override nothrow void setPosition(float x = 0, float y = 0) {
-		this.xPos = x;
-		this.yPos = y;
+		xPos = x;
+		yPos = y;
 		newArray = true;
+		if (background !is null)
+			background.setPosition(x, y);
 	}
+	public override nothrow void setScale(float width, float height) {
+		if (background !is null)
+			background.setScale(width, height);
+		super.setScale(width, height);
+	}
+	public override nothrow void setScaleAndPosition(float width, float height, float x, float y) {
+		xPos = x;
+		yPos = y;
+		if (background !is null)
+			background.setPosition(x, y);
+		setScale(width, height);
+	}
+
 	public override nothrow bool isStretchy() {
 		return stretchy;
 	}
@@ -143,12 +164,17 @@ class RenderTextBox : RenderText, Scrollable {
 		if (!visible)
 			return;
 
-		GLint[4] oldScissor;
-		glGetIntegerv(GL_SCISSOR_BOX, &oldScissor[0]);
-		glScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
+		if (background !is null)
+			background.render();
 
-		super.render();
-
-		glScissor(oldScissor[0], oldScissor[1], oldScissor[2], oldScissor[3]);
+		if (lineLimit == 1) {
+			super.render();
+		} else {
+			GLint[4] oldScissor;
+			glGetIntegerv(GL_SCISSOR_BOX, &oldScissor[0]);
+			glScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
+			super.render();
+			glScissor(oldScissor[0], oldScissor[1], oldScissor[2], oldScissor[3]);
+		}
 	}
 }

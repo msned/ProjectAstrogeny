@@ -32,6 +32,6 @@ class FillRegion : ResponsiveRegion {
 		float height = getPosition(Side.top) - getPosition(Side.bottom);
 		float x = (getPosition(Side.right) + getPosition(Side.left)) / 2f;
 		float y = (getPosition(Side.top) + getPosition(Side.bottom)) / 2f;
-		fill.setScaleAndPosition(width, height, x, y);
+		fill.setScaleAndPosition(width / 2, height / 2, x, y);
 	}
 }

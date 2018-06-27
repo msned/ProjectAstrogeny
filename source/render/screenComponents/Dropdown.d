@@ -7,7 +7,7 @@ import render.TextureUtil;
 import render.responsiveControl;
 import derelict.opengl;
 
-class RenderDropdown : RenderContentButton, Inputable {
+class RenderDropdown : RenderContentButton {
 
 	private bool displaying;
 	GLuint up, down;
@@ -63,21 +63,13 @@ class RenderDropdown : RenderContentButton, Inputable {
 		}
 	}
 
-	public override nothrow void charInput(uint i) {
-		
-	}
-
-	public override nothrow void keyInput(int key, int mod) {
-		
-	}
-
 	public override nothrow bool isFocused() {
 		return displaying;
 	}
 
 	private bool skipFocus = false;
 
-	public nothrow void focusLost() {
+	public override nothrow void focusLost() {
 		if (skipFocus) {
 			skipFocus = false;
 			return;

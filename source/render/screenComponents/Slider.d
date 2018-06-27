@@ -129,7 +129,7 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 	}
 
 	float scrollDivider = 20;
-	public nothrow void scroll(float x, float y) {
+	public nothrow void scroll(float x, float y, Scrollable caller = null) {
 		if (vertical) {
 			setValue(value + y / scrollDivider);
 		} else {
