@@ -46,7 +46,7 @@ void main(string[] args) {
 		LoadGameFiles(args[1]);
 	}
 
-	NewGameFiles("testerino");
+	//NewGameFiles("testerino");
 
 	running = true;
 	auto mainthread = new Thread(&MainLoop).start();

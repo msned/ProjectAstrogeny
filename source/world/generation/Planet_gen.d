@@ -1,6 +1,6 @@
 module world.generation.Planet_gen;
 import world.generation.Star_gen;
-import Resources;
+import world.Resources;
 import std.random;
 import std.math;
 

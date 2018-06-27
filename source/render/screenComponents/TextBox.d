@@ -72,7 +72,7 @@ class RenderTextBox : RenderText, Scrollable {
 	float lineSpacing = 1.1;
 
 	const static string nextLine = "
-		yOffset += Characters['|'].ySize * scale * lineSpacing;
+		yOffset += Characters[windowID]['|'].ySize * scale * lineSpacing;
 		xOffset = 0;
 		if (lineLimit && ++line > lineLimit)
 			return false;
@@ -98,7 +98,7 @@ class RenderTextBox : RenderText, Scrollable {
 			float total = 0;
 			foreach(char c; s) {
 				if (c != '\n')
-					total += Characters[c].Advance >> 6;
+					total += Characters[windowID][c].Advance >> 6;
 			}
 			total *= scale;
 			if (xOffset + total > width * 2 && total < width * 2) {
@@ -110,14 +110,14 @@ class RenderTextBox : RenderText, Scrollable {
 					index++;
 					continue;
 				}
-				Character ch = Characters[c];
+				Character ch = Characters[windowID][c];
 
 				if (xOffset + (ch.Advance >> 6) * scale >= width * 2) {
 					mixin(nextLine);
 				}
 
 				float xP = xPos + ch.xBearing * scale + xOffset - width;
-				float yP = yPos - (ch.ySize - ch.yBearing) * scale - yOffset + height - Characters['|'].ySize * scale;
+				float yP = yPos - (ch.ySize - ch.yBearing) * scale - yOffset + height - Characters[windowID]['|'].ySize * scale;
 				float w = ch.xSize * scale;
 				float h = ch.ySize * scale;
 
@@ -135,7 +135,7 @@ class RenderTextBox : RenderText, Scrollable {
 				xOffset += (ch.Advance >> 6) * scale;
 			}
 		}
-		textLength = yOffset + Characters['|'].ySize * scale * lineSpacing - scrollAmount;
+		textLength = yOffset + Characters[windowID]['|'].ySize * scale * lineSpacing - scrollAmount;
 		return true;
 	}
 

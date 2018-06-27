@@ -295,9 +295,9 @@ class RenderObject {
 	}
 
 	public static void onDestroyWindow(UUID winID) {
-		glDeleteProgram(shaderPrograms[winID]);
-		shaderPrograms.remove(winID);
 		projMatrices.remove(winID);
+		orthoUpdates.remove(winID);
+		registeredOrtho[winID] = false;
 	}
 
 	public void onDestroy() {

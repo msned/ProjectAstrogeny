@@ -1,4 +1,4 @@
-module Resources;
+module world.Resources;
 
 public Gas[] gases;
 public min_metals[] nat_resources;
@@ -17,7 +17,7 @@ interface Resource {
 /**
  * Atmospheric gases that are used as resources
  */
-class Gas : Resource{
+class Gas : Resource {
 	private:
 		const string type = "gas";
 		string name;
@@ -66,7 +66,7 @@ class Gas : Resource{
 /**
  * The minerals and metals that occur naturally
  */
-class min_metals : Resource{
+class min_metals : Resource {
 	private:
 		const string type = "metal";
 		string name;
@@ -101,7 +101,7 @@ class min_metals : Resource{
 /**
  * class for all player constructed materials
  */
-class engineered_materials : min_metals{
+class engineered_materials : min_metals {
 	private:
 		min_metals[] components;
 		string[double] makeupRates;
@@ -117,7 +117,7 @@ class engineered_materials : min_metals{
 /**
  * Call at beginning of game to create the resources
  */
-public void instantiateResources(){
+public void instantiateResources() {
 	gases[gases.sizeof] = new Gas("Hydrogen", -252.879, true);
 	gases[gases.sizeof] = new Gas("Helium", -268.9289, false);
 	gases[gases.sizeof] = new Gas("Methane", -161.49, true);

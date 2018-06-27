@@ -13,7 +13,7 @@ class ShipSave {
 	}
 	public bool removeShip(UUID shipID) {
 		foreach(int i, ShipBase b; shipList) {
-			if (b.shipID == shipID) {
+			if (b.getID() == shipID) {
 				shipList = shipList.remove(i);
 				return true;
 			}

@@ -4,18 +4,20 @@ import derelict.freetype;
 import derelict.opengl;
 import std.stdio;
 import Settings;
+import std.uuid;
 
 __gshared FT_Library ft;
 __gshared FT_Face face;
 
 
-void FontInit() {
+void FontInit(UUID winID) {
 	if (ft is null)
 		if (FT_Init_FreeType(&ft))
 			throw new Exception("FreeType failed to load");
 	if (face is null)
-		if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ GameSettings.FontName ~ ".ttf"), 0, &face))
+		if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ GameSettings.FontName ~ ".ttf"), 0, &face)) {
 			throw new Exception("Font failed to load");
+		}
 
 	FT_Set_Pixel_Sizes(face, 0, GameSettings.FontSize);
 	for(GLubyte c = 0; c < 128; c++) {
@@ -39,8 +41,13 @@ void FontInit() {
 			face.glyph.bitmap_left, face.glyph.bitmap_top,
 			face.glyph.advance.x
 		};
-		Characters[c] = ch;
+		Characters[winID][c] = ch;
 	}
+}
+
+void NewFont(UUID winID) {
+	face = null;
+	FontInit(winID);
 }
 
 string GetFontType() {
@@ -63,4 +70,4 @@ struct Character {
 	GLuint Advance;
 };
 
-Character[GLchar] Characters;
+Character[GLchar][UUID] Characters;

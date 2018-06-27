@@ -67,7 +67,7 @@ abstract class WindowObject {
 		glfwSwapInterval(globalSwapInterval);
 		//Render Setup
 		RenderInit();
-		FontInit();
+		FontInit(windowID);
 		loadRenderObjects();
 		foreach(ResponsiveRegion r; regions)
 			r.postInit(sizeX, sizeY);

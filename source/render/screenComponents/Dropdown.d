@@ -23,7 +23,7 @@ class RenderDropdown : RenderContentButton, Inputable {
 			setList(scroll);
 		super(width, height, background, label, win);
 		iconSide = Side.left;
-		setClick(&toggleDropdown);
+		setClick(&dropdownClicked);
 		registerFocus(&focusLost);
 	}
 
@@ -46,8 +46,13 @@ class RenderDropdown : RenderContentButton, Inputable {
 		super.setScale(width, height);
 	}
 
-	private nothrow void toggleDropdown() {
+	public nothrow void dropdownClicked() {
+		skipFocus = true;
 		focusGained();
+		toggleDropdown();
+	}
+
+	private nothrow void toggleDropdown() {
 		displaying = !displaying;
 		if (displaying) {
 			icon.texture = up;
@@ -70,7 +75,13 @@ class RenderDropdown : RenderContentButton, Inputable {
 		return displaying;
 	}
 
+	private bool skipFocus = false;
+
 	public nothrow void focusLost() {
+		if (skipFocus) {
+			skipFocus = false;
+			return;
+		}
 		if (displaying)
 			toggleDropdown();
 	}

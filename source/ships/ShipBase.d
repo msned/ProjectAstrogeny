@@ -16,6 +16,12 @@ class ShipBase {
 		void tick() {
 		
 		}
+		UUID getID() {
+			return shipID;
+		}
+		string getName() {
+			return name;
+		}
 }
 
 /**
@@ -35,34 +41,34 @@ class ShipHold {
 /**
 *
 */
-class CargoHold : ShipHold{
+class CargoHold : ShipHold {
 
 }
 
 /**
 *
 */
-class OccupantHold : ShipHold{
+class OccupantHold : ShipHold {
 
 }
 
 /**
 *
 */
-class Sensor{
+class Sensor {
 
 }
 
 /**
 *
 */
-class armanent{
+class Armanent {
 
 }
 
 /**
 *
 */
-class lifeSupport{
+class LifeSupport{
 
 }

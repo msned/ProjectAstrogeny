@@ -11,6 +11,9 @@ import std.stdio;
 import core.thread;
 import GameState;
 import Settings;
+import render.Fonts;
+import render.responsiveControl.ResponsiveRegion;
+import render.screenComponents;
 
 __gshared WindowObject[] windowList;
 
@@ -42,7 +45,7 @@ public void WindowLoop() {
 	}
 }
 
-public WindowObject AddWindow(WindowObject o) {
+public nothrow WindowObject AddWindow(WindowObject o) {
 	windowList ~= o;
 	return o;
 }
@@ -61,4 +64,19 @@ public nothrow void UpdateSwapInterval(int newInterval) {
 	}
 	glfwMakeContextCurrent(current);
 	globalSwapInterval = newInterval;
+}
+
+public nothrow void UpdateFonts() {
+	GLFWwindow* current = glfwGetCurrentContext();
+	foreach(WindowObject o; windowList) {
+		glfwMakeContextCurrent(o.getGLFW());
+		try {NewFont(o.windowID);} catch (Exception e) {}
+	}
+	foreach(WindowObject o; windowList) {
+		foreach(ResponsiveRegion r; o.regions)
+			foreach(RenderObject g; r.getRenderObjects())
+				if (auto t = cast(RenderText)g)
+					t.setNewArray();
+	}
+	glfwMakeContextCurrent(current);
 }

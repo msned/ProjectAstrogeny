@@ -113,7 +113,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	public nothrow float getTextLength(float scale) {
 		int total = 0;
 		foreach(char c; displayText) {
-			Character ch = Characters[c];
+			Character ch = Characters[windowID][c];
 			total += ch.Advance >> 6;
 		}
 		return total * scale;
@@ -123,7 +123,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		int maxY = 0;
 		int minY = 0;
 		foreach(char c; displayText) {
-			Character ch = Characters[c];
+			Character ch = Characters[windowID][c];
 			if (ch.yBearing > maxY)
 				maxY = ch.yBearing;
 			if (ch.yBearing - ch.ySize < minY)
@@ -150,7 +150,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	public override nothrow void setPosition(float x = 0, float y = 0) {
 		int maxY = 0;
 		foreach(char c; displayText) {
-			Character ch = Characters[c];
+			Character ch = Characters[windowID][c];
 			if (ch.yBearing > maxY)
 				maxY = ch.yBearing;
 		}
@@ -175,7 +175,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		int minY = 0;
 		int xTotal = 0;
 		foreach(char c; displayText) {
-			Character ch = Characters[c];
+			Character ch = Characters[windowID][c];
 			if (ch.yBearing > maxY)
 				maxY = ch.yBearing;
 			if (ch.yBearing - ch.ySize < minY)
@@ -251,6 +251,10 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	protected bool newArray = true;
 
+	public nothrow void setNewArray() {
+		newArray = true;
+	}
+
 	override nothrow void render() {
 		if (!visible)
 			return;
@@ -269,7 +273,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		foreach(int i, char c; displayText) {
 			if (c == '\n')
 				continue;
-			glBindTexture(GL_TEXTURE_2D, Characters[c].TextureID);
+			glBindTexture(GL_TEXTURE_2D, Characters[windowID][c].TextureID);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vert[i].sizeof, vert[i].ptr);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
@@ -281,7 +285,7 @@ class RenderText : RenderObject, ResponsiveElement {
 		vert = new GLfloat[5][6][displayText.length];
 		float xOffset = 0;
 		foreach(int i, char c; displayText) {
-			Character ch = Characters[c];
+			Character ch = Characters[windowID][c];
 
 			float xP = xPos + ch.xBearing * scale + xOffset;
 			float yP = yPos - (ch.ySize - ch.yBearing) * scale;

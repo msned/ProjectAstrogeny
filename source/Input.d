@@ -4,10 +4,16 @@ import derelict.glfw3;
 import render.window.WindowObject;
 import std.stdio;
 
+import render.window.WindowLoop;
+import render.window.DebugWindow;
+import render.window.SettingsWindow;
+
 
 
 extern(C)
 nothrow void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (checkHotKeys(key, action, mods))
+		return;
 	auto winO = window in windowObjects;
 	if (winO !is null) {
 		if (action == GLFW_PRESS)
@@ -68,4 +74,22 @@ nothrow void glfwScrollCallback(GLFWwindow* window, double xOffset, double yOffs
 	if (winO !is null) {
 		winO.mouseScroll(xOffset, yOffset);
 	}
+}
+
+private nothrow bool checkHotKeys(int key, int action, int mods) {
+	if (action == GLFW_PRESS && mods == GLFW_MOD_CONTROL) {
+		if (key == GLFW_KEY_EQUAL) {
+			try {
+				AddWindow(new DebugWindow());
+			} catch (Exception e) {assert(0);}
+			return true;
+		}
+		else if (key == GLFW_KEY_MINUS) {
+			try {
+				AddWindow(new SettingsWindow());
+			} catch (Exception e) {assert(0);}
+			return true;
+		}
+	}
+	return false;
 }
