@@ -100,7 +100,7 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	public nothrow void setText(string s) {
 		if (displayText is null)
 			return;
-		displayText.setText(s);
+		displayText.swapText(s);
 		setScale(width, height);
 	}
 

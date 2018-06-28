@@ -36,7 +36,7 @@ public void WindowLoop() {
 		if (GameSettings.VSync && windowList.length > 1)
 			glfwSwapInterval(1);
 
-		foreach(i; removeList){
+		foreach(i; removeList) {
 			RemoveWindow(i);
 		}
 		removeList.clear();
