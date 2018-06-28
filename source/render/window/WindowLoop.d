@@ -70,7 +70,7 @@ public nothrow void UpdateFonts() {
 	GLFWwindow* current = glfwGetCurrentContext();
 	foreach(WindowObject o; windowList) {
 		glfwMakeContextCurrent(o.getGLFW());
-		try {NewFont(o.windowID);} catch (Exception e) {}
+		NewFont(o.windowID);
 	}
 	foreach(WindowObject o; windowList) {
 		foreach(ResponsiveRegion r; o.regions)

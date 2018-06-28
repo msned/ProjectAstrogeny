@@ -12,6 +12,7 @@ class RenderButton : RenderObject, Clickable, Inputable {
 
 	public nothrow bool checkClick(float x, float y, int button) {
 		if (within(x, y)) {
+				skipFocus = true;
 				focusGained();
 				if (button == 0) {
 					if (click !is null)
@@ -51,6 +52,8 @@ class RenderButton : RenderObject, Clickable, Inputable {
 	public void setRClick(void delegate() nothrow rC) {
 		rClick ~= rC;
 	}
+
+	protected bool skipFocus = false;
 
 	public nothrow void keyInput(int i, int j) {}
 	public nothrow void charInput(uint i) {}

@@ -17,6 +17,7 @@ import render.window.ChartTestWindow;
 import logic.LogicLoop;
 import save.SaveData;
 import save.GameSave;
+import render.Fonts;
 import ships;
 
 ShouldThrow missingSymCall(string symbolName) {
@@ -46,6 +47,7 @@ void main(string[] args) {
 		writeln(args[1]);
 		LoadGameFiles(args[1]);
 	}
+	FontInit();
 
 	NewGameFiles("testerino");
 

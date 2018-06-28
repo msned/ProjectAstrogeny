@@ -47,8 +47,6 @@ class RenderDropdown : RenderContentButton {
 	}
 
 	public nothrow void dropdownClicked() {
-		skipFocus = true;
-		focusGained();
 		toggleDropdown();
 	}
 
@@ -66,8 +64,6 @@ class RenderDropdown : RenderContentButton {
 	public override nothrow bool isFocused() {
 		return displaying;
 	}
-
-	private bool skipFocus = false;
 
 	public override nothrow void focusLost() {
 		if (skipFocus) {

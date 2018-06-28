@@ -74,25 +74,22 @@ class SettingsWindow : WindowObject {
 			labelGraphics.addObject(new RenderSpacer(1f, 10f));
 			valueGraphics.addObject(new RenderSpacer(1f, 25f));
 			RenderDropdown fDr = new RenderDropdown(40f, 20f, Colors.Blue3, GetFontType(), this);
-			RenderScrollList rList = new RenderScrollList(40f, 35f, this);
+			RenderScrollList rList = new RenderScrollList(40f, 65f, this);
 			rList.setElements(
 				[new RenderContentButton(40f, 20f, Colors.Blue4, "Light", this, () {
 					GameSettings.FontName = "rockwell_light";
 					UpdateFonts();
 					fDr.setText("Light");
-					fDr.dropdownClicked();
 				}),
 				new RenderContentButton(40f, 20f, Colors.Blue4, "Regular", this, () {
 					GameSettings.FontName = "rockwell";
 					UpdateFonts();
 					fDr.setText("Regular");
-					fDr.dropdownClicked();
 				}),
 				new RenderContentButton(40f, 20f, Colors.Blue4, "Bold", this, () {
 					GameSettings.FontName = "rockwell_bold";
 					UpdateFonts();
 					fDr.setText("Bold");
-					fDr.dropdownClicked();
 				})]);
 			controlGraphics.addFixedObject(rList);
 			fDr.setList(rList);

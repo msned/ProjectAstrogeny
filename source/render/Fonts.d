@@ -7,25 +7,35 @@ import Settings;
 import std.uuid;
 
 __gshared FT_Library ft;
+__gshared FT_Face[string] faces;
 __gshared FT_Face face;
 
+const static string[] fontNames = ["rockwell", "rockwell_light", "rockwell_bold"];
 
-void FontInit(UUID winID) {
+
+void FontInit() {
 	if (ft is null)
 		if (FT_Init_FreeType(&ft))
 			throw new Exception("FreeType failed to load");
-	if (face is null)
-		if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ GameSettings.FontName ~ ".ttf"), 0, &face)) {
-			throw new Exception("Font failed to load");
+	foreach(string s; fontNames) {
+		if (!(s in faces))
+			faces[s] = null;
+			if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ s ~ ".ttf"), 0, &faces[s])) {
+				throw new Exception("Font failed to load");
 		}
+	}
+}
 
+nothrow void NewFont(UUID winID) {
+	face = faces[GameSettings.FontName];
 	FT_Set_Pixel_Sizes(face, 0, GameSettings.FontSize);
 	for(GLubyte c = 0; c < 128; c++) {
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+			try {
 			writeln("failed to load character: %c", c);
+			} catch (Exception e) { assert(0); }
 			continue;
 		}
-
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		GLuint texture;
 		glGenTextures(1, &texture);
@@ -43,11 +53,6 @@ void FontInit(UUID winID) {
 		};
 		Characters[winID][c] = ch;
 	}
-}
-
-void NewFont(UUID winID) {
-	face = null;
-	FontInit(winID);
 }
 
 string GetFontType() {
