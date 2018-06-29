@@ -88,6 +88,8 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		if (!visible)
 			return;
 
+		if (totalLength < height * 2)
+			return;
 		scrollAmount -= y * scrollMult;
 		if (scrollAmount < 0)
 			scrollAmount = 0;
@@ -107,14 +109,10 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		if (!visible)
 			return;
 
-		GLint[4] oldScissor;
-		glGetIntegerv(GL_SCISSOR_BOX, &oldScissor[0]);
-		glScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
-
+		window.pushScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
 		foreach(RenderObject o; items)
 			o.render();
-
-		glScissor(oldScissor[0], oldScissor[1], oldScissor[2], oldScissor[3]);
+		window.popScissor();
 	}
 
 }

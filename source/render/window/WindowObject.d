@@ -103,10 +103,12 @@ abstract class WindowObject {
 
 	public nothrow void renderObjects() {
 		glViewport(0, 0, sizeX, sizeY);
-		glScissor(0, 0, sizeX, sizeY);
+		pushScissor(0, 0, sizeX, sizeY);
 
 		foreach(ResponsiveRegion r; regions)
 			r.renderObjects();
+
+		popScissor();
 	}
 
 	long oldTime;
@@ -239,6 +241,77 @@ abstract class WindowObject {
 				glfwSetCursor(window, iBeam);
 				break;
 		}
+	}
+
+	const static int stackSize = 6;
+	GLint[4][stackSize] scissorStack;		//Stack for the GLScissor tests
+	int stackIndex = -1;
+
+	/++
+	Pushes another GLScissor frame onto the stack and sets the scissor boundaries
+	+/
+	public nothrow void pushScissor(int x, int y, int width, int height) {
+		if (stackIndex >= stackSize - 1)
+			return;
+		stackIndex++;
+		if (stackIndex == 0) {
+			glScissor(x, y, width, height);
+			scissorStack[stackIndex][0] = x;
+			scissorStack[stackIndex][1] = y;
+			scissorStack[stackIndex][2] = width;
+			scissorStack[stackIndex][3] = height;
+		} else {
+			int x1 = x;
+			int x2 = x + width;
+			int y1 = y;
+			int y2 = y + height;
+			int x3 = scissorStack[stackIndex - 1][0];
+			int x4 = x3 + scissorStack[stackIndex - 1][2];
+			int y3 = scissorStack[stackIndex - 1][1];
+			int y4 = y3 + scissorStack[stackIndex - 1][3];
+			pragma(inline)
+			int min(int x, int x2) {
+				return (x > x2) ? x2 : x;
+			}
+			pragma(inline)
+			int max(int x, int x2) {
+				return (x > x2) ? x : x2;
+			}
+			int x5 = max(x1, x3);
+			int y5 = max(y1, y3);
+			int x6 = min(x2, x4);
+			int y6 = min(y2, y4);
+			if (x5 >= x6 || y5 >= y6) {
+				glScissor(x3, y3, scissorStack[stackIndex - 1][2], scissorStack[stackIndex - 1][3]);
+				scissorStack[stackIndex][0] = x3;
+				scissorStack[stackIndex][1] = y3;
+				scissorStack[stackIndex][2] = scissorStack[stackIndex - 1][2];
+				scissorStack[stackIndex][3] = scissorStack[stackIndex - 1][3];
+			} else {
+				glScissor(x5, y5, x6 - x5, y6 - y5);
+				scissorStack[stackIndex][0] = x5;
+				scissorStack[stackIndex][1] = y5;
+				scissorStack[stackIndex][2] = x6 - x5;
+				scissorStack[stackIndex][3] = y6 - y5;
+			}
+		}
+	}
+	/++
+	Pops the most recent GLScissor frame off of the stack and restores to the previous layer
+	+/
+	public nothrow void popScissor() {
+		if (stackIndex < 0)
+			return;
+		stackIndex--;
+		if (stackIndex == -1)
+			return;
+		glScissor(scissorStack[stackIndex][0], scissorStack[stackIndex][1], scissorStack[stackIndex][2], scissorStack[stackIndex][3]);
+	}
+	/++
+	Returns the GLScissor frame from the top of the stack without popping it off
+	+/
+	public nothrow GLint[4] peekScissor() {
+		return scissorStack[stackIndex];
 	}
 
 }

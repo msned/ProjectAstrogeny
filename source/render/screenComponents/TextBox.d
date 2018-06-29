@@ -167,14 +167,8 @@ class RenderTextBox : RenderText, Scrollable {
 		if (background !is null)
 			background.render();
 
-		if (lineLimit == 1) {
-			super.render();
-		} else {
-			GLint[4] oldScissor;
-			glGetIntegerv(GL_SCISSOR_BOX, &oldScissor[0]);
-			glScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
-			super.render();
-			glScissor(oldScissor[0], oldScissor[1], oldScissor[2], oldScissor[3]);
-		}
+		window.pushScissor(cast(int)(xPos - width) + window.sizeX / 2, cast(int)(yPos - height) + window.sizeY / 2, cast(int)(width * 2), cast(int)(height * 2));
+		super.render();
+		window.popScissor();
 	}
 }

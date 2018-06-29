@@ -104,6 +104,9 @@ class RenderObject {
 				y >  this.getYPos() - this.getHeight() && y < this.getYPos() + this.getHeight());
 	}
 
+	/++
+	Returns true if the passed x and y coordinates are within the passed width and height of the center of the RenderObject
+	+/
 	public nothrow bool within(float x, float y, float width, float height) {
 		return (x > this.getXPos() - width && x < this.getXPos() + width &&
 				y >  this.getYPos() - height && y < this.getYPos() + height);
