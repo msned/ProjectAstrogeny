@@ -98,6 +98,10 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+
+		for(int i = 0; i < labels.length; i++) {
+			labels[i] = new RenderText("penis", 0, 0, .125f * GameSettings.GUIScale, window);
+		}
 	}
 
 	public override nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {
@@ -116,6 +120,30 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 		}
 		dataX = datX;
 		dataY = datY;
+		float minValue = cast(float)long.max, maxValue = cast(float)long.min;		//Might need to be updated to work with larger values than longs
+		float minW = cast(float)long.max, maxW = cast(float)long.min;
+		foreach(float v; dataY) {
+			if (v < minValue)
+				minValue = v;
+			if (v > maxValue)
+				maxValue = v;
+		}
+		foreach(float v; dataX) {
+			if (v < minW)
+				minW = v;
+			if (v > maxW)
+				maxW = v;
+		}
+		labelIncrement(minValue, maxValue, minW, maxW);
+		try {
+			labels[0].setText(to!string(minY));
+			labels[1].setText(to!string(minX));
+			for(int i = 1; i <= NTICK; i++) {
+				labels[i * 2].setText(to!string((minY + i * incrY).quantize(incrY)));
+				labels[i * 2 + 1].setText(to!string((minX + i * incrX).quantize(incrX)));
+			}
+		} catch (Exception e) { assert(0); }
+
 		updateVertices = true;
 	}
 
@@ -144,8 +172,8 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 	protected float colorR = Colors.Golden_Dragons.red, colorG = Colors.Golden_Dragons.green, colorB = Colors.Golden_Dragons.blue;
 
 	float[6][] lines;
-	float[6][] marks;
-	RenderText[] labels;
+	float[6][22] marks;
+	RenderText[22] labels;
 
 	float bound = 50f;
 
@@ -154,50 +182,35 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 			return;
 
 		if (updateVertices) {
-			marks = [];
-			lines = [];
-			labels = [];
-			float minValue = cast(float)long.max, maxValue = cast(float)long.min;		//Might need to be updated to work with larger values than longs
-			float minW = cast(float)long.max, maxW = cast(float)long.min;
-			foreach(float v; dataY) {
-				if (v < minValue)
-					minValue = v;
-				if (v > maxValue)
-					maxValue = v;
-			}
-			foreach(float v; dataX) {
-				if (v < minW)
-					minW = v;
-				if (v > maxW)
-					maxW = v;
-			}
+			lines.length = dataX.length - 1;
+			
 			float startcornerX = xPos -width + bound * GameSettings.GUIScale, startcornerY = yPos -height + bound * GameSettings.GUIScale, 
 				  endcornerY = yPos + height - bound * GameSettings.GUIScale, endcornerX = xPos + width - bound * GameSettings.GUIScale;
-			labelIncrement(minValue, maxValue, minW, maxW);
-			marks ~= [	//Vertical Axis
+			marks[0] = [	//Vertical Axis
 				startcornerX, startcornerY - 2f * GameSettings.GUIScale, .5f,
 				startcornerX, endcornerY, .5f
 			];
-			marks ~= [	//Horizontal Axis
+			marks[1] = [	//Horizontal Axis
 				startcornerX - 2f * GameSettings.GUIScale, startcornerY, .5f,
 				endcornerX, startcornerY, .5f
 			];
 			float hashX = (endcornerX - startcornerX) / NTICK, hashY = (endcornerY - startcornerY) / NTICK, hashLength = 10f * GameSettings.GUIScale;
 			try {
-				labels ~= new RenderText(to!string(minY), xPos - width + 5, startcornerY, .125f * GameSettings.GUIScale, window);
-				labels ~= new RenderText(to!string(minX), startcornerX, yPos - height + 5, .125f * GameSettings.GUIScale, window);
+				labels[0].setPosition(xPos - width + (bound - hashLength) / 2f, startcornerY);
+				labels[1].setPosition(startcornerX, yPos - height + (bound - hashLength) / 2f);
 			} catch (Exception e) { assert(0); }
 			for(int i = 1; i <= NTICK; i++) {
-				marks ~= [[
+				marks[i * 2] = [
 					startcornerX - hashLength, startcornerY + i * hashY, .45f,
 					startcornerX + hashLength, startcornerY + i * hashY, .45f
-				], [
+				];
+				marks[i*2 + 1] = [
 					startcornerX + i * hashX, startcornerY - hashLength, .45f,
 					startcornerX + i * hashX, startcornerY + hashLength, .45f
-				]];
+				];
 				try {
-					labels ~= new RenderText(to!string((minY + i * incrY).quantize(incrY)), xPos - width + 5, startcornerY + i * hashY - 4 * GameSettings.GUIScale, .125f * GameSettings.GUIScale, window);
-					labels ~= new RenderText(to!string((minX + i * incrX).quantize(incrX)), startcornerX + i * hashX - 4 * GameSettings.GUIScale, yPos - height + 5, .125f * GameSettings.GUIScale, window);
+					labels[i * 2].setPosition(xPos - width + (bound - hashLength) / 2f, startcornerY + i * hashY);
+					labels[i *2 + 1].setPosition(startcornerX + i * hashX, yPos - height + (bound - hashLength) / 2f);
 				} catch (Exception e) { assert(0); }
 			}
 
@@ -208,7 +221,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 			for(int i = 1; i < dataX.length; i++) {
 				float xPos2 = startcornerX + (endcornerX - startcornerX) * (dataX[i] - minX) / xRange;
 				float yPos2 = startcornerY + (endcornerY - startcornerY) * (dataY[i] - minY) / yRange;
-				lines ~= [
+				lines[i - 1] = [
 					xPos, yPos, .4f,
 					xPos2, yPos2, .4f
 				];

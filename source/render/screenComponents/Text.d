@@ -113,8 +113,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	public nothrow float getTextLength(float scale) {
 		int total = 0;
 		foreach(char c; displayText) {
-			Character ch = Characters[windowID][c];
-			total += ch.Advance >> 6;
+			total += Characters[windowID][c].Advance >> 6;
 		}
 		return total * scale;
 	}
@@ -150,9 +149,9 @@ class RenderText : RenderObject, ResponsiveElement {
 	public override nothrow void setPosition(float x = 0, float y = 0) {
 		int maxY = 0;
 		foreach(char c; displayText) {
-			Character ch = Characters[windowID][c];
-			if (ch.yBearing > maxY)
-				maxY = ch.yBearing;
+			int chY = Characters[windowID][c].yBearing;
+			if (chY > maxY)
+				maxY = chY;
 		}
 		this.xPos = x - getWidth();
 		this.yPos = y - maxY * scale / 2;
@@ -161,9 +160,20 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	float boundingWidth, boundingHeight;
 
-	public nothrow void setText(string text) {
+	/++
+	+ Sets the displayed text and sets it to max size within the previous bounds
+	++/
+	public nothrow void swapText(string text) {
 		displayText = text;
 		setMaxScale(boundingWidth, boundingHeight);
+	}
+
+	/++
+	+ Sets the displayed text with not further updates
+	++/
+	public nothrow void setText(string text) {
+		displayText = text;
+		newArray = true;
 	}
 
 	/++
@@ -282,7 +292,7 @@ class RenderText : RenderObject, ResponsiveElement {
 	}
 
 	protected nothrow bool arrangeText() {
-		vert = new GLfloat[5][6][displayText.length];
+		vert.length = displayText.length;
 		float xOffset = 0;
 		foreach(int i, char c; displayText) {
 			Character ch = Characters[windowID][c];
