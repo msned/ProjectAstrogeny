@@ -150,4 +150,7 @@ public void instantiateResources() {
 	nat_resources[nat_resources.sizeof] = new min_metals("Titanium");
 	nat_resources[nat_resources.sizeof] = new min_metals("Phosphorus");
 	nat_resources[nat_resources.sizeof] = new min_metals("Potassium");
+
+	
+
 }

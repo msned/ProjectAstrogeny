@@ -2,6 +2,8 @@ module world.SolarSystem;
 
 import world.generation.Planet_gen;
 import world.generation.Star_gen;
+import ships.ShipBase;
+import stations.StationBase;
 import std.random;
 import std.math;
 import std.uuid;
@@ -16,6 +18,8 @@ class SolarSystem{
 	private:
 		Star sun;
 		Planet[] planets;
+		ShipBase[] shipsInSystem;
+		StationBase[] stationsInSystem; 
 	public:
 		this(Star sun, Planet[] planets){
 			this.sun = sun;
