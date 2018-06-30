@@ -46,6 +46,9 @@ public void SaveGameFiles() {
 	StoreSave(loadedSave.colonies, loadedSave.saveName ~ SaveComponentNames.colonies, loadedSavePath);
 	StoreSave(loadedSave.world, loadedSave.saveName ~ SaveComponentNames.world, loadedSavePath);
 	StoreSave(loadedSave, loadedSave.saveName, loadedSavePath);
+
+	if (DEBUG)
+		writeln("Saved ", loadedSave.saveName);
 }
 
 public void NewGameFiles(string gameName) {

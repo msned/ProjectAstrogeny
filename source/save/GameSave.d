@@ -4,13 +4,14 @@ import cerealed;
 import std.datetime;
 import save;
 import std.stdio;
+import save.util.WorldGen;
 
 class GameSave {
 	
 	string saveName;
 
-	ubyte day, month;
-	short year;
+	ubyte creationDay, creationMonth;
+	short creationYear;
 
 	@NoCereal
 	WorldSave world;
@@ -37,8 +38,12 @@ GameSave NewGameSave(string saveName) {
 	g.world = new WorldSave();
 	g.colonies = new ColonySave();
 	g.stations = new StationSave();
-	g.day = Clock.currTime.day;
-	g.month = Clock.currTime.month;
-	g.year = Clock.currTime.year;
+
+	GenerateNewWorld(g.world);
+
+	g.creationDay = Clock.currTime.day;
+	g.creationMonth = Clock.currTime.month;
+	g.creationYear = Clock.currTime.year;
+
 	return g;
 }

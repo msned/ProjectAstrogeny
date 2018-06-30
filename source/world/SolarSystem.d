@@ -31,7 +31,7 @@ class SolarSystem{
 /**
 * Generates a solar system class
 */
-SolarSystem genSolSystem(){
+SolarSystem GenSolSystem(){
 	Star sun = genStar();
 	Planet[] planets = genPlanets(sun);
 	SolarSystem sys = new SolarSystem(sun, planets);

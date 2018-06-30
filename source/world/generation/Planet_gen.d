@@ -1,6 +1,7 @@
 module world.generation.Planet_gen;
 import world.generation.Star_gen;
 import world.Resources;
+import MathConsts;
 import std.random;
 import std.math;
 
@@ -9,9 +10,6 @@ const enum ats {Meth, CarbonDI, Oxygen};
 //Types of planets
 const enum planet_type {GasGiant, IceGiant, GasDwarf, Terrestrial};
 
-/** Radius of sun*/
-immutable double solarRad = 695700;
-immutable double astroUnit = 149597870;
 
 
 /**
@@ -45,7 +43,7 @@ class Atmosphere {
 		}
 
 		void addGas(Gas gas, double percent){
-			atmosGases[atmosGases.sizeof] = gas;
+			atmosGases ~= gas;
 			atmosComposition[gas] = percent;
 		}
 
@@ -156,7 +154,7 @@ Planet[] genPlanets(Star star){
 		else if(gen == 3 || gen == 4){
 			planetArray[i] = createPlanet(planetArray, star, planet_type.IceGiant);
 		}
-		else if(gen == 5){
+		else if(gen == 5) {
 			planetArray[i] = createPlanet(planetArray, star, planet_type.GasDwarf);
 		}
 		else{
@@ -171,7 +169,7 @@ double createOrbit(Star star, planet_type type){
 
 	double radius, min, max;
 	if(type == 3){
-		min = (0.2 * star.getMass()) > pow((star.getLuminosity() / 16), 0.5) ? (0.2 * star.getMass()) : pow((star.getLuminosity() / 16), 0.5);
+		min = (0.2 * star.getMass()) < pow((star.getLuminosity() / 16), 0.5) ? (0.2 * star.getMass()) : pow((star.getLuminosity() / 16), 0.5);
 		max = pow( (star.getLuminosity() / .04) , 0.5);
 	}
 	else{
@@ -179,6 +177,7 @@ double createOrbit(Star star, planet_type type){
 		max = 40.0 * star.getMass();
 	}
 
+	assert(min < max);
 	radius = uniform(min, max);
 	return radius;
 }
@@ -219,24 +218,31 @@ Planet createPlanet(Planet[] array, Star star, planet_type type){
 	density = (uniform(5, 100)) / 10.0;
 
 	double orbitRad = 0;
-	double orbitCheck = 0;
+	bool orbitCheck = false;
 
-	while(orbitCheck == 0){
+	long loopCounter = 0;
+
+	while(!orbitCheck){
+		loopCounter++;
 		orbitRad = createOrbit(star, planet_type.GasGiant);
-		orbitCheck = 1;
+		orbitCheck = true;
 		for(int i = 0; i < array.length; i++){
-			if(!(array[i] is null)){
-				if(!(orbitRad > (array[i].getRadius() + 4) || orbitRad < (array[i].getRadius() - 4))){
-					orbitCheck = 0;
+			if(!(array[i] is null)) {
+				if(!(orbitRad > (array[i].getRadius() + .4) || orbitRad < (array[i].getRadius() - .4))){
+					orbitCheck = false;
 				}
 			}
+		}
+		import std.stdio;
+		if (loopCounter > 200) {
+			throw new Exception("Infinite Loop Detected");
 		}
 	}
 
 	double radius = pow((mass * density), 0.33);
 	double gravAccel = radius * density;
-	double year = pow(pow(orbitRad, 3) / star.getMass(), 0.5);
-	double escapeVelocity = (2.365 * pow(10, -5)) * gravAccel;
+	double year = pow(pow(orbitRad, 3.0) / star.getMass(), 0.5);
+	double escapeVelocity = (2.365 * 0.00001) * gravAccel;
 
 	double sunlightIntensity = star.getLuminosity() / pow(orbitRad, 2);
 	Atmosphere atmos = genAtmosphere(type, albedo, sunlightIntensity, mass, star, radius);
@@ -366,7 +372,7 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 				int Trace = 0;
 				int gasTrace = 0;
 				while(Trace == 0){
-					gasTrace = uniform(5, 20);
+					gasTrace = uniform(5, gases.length);		//TODO: Fix bounds?
 					if(gasTrace == 6 || gasTrace == 9 || gasTrace == 12){
 						Trace = 0;
 					}

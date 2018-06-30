@@ -90,6 +90,13 @@ private nothrow bool checkHotKeys(int key, int action, int mods) {
 			} catch (Exception e) {assert(0);}
 			return true;
 		}
+		else if (key == GLFW_KEY_S) {
+			import save.SaveData;
+			try {
+				SaveGameFiles();
+			} catch (Exception e) { assert(0); }
+			return true;
+		}
 	}
 	return false;
 }

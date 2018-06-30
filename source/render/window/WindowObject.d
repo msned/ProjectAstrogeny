@@ -243,9 +243,9 @@ abstract class WindowObject {
 		}
 	}
 
-	const static int stackSize = 6;
+	immutable static char stackSize = 6;
 	GLint[4][stackSize] scissorStack;		//Stack for the GLScissor tests
-	int stackIndex = -1;
+	short stackIndex = -1;
 
 	/++
 	Pushes another GLScissor frame onto the stack and sets the scissor boundaries

@@ -18,6 +18,7 @@ import logic.LogicLoop;
 import save.SaveData;
 import save.GameSave;
 import render.Fonts;
+import world.Resources;
 import ships;
 
 ShouldThrow missingSymCall(string symbolName) {
@@ -47,7 +48,9 @@ void main(string[] args) {
 		writeln(args[1]);
 		LoadGameFiles(args[1]);
 	}
+
 	FontInit();
+	InstantiateResources();
 
 	NewGameFiles("testerino");
 
