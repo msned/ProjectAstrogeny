@@ -5,6 +5,17 @@ import std.stdio;
 enum star_types {O, B, A, F, G, K, X, M};
 
 class Star {
+
+	import cerealed;
+
+	void postBlit(C)(auto ref C cereal) {
+		cereal.grain(type);
+		cereal.grain(radius);
+		cereal.grain(temperature);
+		cereal.grain(mass);
+		cereal.grain(luminosity);
+	}
+
 	private:
 		/** Type of star*/
 		star_types type;
@@ -20,6 +31,8 @@ class Star {
 			this.mass = mass;
 			this.luminosity = luminosity;
 		}
+
+		this() {}
 
 		star_types getType(){
 			return type;

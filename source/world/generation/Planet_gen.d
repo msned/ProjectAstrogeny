@@ -16,11 +16,27 @@ const enum planet_type {GasGiant, IceGiant, GasDwarf, Terrestrial};
  * Class object that represents a planet's atmosphere
  */
 class Atmosphere {
+
+	import cerealed;
+
+	void postBlit(C)(auto ref C cereal) {
+		cereal.grain(pressure);
+		cereal.grain(hydrosphereExtent);
+		cereal.grain(greenhouseFactor);
+		cereal.grain(albedo);
+		cereal.grain(surfaceTemperature);
+		cereal.grain(hydrosphere);
+		cereal.grain(hasAtmos);
+		cereal.grain(toxic);
+		cereal.grain(atmosGases);
+		cereal.grain(atmosComposition);		//TODO: Fix later
+	}
+
 	private:
 		double pressure, hydrosphereExtent, greenhouseFactor, albedo, surfaceTemperature;
 		bool hydrosphere, hasAtmos, toxic;
 		Gas[] atmosGases;
-		double[Gas] atmosComposition;
+		double[string] atmosComposition;
 	public:
 		this(double albedo){
 			this.albedo = albedo;
@@ -29,6 +45,7 @@ class Atmosphere {
 			toxic = false;
 			hasAtmos = true;
 		}
+		this() {}
 
 		void setHydrosphere(bool val){
 			hydrosphere = val;
@@ -38,13 +55,13 @@ class Atmosphere {
 			return atmosGases;
 		}
 
-		double[Gas] getGasSize(){
+		double[string] getGasSize(){
 			return atmosComposition;
 		}
 
 		void addGas(Gas gas, double percent){
 			atmosGases ~= gas;
-			atmosComposition[gas] = percent;
+			atmosComposition[gas.getName()] = percent;
 		}
 
 		void setHasAtmos(bool at){
@@ -68,6 +85,23 @@ class Atmosphere {
  * Class object that represents a planet
  */
 class Planet {
+
+	import cerealed;
+
+	void postBlit(C)(auto ref C cereal) {
+		cereal.grain(mass);
+		cereal.grain(density);
+		cereal.grain(orbitRad);
+		cereal.grain(gravAccel);
+		cereal.grain(year);
+		cereal.grain(escapeVelocity);
+		cereal.grain(orbitAngle);
+		cereal.grain(atmos);
+		cereal.grain(type);
+		cereal.grain(prominentRes);
+		cereal.grain(traceRes);
+	}
+
 	private:
 		/** mass of planet, average density, radius of planet in AU, gravity in Gs,
 		 * length of full rotation in earth years, velocity in m/s, angle from sun
@@ -94,6 +128,7 @@ class Planet {
 				this.escapeVelocity = escapeVelocity;
 				orbitAngle = uniform(0, 359);
 		}
+		this() {}
 
 		double getRadius(){
 			return orbitRad;
@@ -400,11 +435,11 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 	else{
 		atmos.setPressure(totalATM);
 		Gas[] comp = atmos.getGasComp();
-		double[Gas] makeup =  atmos.getGasSize();
+		double[string] makeup =  atmos.getGasSize();
 
 		foreach (index; comp){
 			if(index.getBoilingPoint() <= gasTemp && index.isGreenH()){
-				GreenhousePressure += makeup[index];
+				GreenhousePressure += makeup[index.getName()];
 			}
 		}
 

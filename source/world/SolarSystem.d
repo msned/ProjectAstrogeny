@@ -7,6 +7,7 @@ import stations.StationBase;
 import std.random;
 import std.math;
 import std.uuid;
+import cerealed;
 
 /**
  * Class object for each system
@@ -15,6 +16,13 @@ class SolarSystem{
 	
 	UUID systemID;
 
+	void postBlit(C)(ref C cereal) {
+		cereal.grain(sun);
+		cereal.grain(planets);
+		cereal.grain(shipsInSystem);
+		cereal.grain(stationsInSystem);
+	}
+ 
 	private:
 		Star sun;
 		Planet[] planets;
@@ -26,6 +34,8 @@ class SolarSystem{
 			this.planets = planets;
 			systemID = randomUUID();
 		}
+		this() {}
+		
 }
 
 /**

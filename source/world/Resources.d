@@ -18,6 +18,15 @@ interface Resource {
  * Atmospheric gases that are used as resources
  */
 class Gas : Resource {
+
+	import cerealed;
+
+	void postBlit(C)(auto ref C cereal) {
+		cereal.grain(name);
+		cereal.grain(boilingPoint);
+		cereal.grain(greenhouseFactor);
+	}
+
 	private:
 		const string type = "gas";
 		string name;
@@ -30,6 +39,7 @@ class Gas : Resource {
 			this.boilingPoint = boilingPoint;
 			this.greenhouseFactor = greenhouseFactor;
 		}
+		this() {}
 		
 		string getName(){
 			return name;
@@ -67,6 +77,13 @@ class Gas : Resource {
  * The minerals and metals that occur naturally
  */
 class min_metals : Resource {
+
+	import cerealed;
+
+	void postBlit(C)(auto ref C cereal) {
+		cereal.grain(name);
+	}
+
 	private:
 		const string type = "metal";
 		string name;
@@ -74,6 +91,7 @@ class min_metals : Resource {
 		this(string name){
 			this.name = name;
 		}
+		this() {}
 
 		string getName(){
 			return name;
@@ -102,6 +120,14 @@ class min_metals : Resource {
  * class for all player constructed materials
  */
 class engineered_materials : min_metals {
+
+	import cerealed;
+
+	void postBlit(C)(auto ref C cereal) {
+		cereal.grain(components);
+		cereal.grain(makeupRates);
+	}
+
 	private:
 		min_metals[] components;
 		string[double] makeupRates;
@@ -112,6 +138,7 @@ class engineered_materials : min_metals {
 			this.components = components;
 			this.makeupRates = makeupRates;
 		}
+		this() {}
 }
 
 /**
