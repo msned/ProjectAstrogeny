@@ -44,13 +44,13 @@ void main(string[] args) {
 	LoadGameSettings();
 	gameSaveMutex = new shared Mutex();
 
+	FontInit();
+	InstantiateResources();
+
 	if (args.length > 1) {
 		writeln(args[1]);
 		LoadGameFiles(args[1]);
 	}
-
-	FontInit();
-	InstantiateResources();
 
 	NewGameFiles("testerino");
 

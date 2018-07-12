@@ -29,7 +29,7 @@ class Atmosphere {
 		cereal.grain(hasAtmos);
 		cereal.grain(toxic);
 		cereal.grain(atmosGases);
-		cereal.grain(atmosComposition);		//TODO: Fix later
+		cereal.grain(atmosComposition);
 	}
 
 	private:

@@ -11,7 +11,7 @@ class HorizontalRegion : ResponsiveRegion {
 
 	this (AnchorPoint left, AnchorPoint top, AnchorPoint right, AnchorPoint bottom, Side alignment, int pri = 0) {
 		static if (DEBUG)
-			enforce(alignment == Side.top || alignment == Side.bottom, "Alignment is only valid for top or bottom");
+			assert(alignment == Side.top || alignment == Side.bottom, "Alignment is only valid for top or bottom");
 		super(left, top, right, bottom, pri);
 		this.alignment = alignment;
 	}

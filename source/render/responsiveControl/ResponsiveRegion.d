@@ -51,9 +51,9 @@ class AnchorRegion : AnchorPoint {
 
 	this(ResponsiveRegion relation, Side assigned) {
 		static if (DEBUG) {
-			enforce(relation !is null, "Referenced region was NULL");
+			assert(relation !is null, "Referenced region was NULL");
 			if (relation.getAnchor(-assigned) !is null && relation.getAnchor(-assigned).type == AnchorType.region)
-				enforce((cast(AnchorRegion)relation.getAnchor(-assigned)).reg != this, "Recursive region anchors detected");
+				assert((cast(AnchorRegion)relation.getAnchor(-assigned)).reg != this, "Recursive region anchors detected");
 		}
 		reg = relation;
 		type = AnchorType.region;
@@ -72,7 +72,7 @@ class AnchorRatio : AnchorPoint {
 
 	this(float ratio, bool lock, Side assigned) {
 		static if (DEBUG) {
-			enforce(ratio > 0, "Invalid ratio value");
+			assert(ratio > 0, "Invalid ratio value");
 		}
 		this.ratio = ratio;
 		type = AnchorType.ratio;
@@ -144,11 +144,10 @@ class DragRatio : AnchorRatio, DragAnchor {
 	float min;
 
 	this(float ratio, Side assigned, RegionBoarder boarder, float minimum = float.infinity) {
-		super(ratio, false, assigned);
+		super(ratio, true, assigned);
 		board = boarder;
 		min = minimum;
 		board.setAnchor(this);
-		throw new Exception("Functionality not Implemented");
 	}
 
 	nothrow RegionBoarder linkRegion(ResponsiveRegion r) {
@@ -157,7 +156,23 @@ class DragRatio : AnchorRatio, DragAnchor {
 	}
 
 	nothrow bool updateValue(float val, int width, int height) {
-		//TODO: Implement or Remove
+		float rat;
+		if (assignedAnchor % 2) {	//Horizontal
+			if (val < -width / 2f || val > width / 2f)
+				return false;
+			rat = (assignedAnchor * val - assignedAnchor * reg.getPosition(-assignedAnchor)) / (reg.getPosition(Side.top) - reg.getPosition(Side.bottom));
+		} else {
+			if (val < -height / 2f || val > height / 2f)
+				return false;
+			rat = (assignedAnchor / 2 * val - assignedAnchor / 2 * reg.getPosition(-assignedAnchor)) / (reg.getPosition(Side.right) - reg.getPosition(Side.left));
+		}
+
+		if (min != float.infinity) {
+			if (rat < min)
+				return false;
+		}
+		ratio = rat;
+		board.window.setSize(width, height);
 		return true;
 	}
 }
@@ -223,15 +238,15 @@ class DragPixel : AnchorPixel, DragAnchor {
 	}
 
 	nothrow bool updateValue(float val, int width, int height) {
-		float pix = assignedAnchor * (val - reg.getPosition(-assignedAnchor));
-
-		if (assignedAnchor % 2) {
+		if (assignedAnchor % 2) {	//Horizontal
 			if (val < -width / 2f || val > width / 2f)
 				return false;
 		} else {
 			if (val < -height / 2f || val > height / 2f)
 				return false;
 		}
+
+		float pix = assignedAnchor * (val - reg.getPosition(-assignedAnchor));
 
 		if (min != float.infinity) {
 			if (assignedAnchor < 0) {
@@ -392,7 +407,7 @@ class ResponsiveRegion {
 	+/
 	public void addObject(RenderObject o) {
 		static if (DEBUG)
-			enforce(cast(ResponsiveElement)o, "All added objects must be of type ResponsiveElement");
+			assert(cast(ResponsiveElement)o, "All added objects must be of type ResponsiveElement");
 		elements ~= o;
 	}
 
@@ -402,7 +417,7 @@ class ResponsiveRegion {
 	public void addObjects(RenderObject [] o) {
 		static if (DEBUG) {
 			foreach(RenderObject c; o)
-				enforce(cast(ResponsiveElement)c, "All added objects must be of type ResponsiveElement");
+				assert(cast(ResponsiveElement)c, "All added objects must be of type ResponsiveElement");
 		}
 		elements ~= o;
 	}

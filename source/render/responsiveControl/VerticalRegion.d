@@ -11,7 +11,7 @@ class VerticalRegion : ResponsiveRegion {
 
 	this(AnchorPoint left, AnchorPoint top, AnchorPoint right, AnchorPoint bottom, Side alignment = Side.left, int pri = 0) {
 		static if (DEBUG)
-			enforce(alignment == Side.left || alignment == Side.right, "Alignment is only valid for left or right");
+			assert(alignment == Side.left || alignment == Side.right, "Alignment is only valid for left or right");
 		super(left, top, right, bottom, pri);
 		this.alignment = alignment;
 	}
