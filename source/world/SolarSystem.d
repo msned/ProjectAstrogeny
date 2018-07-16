@@ -21,6 +21,8 @@ class SolarSystem{
 		cereal.grain(planets);
 		cereal.grain(shipsInSystem);
 		cereal.grain(stationsInSystem);
+		cereal.grain(posRad);
+		cereal.grain(posAngle);
 	}
  
 	private:
@@ -28,13 +30,27 @@ class SolarSystem{
 		Planet[] planets;
 		ShipBase[] shipsInSystem;
 		StationBase[] stationsInSystem; 
+
+		//Position Relative to the stationary universe, may change to a galaxy later
+		double posRad, posAngle;
+
 	public:
 		this(Star sun, Planet[] planets){
 			this.sun = sun;
 			this.planets = planets;
 			systemID = randomUUID();
+			posRad = uniform(1, 999);
+			posAngle = uniform(0, 259);
 		}
 		this() {}
+
+		nothrow double getRadius() {
+			return posRad;
+		}
+
+		nothrow double getAngle() {
+			return posAngle;
+		}
 		
 }
 
@@ -46,4 +62,9 @@ SolarSystem GenSolSystem(){
 	Planet[] planets = genPlanets(sun);
 	SolarSystem sys = new SolarSystem(sun, planets);
 	return sys;
+}
+
+nothrow double distanceBetween(SolarSystem a, SolarSystem b) {
+	double ang = (a.getAngle() < b.getAngle()) ? b.getAngle() - a.getAngle() : a.getAngle() - b.getAngle();
+	return sqrt(a.getRadius() * a.getRadius() + b.getRadius() * b.getRadius() - 2 * a.getRadius() * b.getRadius() * cos(ang));		//Law of cosines
 }

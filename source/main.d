@@ -9,11 +9,13 @@ import derelict.util.exception : ShouldThrow;
 import derelict.freetype;
 import render.window.WindowLoop;
 import GameState;
+
 import render.window.WindowObject;
 import render.window.DebugWindow;
 import render.window.SettingsWindow;
-import render.window.ChartWindow;
 import render.window.ChartTestWindow;
+import render.window.MapWindow;
+
 import logic.LogicLoop;
 import save.SaveData;
 import save.GameSave;
@@ -42,7 +44,7 @@ void main(string[] args) {
 		return;
 
 	LoadGameSettings();
-	gameSaveMutex = new shared Mutex();
+	genMutexes();
 
 	FontInit();
 	InstantiateResources();
@@ -57,9 +59,10 @@ void main(string[] args) {
 	running = true;
 	auto mainthread = new Thread(&MainLoop).start();
 
-	//WindowObject deb = AddWindow(new DebugWindow());
-	WindowObject settings = AddWindow(new SettingsWindow());
-	WindowObject cht = AddWindow(new ChartTestWindow());
+	//AddWindow(new DebugWindow());
+	AddWindow(new SettingsWindow());
+	AddWindow(new ChartTestWindow());
+	AddWindow(new MapWindow());
 
 	WindowLoop();
 }

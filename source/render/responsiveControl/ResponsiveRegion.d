@@ -116,8 +116,8 @@ class AnchorPixel : AnchorPoint {
 	}
 
 	nothrow override float getPos(ResponsiveRegion reg) {
-		static if (DEBUG) {			//Can not have opposing sides both sizing pixels
-			assert(reg.getAnchor(-assignedAnchor).type != AnchorType.ratio);
+		static if (DEBUG) {
+			assert(reg.getAnchor(-assignedAnchor).type != AnchorType.ratio, "Can not have opposing sides both use pixel sizing");
 		}
 		if (assignedAnchor % 2) {
 			float p = reg.getPosition(-assignedAnchor) + assignedAnchor * pixels;

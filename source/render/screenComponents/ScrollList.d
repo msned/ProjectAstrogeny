@@ -24,7 +24,7 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 		items = elements;
 		shiftElements();
 	}
-	public RenderObject[] getElements() {
+	public nothrow RenderObject[] getElements() {
 		return items;
 	}
 

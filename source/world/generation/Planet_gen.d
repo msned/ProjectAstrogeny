@@ -450,3 +450,8 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 	}
 	return atmos;
 }
+
+double distanceBetween(Planet a, Planet b) {
+	double ang = (a.getAngle() < b.getAngle()) ? b.getAngle() - a.getAngle() : a.getAngle() - b.getAngle();
+	return sqrt(a.getRadius() * a.getRadius() + b.getRadius() * b.getRadius() - 2 * a.getRadius() * b.getRadius() * cos(ang));		//Law of cosines
+}

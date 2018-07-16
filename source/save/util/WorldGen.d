@@ -8,9 +8,10 @@ import std.stdio;
 const uint genNumber = 20;
 
 void GenerateNewWorld(WorldSave save) {
-	save.systems.length = genNumber;
+
 	for(int i = 0; i < genNumber; i++) {
-		save.systems[i] = GenSolSystem();
+		SolarSystem s = GenSolSystem();
+		save.systems[s.systemID] = s;
 	}
 	writeln("Generated ", genNumber, " Solar Systems");
 }

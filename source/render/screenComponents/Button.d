@@ -52,6 +52,10 @@ class RenderButton : RenderObject, Clickable, Inputable {
 	public void setRClick(void delegate() nothrow rC) {
 		rClick ~= rC;
 	}
+	public void clearClick() {
+		click = [];
+		rClick = [];
+	}
 
 	protected bool skipFocus = false;
 
