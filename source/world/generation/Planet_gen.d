@@ -204,7 +204,7 @@ double createOrbit(Star star, planet_type type){
 
 	double radius, min, max;
 	if(type == 3){
-		min = (0.2 * star.getMass()) < pow((star.getLuminosity() / 16), 0.5) ? (0.2 * star.getMass()) : pow((star.getLuminosity() / 16), 0.5);
+		min = (0.2 * star.getMass()) > pow((star.getLuminosity() / 16), 0.5) ? (0.2 * star.getMass()) : pow((star.getLuminosity() / 16), 0.5);
 		max = pow( (star.getLuminosity() / .04) , 0.5);
 	}
 	else{

@@ -8,7 +8,7 @@ const public int cargoPerHoldLevel = 2000;
 
 class ShipBase {
 	
-	private:
+	public:
 		//Id of ship
 		string name;
 		UUID shipID;
@@ -33,7 +33,11 @@ class ShipBase {
 		Armanent[] arms;
 
 		Engine engine;
-	public:
+		
+		/*
+		 * methods
+		 */
+
 		this() {
 			shipID = randomUUID();
 		}
@@ -59,12 +63,11 @@ class ShipBase {
  * The hull of the ship
  */
 class ShipHull {
-	private:
+	public:
 		//mass of hull
 		double mass;
 		//Levels for physical integrity of hull, thermal dampening
 		int phsShield, thermDamp;
-	public:
 }
 
 /**
@@ -82,11 +85,11 @@ interface ShipHold {
 * The hold for shipping resources
 */
 class CargoHold : ShipHold {
-	private:
+	public:
 		int level;
 		int capacity, occupied;
 		int[Resource] cargo;
-	public:
+
 		this(int level){
 			this.level = level;
 			capacity = level * cargoPerHoldLevel;
@@ -146,9 +149,9 @@ class CargoHold : ShipHold {
 * Holds for people dorms
 */
 class OccupantHold : ShipHold {
-	private:
-		int level, occupied, capacity;
 	public:
+		int level, occupied, capacity;
+
 		this(int level){
 			this.level = level;
 			capacity = level * peoplePerHoldLevel;
@@ -193,11 +196,11 @@ const enum activeSensorType {gravPulse, geo};
 * A sensor that projects energy to scan things 
 */
 class activeSensor {
-	private:
+	public:
 		//In AU, effectiveness modifier, extended range a Em passive sensor can pick up an echo
 		double range, sensitivity, detectableRange;
 		activeSensorType type;
-	public:
+
 		this(double range, double sensitivity, activeSensorType type){
 			this.range = range;
 			this.sensitivity = sensitivity;
@@ -218,10 +221,10 @@ const enum passiveSensorType {electrical, thermal, gravitational};
 * Picks up info passively, non detectable
 */
 class passiveSensor {
-	private:
+	public:
 		int sensitivity, size;
 		passiveSensorType type;
-	public:
+
 		this(int sensitivity, int size, passiveSensorType type){
 			this.sensitivity = sensitivity;
 			this.size = size;
@@ -238,20 +241,22 @@ class passiveSensor {
 *
 */
 class Armanent {
-
+	public:
+		this(){}
 }
 
 /**
 *
 */
 class LifeSupport{
-
+	public:
+		this(){}
 }
 
 /**
  *
  */
 class Engine{
-	private:
 	public:
+		this(){}
 }
