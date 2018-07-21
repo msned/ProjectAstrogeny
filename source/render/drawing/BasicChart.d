@@ -120,8 +120,8 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 		}
 		dataX = datX;
 		dataY = datY;
-		float minValue = cast(float)long.max, maxValue = cast(float)long.min;		//Might need to be updated to work with larger values than longs
-		float minW = cast(float)long.max, maxW = cast(float)long.min;
+		float minValue = float.max, maxValue = -float.max;
+		float minW = float.max, maxW = -float.max;
 		foreach(float v; dataY) {
 			if (v < minValue)
 				minValue = v;

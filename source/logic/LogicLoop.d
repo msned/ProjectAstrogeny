@@ -19,13 +19,19 @@ void MainLoop() {
 		auto startTime = MonoTime.currTime;
 		
 		GameSave g = getGameSave();
+		shipSaveMutex.lock();
 		foreach(ShipBase s; g.ships.shipList)
 			s.tick();
+
+		shipSaveMutex.unlock();
+		colonySaveMutex.lock();
 		foreach(ColonyBase b; g.colonies.colonies)
 			b.tick();
+		colonySaveMutex.unlock();
+		stationSaveMutex.lock();
 		foreach(StationBase s; g.stations.stations)
 			s.tick();
-		gameSaveMutex.unlock();
+		stationSaveMutex.unlock();
 
 		auto endTime = MonoTime.currTime;
 		Thread.sleep(threadInterval - (endTime - startTime));

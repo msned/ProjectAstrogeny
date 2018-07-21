@@ -9,7 +9,7 @@ import save;
 import Settings;
 
 private __gshared GameSave loadedSave;
-public shared Mutex gameSaveMutex;
+public shared Mutex worldSaveMutex, shipSaveMutex, stationSaveMutex, colonySaveMutex;
 
 private string loadedSavePath;
 
@@ -60,8 +60,8 @@ public const(GameSave)* readonlyGameSave() {
 	return &loadedSave;
 }
 
-public GameSave getGameSave() {
-	enforce(gameSaveMutex.tryLock(), "lock is required before obtaining GameSave");
+public nothrow GameSave getGameSave() {
+	assert(loadedSave !is null, "No game save loaded");
 	return loadedSave;
 }
 
@@ -73,4 +73,11 @@ public void LoadGameSettings() {
 
 public void SaveGameSettings() {
 	SaveSettingsFile();
+}
+
+public void genMutexes() {
+	worldSaveMutex = new shared Mutex();
+	shipSaveMutex = new shared Mutex();
+	stationSaveMutex = new shared Mutex();
+	colonySaveMutex = new shared Mutex();
 }

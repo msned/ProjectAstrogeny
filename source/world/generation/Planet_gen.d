@@ -29,7 +29,7 @@ class Atmosphere {
 		cereal.grain(hasAtmos);
 		cereal.grain(toxic);
 		cereal.grain(atmosGases);
-		cereal.grain(atmosComposition);		//TODO: Fix later
+		cereal.grain(atmosComposition);
 	}
 
 	private:
@@ -449,4 +449,9 @@ Atmosphere genAtmosphere(planet_type type, double albedo, double sunlightIntensi
 		atmos.setGreenHouseFactor(GreenHouseFactor);
 	}
 	return atmos;
+}
+
+double distanceBetween(Planet a, Planet b) {
+	double ang = (a.getAngle() < b.getAngle()) ? b.getAngle() - a.getAngle() : a.getAngle() - b.getAngle();
+	return sqrt(a.getRadius() * a.getRadius() + b.getRadius() * b.getRadius() - 2 * a.getRadius() * b.getRadius() * cos(ang));		//Law of cosines
 }

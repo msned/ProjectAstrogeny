@@ -18,10 +18,11 @@ void FontInit() {
 		if (FT_Init_FreeType(&ft))
 			throw new Exception("FreeType failed to load");
 	foreach(string s; fontNames) {
-		if (!(s in faces))
-			faces[s] = null;
-			if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ s ~ ".ttf"), 0, &faces[s])) {
-				throw new Exception("Font failed to load");
+		if (!(s in faces)) {
+			if (FT_New_Face(ft, cast(const(char)*)("fonts/" ~ s ~ ".ttf"), 0, &face)) {
+				throw new Exception("Font failed to load: " ~ s);
+			}
+			faces[s] = face;
 		}
 	}
 }

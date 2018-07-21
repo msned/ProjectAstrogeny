@@ -21,6 +21,7 @@ class Gas : Resource {
 
 	import cerealed;
 
+	
 	void postBlit(C)(auto ref C cereal) {
 		cereal.grain(name);
 		cereal.grain(boilingPoint);
