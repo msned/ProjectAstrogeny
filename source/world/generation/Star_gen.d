@@ -20,7 +20,7 @@ class Star {
 		/** Type of star*/
 		star_types type;
 
-		/** Star measurement in Earth Radii, K, solar mass, solar luminosity*/
+		/** Star measurement in sol Radii, K, solar mass, solar luminosity*/
 		double radius, temperature, mass, luminosity;
 	public:
 		/** Constructor for star*/

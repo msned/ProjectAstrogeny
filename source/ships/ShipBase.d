@@ -2,6 +2,7 @@ module ships.ShipBase;
 
 import std.uuid;
 import world.Resources;
+import TechTree.Tech;
 
 const public int peoplePerHoldLevel = 20;
 const public int cargoPerHoldLevel = 2000;
@@ -254,9 +255,28 @@ class LifeSupport{
 }
 
 /**
- *
+ * Engine for the ship
  */
 class Engine{
 	public:
+		//unit : N
+		double thrust;
+		//unit : W
+		double thrustPower;
+		//unit : m/s
+		double exhaustVelocity;
+
+		//Current fuel and fuel capacity for the engine
+		Resource fuel;
+		double fuelPercentCapacity;
+		double fueltotalCapacity;
+		//Current propellant and propellant capacity for the engine
+		Resource propellant;
+		double propellantPercentCapacity;
+		double propellantTotalCapacity;
+
+		//Type of engine tech
+		engineTech type;
+
 		this(){}
 }
