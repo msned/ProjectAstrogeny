@@ -6,12 +6,12 @@ public min_metals[] nat_resources;
 /**
  * Interface for all in game resources
  */
-interface Resource {
+abstract class Resource {
 	public:
-		bool isEqual(Resource r);
-		bool sameType(Resource r);
-		string getName();
-		string getType();
+		abstract bool isEqual(Resource r);
+		abstract bool sameType(Resource r);
+		abstract string getName();
+		abstract string getType();
 }
 
 /**
@@ -42,11 +42,11 @@ class Gas : Resource {
 		}
 		this() {}
 		
-		string getName(){
+		override string getName(){
 			return name;
 		}
 
-		string getType(){
+		override string getType(){
 			return type;
 		}
 
@@ -58,14 +58,14 @@ class Gas : Resource {
 			return boilingPoint;
 		}
 
-		bool isEqual(Resource r){
+		override bool isEqual(Resource r){
 			if(r.getName() == name){
 				return true;
 			}
 			else{return false;}
 		}
 
-		bool sameType(Resource r){
+		override bool sameType(Resource r){
 			if(r.getType() == type){
 				return true;
 			}
@@ -94,22 +94,22 @@ class min_metals : Resource {
 		}
 		this() {}
 
-		string getName(){
+		override string getName(){
 			return name;
 		}
 
-		string getType(){
+		override string getType(){
 			return type;
 		}
 
-		bool isEqual(Resource r){
+		override bool isEqual(Resource r){
 			if(r.getName() == name){
 				return true;
 			}
 			else{return false;}
 		}
 
-		bool sameType(Resource r){
+		override bool sameType(Resource r){
 			if(r.getType() == type){
 				return true;
 			}

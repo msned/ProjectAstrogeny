@@ -7,11 +7,18 @@ import TechTree.Tech;
 const public int peoplePerHoldLevel = 20;
 const public int cargoPerHoldLevel = 2000;
 
+ShipBase ShipFactory() {
+	ShipBase b = new ShipBase();
+	b.shipID = randomUUID();
+	return b;
+}
+
 class ShipBase {
-	
+
 	public:
 		//Id of ship
 		string name;
+
 		UUID shipID;
 
 		//First double is distance, 2nd is angle from sun
@@ -39,9 +46,7 @@ class ShipBase {
 		 * methods
 		 */
 
-		this() {
-			shipID = randomUUID();
-		}
+		this() {}
 
 		void tick() {
 		
@@ -74,22 +79,24 @@ class ShipHull {
 /**
 * Interface for types of ship hold
 */
-interface ShipHold {
+abstract class ShipHold {
 	public:
-		int getLevel();
-		int getUnusedCapacity();
-		int getOccupancy();
-		int getCapacity();
+		abstract int getLevel();
+		abstract int getUnusedCapacity();
+		abstract int getOccupancy();
+		abstract int getCapacity();
 }
 
 /**
 * The hold for shipping resources
 */
 class CargoHold : ShipHold {
+
+	private int[Resource] cargo;
+
 	public:
 		int level;
 		int capacity, occupied;
-		int[Resource] cargo;
 
 		this(int level){
 			this.level = level;
@@ -129,19 +136,19 @@ class CargoHold : ShipHold {
 			return 0;
 		}
 
-		int getLevel(){
+		override int getLevel(){
 			return level;
 		}
 
-		int getUnusedCapacity(){
+		override int getUnusedCapacity(){
 			return (capacity - occupied);
 		}
 
-		int getCapacity(){
+		override int getCapacity(){
 			return capacity;
 		}
 
-		int getOccupancy(){
+		override int getOccupancy(){
 			return occupied;
 		}
 }
@@ -170,19 +177,19 @@ class OccupantHold : ShipHold {
 			}
 		}	
 
-		int getLevel(){
+		override int getLevel(){
 			return level;
 		}
 
-		int getCapacity(){
+		override int getCapacity(){
 			return capacity;
 		}
 
-		int getUnusedCapacity(){
+		override int getUnusedCapacity(){
 			return (capacity - occupied);
 		}
 
-		int getOccupancy(){
+		override int getOccupancy(){
 			return occupied;
 		}
 }
@@ -277,6 +284,4 @@ class Engine{
 
 		//Type of engine tech
 		engineTech type;
-
-		this(){}
 }
