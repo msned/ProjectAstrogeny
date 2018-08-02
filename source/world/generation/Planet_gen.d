@@ -130,11 +130,11 @@ class Planet {
 		}
 		this() {}
 
-		double getRadius(){
+		nothrow double getRadius(){
 			return orbitRad;
 		}
 
-		double getAngle(){
+		nothrow double getAngle(){
 			return orbitAngle;
 		}
 		

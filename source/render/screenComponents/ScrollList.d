@@ -83,7 +83,7 @@ class RenderScrollList : RenderObject, Scrollable, Clickable, ResponsiveElement 
 
 	Scrollable[] linkedScroll;
 
-	private float scrollMult = 5f;
+	private float scrollMult = 10f;
 	public nothrow void scroll(float x, float y, Scrollable caller = null) {
 		if (!visible)
 			return;

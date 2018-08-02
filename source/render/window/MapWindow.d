@@ -35,6 +35,7 @@ class MapWindow : WindowObject {
 		}
 		solarList.setElements(lst);
 		sortSol();
+		setMap();
 	}
 
 	private UUID selected;
@@ -56,7 +57,6 @@ class MapWindow : WindowObject {
 		RenderObject[] newList = solarList.getElements();
 		foreach(int i, UUID d; sols) {
 			import std.stdio;
-			writelnNothrow(distanceBetween(w.systems[selected], w.systems[d]));
 			try {
 			if (RenderContentButton but = cast(RenderContentButton)newList[i]) {
 				but.setText(to!string(w.systems[d].getRadius()) ~ ", " ~ to!string(w.systems[d].getAngle()));
@@ -72,7 +72,14 @@ class MapWindow : WindowObject {
 		return (){
 			selected = d;
 			sortSol();
+			setMap();
 		};
+	}
+
+	private nothrow void setMap() {
+		import save.WorldSave;
+		WorldSave w = getGameSave().world;
+		map.setData(w.systems[selected]);
 	}
 
 }

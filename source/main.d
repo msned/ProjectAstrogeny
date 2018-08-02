@@ -61,7 +61,7 @@ void main(string[] args) {
 
 	//AddWindow(new DebugWindow());
 	AddWindow(new SettingsWindow());
-	AddWindow(new ChartTestWindow());
+	//AddWindow(new ChartTestWindow());
 	AddWindow(new MapWindow());
 
 	WindowLoop();

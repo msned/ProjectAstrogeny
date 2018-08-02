@@ -63,9 +63,9 @@ class SettingsWindow : WindowObject {
 			gText.setColor(Colors.Titanium_White);
 			valueGraphics.addObject(gText);
 			RenderSlider gui = new RenderSlider(false, 20f, 5f, (float val) {
-				GameSettings.GUIScale = val * 10;
+				GameSettings.GUIScale = val * 5;
 				gText.setText(getString(GameSettings.GUIScale, 4));
-			}, this, GameSettings.GUIScale / 10, true);
+			}, this, GameSettings.GUIScale / 5, true);
 			gui.scrollDivider = 80;
 			controlGraphics.addObject(gui);
 			labelGraphics.addObject(new RenderText("GUI Scale*", 100, 15, this));
