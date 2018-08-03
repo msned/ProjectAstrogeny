@@ -44,6 +44,10 @@ class SolarSystem{
 		}
 		this() {}
 
+		nothrow double getStar() {
+			return sun;
+		}
+
 		nothrow double getRadius() {
 			return posRad;
 		}
