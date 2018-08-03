@@ -30,10 +30,12 @@ class RenderTypeBoxValue(T) : RenderTypeBox {
 		try {
 			string val = displayText[protectedChars .. $];
 			if (val.length > 0)
-				callback(to!T(val));
+				if (callback !is null)
+					callback(to!T(val));
 		} catch (Exception e) {
 			writelnNothrow("Cast error!");
-			callback(T.init);
+			if (callback !is null)
+				callback(T.init);
 		}
 	}
 

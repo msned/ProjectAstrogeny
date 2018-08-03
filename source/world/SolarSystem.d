@@ -56,6 +56,14 @@ class SolarSystem{
 			return posAngle;
 		}
 		
+		nothrow Planet[] getPlanets() {
+			return planets;
+		}
+
+		nothrow Star getSun() {
+			return sun;
+		}
+		
 }
 
 /**

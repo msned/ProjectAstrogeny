@@ -229,7 +229,6 @@ class RenderObject {
 
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * float.sizeof, cast(void*)(6 * float.sizeof));
 		glEnableVertexAttribArray(2);
-		glBindVertexArray(0);
 		
 		if (!(windowID in shaderPrograms))
 			loadShader(vertexShader, fragmentShader);

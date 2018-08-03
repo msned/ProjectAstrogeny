@@ -15,7 +15,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 
 	const static char* vertexShaderSource = 
 		"#version 330 core
-		layout (location = 0) in vec3 vertex; // <vec2 pos, vec2 tex>
+		layout (location = 0) in vec3 vertex; // pos
 
 		uniform mat4 proj;
 
@@ -50,6 +50,8 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 	private static bool[UUID] registeredOrtho;
 	private WindowObject window;
 
+	protected GLuint LineVBO, LineVAO;
+
 	protected void initRender(WindowObject windowObj) {
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
@@ -59,21 +61,30 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLfloat.sizeof * 3, cast(void*)0);
 
-		if (!(windowID in chartPrograms))
+		glGenBuffers(1, &LineVBO);
+		glGenVertexArrays(1, &LineVAO);
+		glBindVertexArray(LineVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, LineVAO);
+		glBufferData(GL_ARRAY_BUFFER, GLfloat.sizeof * 2 * 3, null, GL_DYNAMIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLfloat.sizeof * 3, cast(void*)0);
+
+		if (windowID !in chartPrograms)
 			loadChartShader();
-		glUseProgram(chartPrograms[windowID]);
 		glOrtho(windowObj.sizeX, windowObj.sizeY, windowID);
-		glUniformMatrix4fv(glGetUniformLocation(chartPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
 		if (windowID !in registeredOrtho) {
 			orthoUpdates[windowID] ~= &glOrtho;
 			registeredOrtho[windowID] = true;
+		}
+
+		for(int i = 0; i < labels.length; i++) {
+			labels[i] = new RenderText("", 0, 0, .125f * GameSettings.GUIScale, window);
 		}
 
 	}
 	private static GLuint[UUID] chartPrograms;
 
 	private void loadChartShader() {
-
 		int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vertexShaderSource, null);
 		glCompileShader(vertexShader);
@@ -95,13 +106,8 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 		glGetProgramiv(chartPrograms[windowID], GL_LINK_STATUS, &success);
 		if (!success)
 			throw new Exception("Linking Shader Error");
-
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
-
-		for(int i = 0; i < labels.length; i++) {
-			labels[i] = new RenderText("penis", 0, 0, .125f * GameSettings.GUIScale, window);
-		}
 	}
 
 	public override nothrow void glOrtho(GLdouble width, GLdouble height, UUID winID) {
@@ -115,9 +121,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 	}
 
 	public nothrow void setData(float[] datX, float[] datY) {
-		if (DEBUG) {
-			assert(datX.length == datY.length);
-		}
+		assert(datX.length == datY.length);
 		dataX = datX;
 		dataY = datY;
 		float minValue = float.max, maxValue = -float.max;
@@ -171,9 +175,10 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 
 	protected float colorR = Colors.Golden_Dragons.red, colorG = Colors.Golden_Dragons.green, colorB = Colors.Golden_Dragons.blue;
 
-	float[6][] lines;
+	float[] lines;
 	float[6][22] marks;
 	RenderText[22] labels;
+	float[] lnD;
 
 	float bound = 50f;
 
@@ -182,7 +187,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 			return;
 
 		if (updateVertices) {
-			lines.length = dataX.length - 1;
+			lines.length = 0;
 			
 			float startcornerX = xPos -width + bound * GameSettings.GUIScale, startcornerY = yPos -height + bound * GameSettings.GUIScale, 
 				  endcornerY = yPos + height - bound * GameSettings.GUIScale, endcornerX = xPos + width - bound * GameSettings.GUIScale;
@@ -194,6 +199,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 				startcornerX - 2f * GameSettings.GUIScale, startcornerY, .5f,
 				endcornerX, startcornerY, .5f
 			];
+			//Labels
 			float hashX = (endcornerX - startcornerX) / NTICK, hashY = (endcornerY - startcornerY) / NTICK, hashLength = 10f * GameSettings.GUIScale;
 			try {
 				labels[0].setPosition(xPos - width + (bound - hashLength) / 2f, startcornerY);
@@ -213,35 +219,34 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 					labels[i *2 + 1].setPosition(startcornerX + i * hashX, yPos - height + (bound - hashLength) / 2f);
 				} catch (Exception e) { assert(0); }
 			}
-
+			//Lines
 			float xRange = maxX - minX, yRange = maxY -  minY;
 
-			float xPos = startcornerX + (endcornerX - startcornerX) * (dataX[0] - minX) / xRange;
-			float yPos = startcornerY + (endcornerY - startcornerY) * (dataY[0] - minY) / yRange;
-			for(int i = 1; i < dataX.length; i++) {
-				float xPos2 = startcornerX + (endcornerX - startcornerX) * (dataX[i] - minX) / xRange;
-				float yPos2 = startcornerY + (endcornerY - startcornerY) * (dataY[i] - minY) / yRange;
-				lines[i - 1] = [
-					xPos, yPos, .4f,
-					xPos2, yPos2, .4f
+			//float xPos = startcornerX + (endcornerX - startcornerX) * (dataX[0] - minX) / xRange;
+			//float yPos = startcornerY + (endcornerY - startcornerY) * (dataY[0] - minY) / yRange;
+			for(int i = 0; i < dataX.length; i++) {
+				float xPos = startcornerX + (endcornerX - startcornerX) * (dataX[i] - minX) / xRange;
+				float yPos = startcornerY + (endcornerY - startcornerY) * (dataY[i] - minY) / yRange;
+				lines ~= [
+					xPos, yPos, .4f
 				];
-				xPos = xPos2;
-				yPos = yPos2;
 			}
+			glBindBuffer(GL_ARRAY_BUFFER, LineVBO);
+			glBufferData(GL_ARRAY_BUFFER, cast(int)float.sizeof * lines.length, lines.ptr, GL_DYNAMIC_DRAW);
 
 			updateVertices = false;
 		}
 
 		glUseProgram(chartPrograms[windowID]);
-		glUniform3f(glGetUniformLocation(chartPrograms[windowID], "lineColor"), colorR, colorG, colorB);	//TODO: set flag for updating uniforms
-
+		glUniform3f(glGetUniformLocation(chartPrograms[windowID], "lineColor"), colorR, colorG, colorB);
+		
+		glBindVertexArray(LineVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, LineVBO);
+		glDrawArrays(GL_LINE_STRIP, 0, lines.length / 3);
+		
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-		foreach(float[6] vs; lines) {
-			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vs.sizeof, vs.ptr);
-			glDrawArrays(GL_LINES, 0, 2);
-		}
 		foreach(float[6] vs; marks) {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, cast(int)vs.sizeof, vs.ptr);
 			glDrawArrays(GL_LINES, 0, 2);

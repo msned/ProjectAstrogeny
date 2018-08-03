@@ -32,7 +32,10 @@ class Atmosphere {
 		cereal.grain(atmosComposition);
 	}
 
-	private:
+	import render.window.PropertyWindow;
+
+	public:
+		@Display
 		double pressure, hydrosphereExtent, greenhouseFactor, albedo, surfaceTemperature;
 		bool hydrosphere, hasAtmos, toxic;
 		Gas[] atmosGases;
@@ -87,7 +90,9 @@ class Atmosphere {
 class Planet {
 
 	import cerealed;
+	import render.window.PropertyWindow;
 
+	/*
 	void postBlit(C)(auto ref C cereal) {
 		cereal.grain(mass);
 		cereal.grain(density);
@@ -103,12 +108,17 @@ class Planet {
 	}
 
 	private:
+	*/
 		/** mass of planet, average density, radius of planet in AU, gravity in Gs,
 		 * length of full rotation in earth years, velocity in m/s, angle from sun
 		 *
 		 * Angle is location from top down look at solar system from the first quadrant X axis
 		 */
+		@Edit!string
+		string name;
+		@Display
 		double mass, density, orbitRad, gravAccel, year, escapeVelocity, orbitAngle;
+		@Display
 		Atmosphere atmos;
 		planet_type type;
 		min_metals[] prominentRes;
@@ -130,11 +140,11 @@ class Planet {
 		}
 		this() {}
 
-		double getRadius(){
+		nothrow double getRadius(){
 			return orbitRad;
 		}
 
-		double getAngle(){
+		nothrow double getAngle(){
 			return orbitAngle;
 		}
 		

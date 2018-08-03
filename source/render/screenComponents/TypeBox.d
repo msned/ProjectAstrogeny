@@ -49,12 +49,16 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 	private nothrow void flashCursor() {
 		ubyte[] text = cast(ubyte[])displayText.dup;
 		if (cursorOn) {
-			if (cursorIndex < displayText.length - 1)
+			if (displayText.length == 0)
+				text = ['|'];
+			else if (cursorIndex < displayText.length - 1)
 				text = text[0 .. cursorIndex] ~ '|' ~ text[cursorIndex + 1 .. $];
 			else
 				text = text[0 .. cursorIndex] ~ '|';
 		} else {
-			if (cursorIndex < displayText.length - 1)
+			if (displayText.length == 0)
+				text = [];
+			else if (cursorIndex < displayText.length - 1)
 				text = text[0 .. cursorIndex] ~ ' ' ~ text[cursorIndex + 1 .. $];
 			else
 				text = text[0 .. cursorIndex] ~ ' ';

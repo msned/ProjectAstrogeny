@@ -22,9 +22,10 @@ int globalSwapInterval = 1;
 public void WindowLoop() {
 	Array!int removeList;
 	while (running){
-		if (GameSettings.VSync && windowList.length > 1)
-			glfwSwapInterval(0);
+		
 		foreach(i, current; windowList) {
+			if (GameSettings.VSync && windowList.length > 1 && i != windowList.length - 1)
+				glfwSwapInterval(0);
 			OpenglPreRender();
 			current.renderElements();
 			glfwPollEvents();
@@ -32,9 +33,10 @@ public void WindowLoop() {
 				removeList.insertBack(i);
 				break;
 			}
+			if (GameSettings.VSync && windowList.length > 1)
+				glfwSwapInterval(1);
 		}
-		if (GameSettings.VSync && windowList.length > 1)
-			glfwSwapInterval(1);
+		
 
 		foreach(i; removeList) {
 			RemoveWindow(i);

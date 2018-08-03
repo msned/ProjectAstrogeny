@@ -5,7 +5,7 @@ import save.WorldSave;
 import world.SolarSystem;
 import std.stdio;
 
-const uint genNumber = 20;
+const uint genNumber = 200;
 
 void GenerateNewWorld(WorldSave save) {
 

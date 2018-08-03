@@ -20,9 +20,11 @@ class Star {
 		/** Type of star*/
 		star_types type;
 
-		/** Star measurement in sol Radii, K, solar mass, solar luminosity*/
-		double radius, temperature, mass, luminosity;
+	import render.window.PropertyWindow;
 	public:
+		/** Star measurement in sol Radii, K, solar mass, solar luminosity*/
+		@Display
+		double radius, temperature, mass, luminosity;
 		/** Constructor for star*/
 		this(star_types type, double radius, double temperature, double mass, double luminosity){
 			this.type = type;
