@@ -109,6 +109,7 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 	public nothrow void setData(SolarSystem data) {
 		planets = data.getPlanets();
 		sun = data.getSun();
+		/*
 		import std.stdio;
 		writelnNothrow("Planets: ");
 		foreach(Planet p; planets) {
@@ -116,6 +117,7 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 				writeln(p.getAngle(), ", ", p.getRadius());
 			} catch (Exception) { assert(0); }
 		}
+		*/
 		centerX = 0;
 		centerY = 0;
 		zoomAmount = .8f;

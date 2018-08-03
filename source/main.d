@@ -59,10 +59,24 @@ void main(string[] args) {
 	running = true;
 	auto mainthread = new Thread(&MainLoop).start();
 
+	reflectProperties();
+
 	//AddWindow(new DebugWindow());
 	AddWindow(new SettingsWindow());
-	//AddWindow(new ChartTestWindow());
+	AddWindow(new ChartTestWindow());
 	AddWindow(new MapWindow());
 
 	WindowLoop();
+}
+
+import world.generation.Planet_gen;
+import world.generation.Star_gen;
+import render.window.PropertyWindow;
+import world.SolarSystem;
+
+void reflectProperties() {
+	SolarSystem s = GenSolSystem();
+	AddWindow(new PropertyWindow!Planet(s.getPlanets()[0]));
+	//AddWindow(new PropertyWindow!Planet(s.getPlanets()[1]));
+	AddWindow(new PropertyWindow!Star(s.getSun()));
 }
