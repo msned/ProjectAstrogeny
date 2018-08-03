@@ -101,10 +101,10 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 			glUseProgram(shaderPrograms[winID]);
 	}
 
-	Planet[] planets;
-	Star sun;
-	immutable float planetSize = 8f;
-	int circleSegmentCount = 180;
+	protected Planet[] planets;
+	protected Star sun;
+	private immutable float planetSize = 8f;
+	private int circleSegmentCount = 180;
 
 	public nothrow void setData(SolarSystem data) {
 		planets = data.getPlanets();
@@ -116,6 +116,9 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 				writeln(p.getAngle(), ", ", p.getRadius());
 			} catch (Exception) { assert(0); }
 		}
+		centerX = 0;
+		centerY = 0;
+		zoomAmount = .8f;
 		updateVertices = true;
 	}
 
@@ -135,10 +138,11 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 		return true;
 	}
 
-	float centerX = 0, centerY = 0;
+	protected float centerX = 0, centerY = 0;
+	protected float zoomAmount = .8f;
 
-	RenderObject[] planetCoords;
-	float[] orbitRings;
+	protected RenderButton[] planetCoords;
+	protected float[] orbitRings;
 
 	protected float colorR = Colors.Patina.red, colorG = Colors.Patina.green, colorB = Colors.Patina.blue;
 
@@ -153,16 +157,16 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 				if (p.getRadius() > maxDist)
 					maxDist = p.getRadius();
 
-			float radMult = (getWidth() > getHeight()) ? getHeight() / maxDist * .8f : getWidth() / maxDist * .8f;
+			float radMult = (getWidth() > getHeight()) ? getHeight() / maxDist * zoomAmount : getWidth() / maxDist * zoomAmount;
 
 			foreach(int i, Planet p; planets) {
-				float pRx = sin(p.getAngle()) * p.getRadius() * radMult, pRy = cos(p.getAngle()) * p.getRadius() * radMult;		//polar to rect
+				float pRx = cos(p.getAngle() / 360 * PI * 2) * p.getRadius() * radMult, pRy = sin(p.getAngle() / 360 * PI * 2) * p.getRadius() * radMult;		//polar to rect	
 				try {
-					planetCoords[i] = new RenderObject(xPos - centerX + pRx, yPos - centerY + pRy, .2f, planetSize, planetSize, "jupiter.png", window);
+					planetCoords[i] = new RenderButton(xPos - centerX + pRx, yPos - centerY + pRy, .2f, planetSize, planetSize, "jupiter.png", window);
 				} catch (Exception e) { assert(0); }
 			}
 			try {
-				planetCoords[planetCoords.length - 1] = new RenderObject(xPos - centerX, yPos - centerY, .1f, sun.getRadius() * radMult, sun.getRadius() * radMult, "sun.png", window);
+				planetCoords[planetCoords.length - 1] = new RenderButton(xPos - centerX, yPos - centerY, .1f, sun.getRadius() * radMult, sun.getRadius() * radMult, "sun.png", window);
 			} catch (Exception) { assert(0); }
 
 			//Generate the line rings for each planet

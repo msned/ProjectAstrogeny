@@ -41,9 +41,11 @@ class RenderButton : RenderObject, Clickable, Inputable {
 		this(width, height, "blank.png", win);
 		setColor(col.red, col.green, col.blue);
 	}
-
 	this(float xPos, float yPos, float depth, string texture, WindowObject win) {
 		super(xPos, yPos, depth, texture, win);
+	}
+	this(float xPos, float yPos, float depth, float width, float height, string texture, WindowObject win) {
+		super(xPos, yPos, depth, width, height, texture, win);
 	}
 
 	public void setClick(void delegate() nothrow c) {

@@ -238,7 +238,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 		}
 
 		glUseProgram(chartPrograms[windowID]);
-		glUniform3f(glGetUniformLocation(chartPrograms[windowID], "lineColor"), colorR, colorG, colorB);	//TODO: set flag for updating uniforms
+		glUniform3f(glGetUniformLocation(chartPrograms[windowID], "lineColor"), colorR, colorG, colorB);
 		
 		glBindVertexArray(LineVAO);
 		glBindBuffer(GL_ARRAY_BUFFER, LineVBO);
