@@ -44,7 +44,7 @@ class SolarSystem{
 		}
 		this() {}
 
-		nothrow double getStar() {
+		nothrow Star getStar() {
 			return sun;
 		}
 

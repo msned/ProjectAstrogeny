@@ -11,11 +11,11 @@ class Trajectory{
 	public:
 		Planet sourcePlanet;
 		Planet destination;
-		shipBase ship;
+		ShipBase ship;
 		double launchWindowTime;
 		Path path;
 
-		this(Planet source, Planet destination, shipBase ship, SolarSystem sys, int typeOrbit){
+		this(Planet source, Planet destination, ShipBase ship, SolarSystem sys, int typeOrbit){
 			this.sourcePlanet = source;
 			this.destination = destination;
 			this.ship = ship;

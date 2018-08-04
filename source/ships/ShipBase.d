@@ -24,7 +24,7 @@ class ShipBase {
 		//First double is distance, 2nd is angle from sun
 		double[2] location;
 		//Ship mass
-		int mass;
+		double mass;
 		
 		
 		ShipHull hull;
@@ -41,12 +41,19 @@ class ShipBase {
 		Armanent[] arms;
 
 		Engine engine;
+
+		//DeltaV capability if all propellant is used, number will change based on maneuvers and refueling
+		double deltaV;
 		
 		/*
 		 * methods
 		 */
 
-		this() {}
+		this() {
+			shipID = randomUUID();
+
+			deltaV = engine.exhaustVelocity * (mass / (mass - engine.propellantTotalCapacity));
+		}
 
 		void tick() {
 		
@@ -266,20 +273,11 @@ class LifeSupport{
  */
 class Engine{
 	public:
-		//unit : N
-		double thrust;
-		//unit : W
-		double thrustPower;
+		
 		//unit : m/s
 		double exhaustVelocity;
 
-		//Current fuel and fuel capacity for the engine
-		Resource fuel;
-		double fuelPercentCapacity;
-		double fueltotalCapacity;
-		//Current propellant and propellant capacity for the engine
 		Resource propellant;
-		double propellantPercentCapacity;
 		double propellantTotalCapacity;
 
 		//Type of engine tech
