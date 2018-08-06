@@ -109,15 +109,6 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 	public nothrow void setData(SolarSystem data) {
 		planets = data.getPlanets();
 		sun = data.getSun();
-		/*
-		import std.stdio;
-		writelnNothrow("Planets: ");
-		foreach(Planet p; planets) {
-			try{
-				writeln(p.getAngle(), ", ", p.getRadius());
-			} catch (Exception) { assert(0); }
-		}
-		*/
 		centerX = 0;
 		centerY = 0;
 		zoomAmount = .8f;
@@ -165,10 +156,12 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 				float pRx = cos(p.getAngle() / 360 * PI * 2) * p.getRadius() * radMult, pRy = sin(p.getAngle() / 360 * PI * 2) * p.getRadius() * radMult;		//polar to rect	
 				try {
 					planetCoords[i] = new RenderButton(xPos - centerX + pRx, yPos - centerY + pRy, .2f, planetSize, planetSize, "jupiter.png", window);
+					planetCoords[i].setClick(genDel!Planet(p));
 				} catch (Exception e) { assert(0); }
 			}
 			try {
 				planetCoords[planetCoords.length - 1] = new RenderButton(xPos - centerX, yPos - centerY, .1f, sun.getRadius() * radMult, sun.getRadius() * radMult, "sun.png", window);
+				planetCoords[planetCoords.length - 1].setClick(genDel!Star(sun));
 			} catch (Exception) { assert(0); }
 
 			//Generate the line rings for each planet
@@ -208,6 +201,22 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 		foreach(RenderObject o; planetCoords) {
 			o.render();
 		}
+	}
+
+	
+	private nothrow void delegate() nothrow genDel(T)(T p) {
+		import render.window.WindowLoop;
+		import render.window.PropertyWindow;
+		import derelict.glfw3;
+		return () nothrow {
+			try {
+				PropertyWindow!T w = new PropertyWindow!T(p);
+				int x, y;
+				glfwGetWindowPos(window.getGLFW(), &x, &y);
+				glfwSetWindowPos(w.getGLFW(), cast(int)(x + (window.cursorXPos + window.sizeX / 2) - w.sizeX / 2), cast(int)(y + (window.sizeY / 2 - window.cursorYPos) - w.sizeY / 2));
+				AddWindow(w);
+			} catch (Exception) { assert(0); }
+		};
 	}
 	
 }

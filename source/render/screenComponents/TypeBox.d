@@ -77,6 +77,9 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 		focusGained();
 		cursorOn = true;
 		focused = true;
+		ubyte[] text = cast(ubyte[])displayText.dup;
+		text = '|' ~ text;
+		displayText = cast(string)text.idup;
 		flashCursor();
 	}
 
@@ -125,6 +128,10 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 			case GLFW_KEY_LEFT:
 				if (cursorIndex <= protectedChars || cursorIndex == 0)
 					break;
+				if (!cursorOn) {
+					cursorOn = true;
+					flashCursor();
+				}
 				ubyte[] text = cast(ubyte[])displayText.dup;
 				text.swapAt(cursorIndex - 1, cursorIndex);
 				text[--cursorIndex] = '|';
@@ -134,6 +141,10 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 			case GLFW_KEY_RIGHT:
 				if (cursorIndex >= displayText.length - 1)
 					break;
+				if (!cursorOn) {
+					cursorOn = true;
+					flashCursor();
+				}
 				ubyte[] text = cast(ubyte[])displayText.dup;
 				text.swapAt(cursorIndex + 1, cursorIndex);
 				text[++cursorIndex] = '|';

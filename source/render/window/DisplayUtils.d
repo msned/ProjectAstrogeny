@@ -11,6 +11,8 @@ nothrow string getString(T)(T value, int maxLength = 0) {
 			return s;
 		}
 		return to!string(value);
-	} catch (Exception e) {}
-	return "";
+	} catch (Exception e) {
+		return "";
+	}
+	
 }

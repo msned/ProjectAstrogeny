@@ -52,14 +52,12 @@ void main(string[] args) {
 	if (args.length > 1) {
 		writeln(args[1]);
 		LoadGameFiles(args[1]);
+	} else {
+		NewGameFiles("testerino");
 	}
-
-	NewGameFiles("testerino");
 
 	running = true;
 	auto mainthread = new Thread(&MainLoop).start();
-
-	reflectProperties();
 
 	//AddWindow(new DebugWindow());
 	AddWindow(new SettingsWindow());
@@ -73,10 +71,3 @@ import world.generation.Planet_gen;
 import world.generation.Star_gen;
 import render.window.PropertyWindow;
 import world.SolarSystem;
-
-void reflectProperties() {
-	SolarSystem s = GenSolSystem();
-	AddWindow(new PropertyWindow!Planet(s.getPlanets()[0]));
-	//AddWindow(new PropertyWindow!Planet(s.getPlanets()[1]));
-	AddWindow(new PropertyWindow!Star(s.getSun()));
-}

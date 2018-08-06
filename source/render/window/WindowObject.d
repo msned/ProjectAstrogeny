@@ -63,7 +63,6 @@ abstract class WindowObject {
 
 		windowObjects[window] = this;
 		RenderObject.orthoUpdates[windowID] = [];
-		GLFWwindow* old = glfwGetCurrentContext();
 		glfwMakeContextCurrent(window);
 		glfwSwapInterval(globalSwapInterval);
 		//Render Setup
@@ -75,7 +74,6 @@ abstract class WindowObject {
 		sortRegions();
 
 		updateResponsiveElements();
-		glfwMakeContextCurrent(old);
 		oldTime = Clock.currTime.stdTime;
 	}
 
@@ -151,12 +149,19 @@ abstract class WindowObject {
 	}
 
 	/++
-	Sets the size of the window, updates all Responsive elements as needed
+	Sets the size of the window, updates all Responsive elements as needed, does not update orthographic projections or GLFW, use the global GLFW function for that purpose. Use updateWindowSize instead
 	+/
 	public nothrow void setSize(int x, int y) {
 		sizeX = x;
 		sizeY = y;
 		updateResponsiveElements();
+	}
+
+	/++
+	Updates the size of the window through all correct GLFW paths.
+	+/
+	public nothrow void updateWindowSize(int x, int y) {
+		glfwSetWindowSize(window, x, y);
 	}
 
 	public nothrow void updateCursor(float x, float y) {
