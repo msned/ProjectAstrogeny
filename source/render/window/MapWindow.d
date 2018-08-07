@@ -32,7 +32,7 @@ class MapWindow : WindowObject {
 		selected = k[0];
 		RenderObject[] lst;
 		foreach(UUID d; k) {
-			lst ~= new RenderContentButton(100f, 20f, Colors.Blue2, to!string(getGameSave().world.systems[d].getRadius()) ~ ", " ~ to!string(getGameSave().world.systems[d].getAngle()), this, genDel(d));
+			lst ~= new RenderContentButton(100f, 20f, Colors.Blue3, to!string(getGameSave().world.systems[d].getRadius()) ~ ", " ~ to!string(getGameSave().world.systems[d].getAngle()), this, genDel(d));
 		}
 		solarList.setElements(lst);
 		sortSol();

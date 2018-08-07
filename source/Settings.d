@@ -12,12 +12,20 @@ static:
 	//Game Settings
 	//======================================//
 	//Graphics
-	float GUIScale = 1.00f;
-	bool VSync = true;
-	string FontName = "rockwell";
-	int FontSize = 128;
+	float GUIScale = GameSettingsDefault.GUIScale;
+	bool VSync = GameSettingsDefault.VSync;
+	string FontName = GameSettingsDefault.FontName;
+	int FontSize = GameSettingsDefault.FontSize;
 	//Audio
-	float MasterVolume = 1f;
+	float MasterVolume = GameSettingsDefault.MasterVolume;
 	//Controls
 
+}
+class GameSettingsDefault {
+static:
+	immutable float GUIScale = 1f;
+	immutable bool VSync = true;
+	immutable string FontName = "rockwell";
+	immutable int FontSize = 128;
+	immutable float MasterVolume = 1f;
 }

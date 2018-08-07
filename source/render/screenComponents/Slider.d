@@ -14,20 +14,21 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 
 	float value;
 	private bool currentlyDragging, vertical;
+	private float defaultVal;
 
 	private float endPadding = 10f;
-
 	private float knobOverflow = 8f;
 
 	nothrow void delegate(float) updateValue;
 
 	bool stretchy = false;
 
-	this(bool vertical, float minWidth, float minHeight, void delegate(float) nothrow updateValue, WindowObject win, float initValue = 0f, bool stretchy = false) {
+	this(bool vertical, float minWidth, float minHeight, void delegate(float) nothrow updateValue, WindowObject win, float initValue = 0f, float defaultValue = 0f, bool stretchy = false) {
 		this.vertical = vertical;
 		this.minWidth = minWidth * GameSettings.GUIScale;
 		this.minHeight = minHeight * GameSettings.GUIScale;
 		this.updateValue = updateValue;
+		this.defaultVal = defaultValue;
 		this.stretchy = stretchy;
 		this.value = initValue;
 		if (vertical)
@@ -112,17 +113,25 @@ class RenderSlider : RenderObject, ResponsiveElement, Draggable, Scrollable {
 	}
 
 	public nothrow bool checkClick(float x, float y, int button) {
-		if (button != 0)
-			return false;
 		if (vertical) {
 			if (within(x, y, width, height - endPadding)) {
-				currentlyDragging = true;
-				return checkPosition(x, y);
+				if (button == 0) {
+					currentlyDragging = true;
+					return checkPosition(x, y);
+				} else {
+					setValue(defaultVal);
+					return true;
+				}
 			}
 		} else {
 			if (within(x, y, width - endPadding, height)) {
-				currentlyDragging = true;
-				return checkPosition(x, y);
+				if (button == 0) {
+					currentlyDragging = true;
+					return checkPosition(x, y);
+				} else if (button == 1) {
+					setValue(defaultVal);
+					return true;
+				}
 			}
 		}
 		return false;

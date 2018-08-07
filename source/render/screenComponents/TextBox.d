@@ -20,7 +20,7 @@ class RenderTextBox : RenderText, Scrollable {
 	RenderObject background;
 
 	this(string displayText, float width, float height, float scale, WindowObject obj, int lineLimit = 0, bool stretchy = true) {
-		super(displayText, scale, obj);
+		super(displayText, scale * GameSettings.GUIScale, obj);
 		this.width = width * GameSettings.GUIScale;
 		this.height = height * GameSettings.GUIScale;
 		this.stretchy = stretchy;

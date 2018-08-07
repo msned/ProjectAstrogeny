@@ -78,8 +78,14 @@ class RenderTypeBox : RenderTextBox, Clickable, Inputable, Animatable {
 		cursorOn = true;
 		focused = true;
 		ubyte[] text = cast(ubyte[])displayText.dup;
-		text = '|' ~ text;
+		if (protectedChars > 0) {
+			text = text[0 .. protectedChars] ~ '|' ~ ((displayText.length > protectedChars) ? text[protectedChars .. $] : []);
+		} else {
+			text = '|' ~ text;
+		}
 		displayText = cast(string)text.idup;
+		cursorIndex = protectedChars;
+		animationCounter = 0;
 		flashCursor();
 	}
 

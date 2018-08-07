@@ -32,7 +32,7 @@ class ChartTestWindow : WindowObject {
 		listL.setColor(Colors.Flower);
 
 
-		top.addObject(new RenderText("   Number of points", .2f, this));
+		top.addObject(new RenderTextBox(" Number of points", 120, 20f, .2f, this, 1));
 		RenderTypeBoxValue!int v = new RenderTypeBoxValue!int(" ", 80, 20, .2f, &updateScrollList, this, 1);
 		v.setBackground(Colors.Blue4);
 		top.addObject(v);
