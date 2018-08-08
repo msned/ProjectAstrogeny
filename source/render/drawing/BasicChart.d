@@ -11,7 +11,7 @@ import std.conv;
 
 class RenderBasicChart : RenderObject, ResponsiveElement {
 
-	private float[] dataX, dataY;
+	private shared float[] dataX, dataY;
 
 	const static char* vertexShaderSource = 
 		"#version 330 core
@@ -120,7 +120,7 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 			glUseProgram(shaderPrograms[winID]);
 	}
 
-	public nothrow void setData(float[] datX, float[] datY) {
+	public nothrow void setData(shared float[] datX, shared float[] datY) {
 		assert(datX.length == datY.length);
 		dataX = datX;
 		dataY = datY;

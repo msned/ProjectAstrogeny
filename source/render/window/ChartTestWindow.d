@@ -40,7 +40,7 @@ class ChartTestWindow : WindowObject {
 		bottom.addObject(new RenderContentButton(80f, 20f, Colors.Blue3, "Chart!", this, () {
 			try {
 				ChartWindow w = new ChartWindow();
-				w.setData(Xvalues, Yvalues);
+				w.setData(cast(shared)Xvalues, cast(shared)Yvalues);
 				AddWindow(w);
 			} catch (Exception e) { assert(0); }
 		}));
@@ -53,7 +53,7 @@ class ChartTestWindow : WindowObject {
 					yValues[i] = sin(xValues[i]);
 				}
 				ChartWindow w = new ChartWindow();
-				w.setData(xValues.dup, yValues.dup);
+				w.setData(cast(shared)xValues.dup, cast(shared)yValues.dup);
 				AddWindow(w);
 			} catch (Exception e) { assert(0); }
 		}));

@@ -8,6 +8,7 @@ immutable bool DEBUG = true;
 immutable string VERSION = "0.0.2";
 
 class GameSettings {
+shared
 static:
 	//Game Settings
 	//======================================//
@@ -22,6 +23,7 @@ static:
 
 }
 class GameSettingsDefault {
+shared
 static:
 	immutable float GUIScale = 1f;
 	immutable bool VSync = true;

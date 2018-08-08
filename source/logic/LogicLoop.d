@@ -22,7 +22,6 @@ void MainLoop() {
 		shipSaveMutex.lock();
 		foreach(ShipBase s; g.ships.shipList)
 			s.tick();
-
 		shipSaveMutex.unlock();
 		colonySaveMutex.lock();
 		foreach(ColonyBase b; g.colonies.colonies)

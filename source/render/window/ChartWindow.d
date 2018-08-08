@@ -19,7 +19,7 @@ class ChartWindow : WindowObject {
 		full.setFill(cht);
 	}
 
-	public nothrow void setData(float[] datx, float [] daty) {
+	public nothrow void setData(shared float[] datx, shared float [] daty) {
 		cht.setData(datx, daty);
 	}
 }

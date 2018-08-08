@@ -210,10 +210,10 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 		import derelict.glfw3;
 		return () nothrow {
 			try {
-				PropertyWindow!T w = new PropertyWindow!T(p);
 				int x, y, top, bottom;
 				glfwGetWindowPos(window.getGLFW(), &x, &y);
 				glfwGetWindowFrameSize(window.getGLFW(), null, &top, null, &bottom);
+				PropertyWindow!T w = new PropertyWindow!T(p);
 				x = cast(int)(x + (window.cursorXPos + window.sizeX / 2) - w.sizeX / 2);
 				y = cast(int)(y + (window.sizeY / 2 - window.cursorYPos) - w.sizeY / 2);
 				glfwSetWindowPos(w.getGLFW(), (x > 0) ? x : 0, (y > top) ? y : top);

@@ -38,11 +38,12 @@ abstract class WindowObject {
 	public Inputable[] inputs;
 
 	public nothrow GLFWwindow* getGLFW() { return window; }
-
+	
 	this(string name, int x = 540, int y = 540) {
 		sizeX = cast(int)(x * GameSettings.GUIScale);
 		sizeY = cast(int)(y * GameSettings.GUIScale);
 		glfwWindowHint(GLFW_SAMPLES, 4);
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		window = glfwCreateWindow(sizeX, sizeY, cast(char*)name, null, null);
 		windowName = name;
 		windowID = randomUUID();
@@ -75,6 +76,7 @@ abstract class WindowObject {
 
 		updateResponsiveElements();
 		oldTime = Clock.currTime.stdTime;
+		glfwShowWindow(window);
 	}
 
 	public nothrow void renderElements() {

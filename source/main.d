@@ -21,7 +21,6 @@ import save.SaveData;
 import save.GameSave;
 import render.Fonts;
 import world.Resources;
-import ships;
 
 ShouldThrow missingSymCall(string symbolName) {
 	if(	symbolName == "FT_Stream_OpenBzip2" ||
@@ -61,13 +60,23 @@ void main(string[] args) {
 
 	//AddWindow(new DebugWindow());
 	AddWindow(new SettingsWindow());
-	AddWindow(new ChartTestWindow());
+	//AddWindow(new ChartTestWindow());
 	AddWindow(new MapWindow());
+
+	testCode();
 
 	WindowLoop();
 }
 
-import world.generation.Planet_gen;
-import world.generation.Star_gen;
-import render.window.PropertyWindow;
-import world.SolarSystem;
+import colonies;
+import std.uuid;
+import render.window.ChartWindow;
+
+void testCode() {
+	UUID planetID = randomUUID();
+	ColonyBase b = new ColonyBase();
+	b.cht = cast(ChartWindow)AddWindow(new ChartWindow());
+	colonySaveMutex.lock();
+	getGameSave().colonies.colonies[planetID] = b;
+	colonySaveMutex.unlock();
+}
