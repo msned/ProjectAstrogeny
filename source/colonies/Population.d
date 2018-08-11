@@ -5,39 +5,37 @@ import GameState;
 
 class Age {
 
-	float[] percentages;
+	ulong[] ages;
+	ulong totalPopulation;
 
-	void addPopulation(int age, ulong addedPop, ulong currentPopulation) {
-		AddPopulation(percentages.ptr, percentages.length, age, addedPop, currentPopulation);
+	void addPopulation(int age, ulong addedPop ) {
+		ages[age] += addedPop;
 	}
 
-	/++
-	Integrated Distribution percentages up to and including the age given
-	+/
-	float lowerCumulativeRate(int age) {
-		if (age > percentages.length - 1)
-			age = percentages.length - 1;
-		else if (age < 0) 
-			age = 0;
-		float total = 0;
-		for(int i = 0; i <= age; i++) {
-			total += percentages[i];
-		}
-		return total;
-	}
+	private enum maxAge = 100;
+	private enum daysPerYear = 365;
 
-	//Ages up 1/365th of the population a day, death calculations to be added later
+	float[maxAge + 1] shiftOverflow;
+
+	//Ages up 1/365th of the population a day
 	void agePopulation() {
-		float yearRate = 1f / 365 * GameState.daysPerTick;
-		percentages ~= percentages[$ - 1] * yearRate;
-		percentages[$ - 2] -= percentages[$ - 1];
-		for(int i = percentages.length - 3; i > 0; i--) {
-			float shift = percentages[i] * yearRate;
-			percentages[i + 1] += shift;
-			percentages[i] -= shift;
+		import std.math;
+		float yearRate = 1f / daysPerYear * GameState.daysPerTick;
+		ages ~= cast(ulong)(ages[$ - 1] * yearRate);
+		ages[$ - 2] -= ages[$ - 1];
+		for(int i = ages.length - 3; i > 0; i--) {
+			//Survival Rate based on the same exponential curve used to generate
+			//float survivalRate = 1f + (1f/maxAge/daysPerYear) - pow(maxAge, cast(float)(i - maxAge)/maxAge)/daysPerYear;
+			float survivalRate = 1f;
+			float shift = ages[i] * yearRate;
+			if (shift < 1)
+
+			ages[i + 1] += cast(ulong)(shift * survivalRate);
+			ages[i] -= cast(ulong)(shift);
 		}
-		if (percentages.length > 100)
-			percentages = percentages[0 .. 100];
+		if (ages.length > 100)
+			ages = ages[0 .. 100];
+
 	}
 	
 	/++
@@ -46,19 +44,19 @@ class Age {
 	float rangedRate(int age1, int age2) {
 		if (age1 >= age2)
 			return 0;
-		if (age1 > percentages.length - 1)
-			age1 = percentages.length - 1;
+		if (age1 > ages.length - 1)
+			age1 = ages.length - 1;
 		else if (age1 < 0) 
 			age1 = 0;
-		if (age2 > percentages.length - 1)
-			age2 = percentages.length - 1;
+		if (age2 > ages.length - 1)
+			age2 = ages.length - 1;
 		else if (age2 < 0) 
 			age2 = 0;
 		float total = 0;
 		for(int i = age1; i <= age2; i++) {
-			total += percentages[i];
+			total += ages[i];
 		}
-		return total;
+		return total / totalPopulation;
 	}
 
 	/++
@@ -67,23 +65,46 @@ class Age {
 	float higherCumulativeRate(int age) {
 		if (age < 0)
 			age = 0;
-		else if (age > percentages.length - 1)
-			age = percentages.length - 1;
+		else if (age > ages.length - 1)
+			age = ages.length - 1;
 		float total = 0;
-		for(int i = percentages.length - 1; i >= age; i--) {
-			total += percentages[i];
+		for(int i = ages.length - 1; i >= age; i--) {
+			total += ages[i];
 		}
-		return total;
+		return total / totalPopulation;
 	}
 
+	/++
+	Integrated Distribution percentages up to and including the age given
+	+/
+	float lowerCumulativeRate(int age) {
+		if (age > ages.length - 1)
+			age = ages.length - 1;
+		else if (age < 0) 
+			age = 0;
+		float total = 0;
+		for(int i = 0; i <= age; i++) {
+			total += ages[i];
+		}
+		return total / totalPopulation;
+	}
 
-	immutable int generatedCount = 45;
-	void generateDistribution() {
+	void generateDistribution(ulong initialCount) {
 		import std.math;
-		percentages.reserve(generatedCount + 1);
-		float fn = pow(.5f, generatedCount);
-		for(int i = 0; i <= generatedCount; i++) {
-			percentages ~= BinomialCoefficient(generatedCount, i) * fn;
+		totalPopulation = 0;
+		ages = [];
+		ages.reserve(maxAge + 1);
+		float[] percentages = [];
+		float rT = 0;
+		for(int i = 0; i <= maxAge; i++) {
+			//Inverse Exponential function for generating a decent population distribution curve
+			float v = 1f + (1f/maxAge) - pow(maxAge, cast(float)(i - maxAge)/maxAge);
+			percentages ~= v;
+			rT += v;
+		}
+		for(int i = 0; i < percentages.length; i++) {
+			ages ~= cast(ulong)(round((percentages[i] / rT) * initialCount));
+			totalPopulation += ages[i];
 		}
 	}
 

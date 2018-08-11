@@ -11,9 +11,10 @@ abstract class Industry {
 	Returns the number of extra employees the industry desires to fulfill the market 
 	+/
 	long getExpandability();
+
 }
 
-class Education : Industry {
+class Education {
 
 	private immutable float higherEducationPercentage = .3f;		//30% of the teaching workforce is higher education
 	private immutable float higherEducationGraduationRate = .4f;	//40% estimated graduation rate
@@ -22,9 +23,13 @@ class Education : Industry {
 	float higherEducationAttendanceRate = .6f;						//60% of high school graduates will attend college, influenced by industry availability and economy
 
 	ulong students;
+	ulong employees;
 
 	private int teacherRatio = 30;	//30 students per education worker, half for higher education
-	override long getExpandability() {
+	/++
+	Returns the number of students over or under capacity
+	+/
+	long getExpandability() {
 		return cast(ulong)(teacherRatio * (1f - higherEducationPercentage) + teacherRatio / 2 * higherEducationPercentage) * employees - students;
 	}
 
@@ -52,5 +57,17 @@ class Education : Industry {
 		rates[2] = schoolGraduationRate * higherEducationAttendanceRate * higherEducationGraduationRate * pop.rangedRate(yearsofSchool + 1, yearsofSchool + yearsofCollege);
 
 		return rates;
+	}
+}
+
+class Housing {
+	
+	ulong capacity;
+
+	/++
+	Returns the percentage of housing capacity filled
+	+/
+	float getSaturationRate(ulong population) {
+		return cast(float)population / capacity;
 	}
 }

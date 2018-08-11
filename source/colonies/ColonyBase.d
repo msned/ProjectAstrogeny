@@ -8,14 +8,13 @@ import render.window.ChartWindow;
 
 class ColonyBase {
 
-	ulong population;
-
 	Age ages = new Age();
 	Profession professions = new Profession();
 	Sector sectors = new Sector();
 
 	Industry[] industries;
 	Education education = new Education();
+	Housing housing = new Housing();
 
 	/*
 	Store ratio of population for each enum value, then multiply to get the total population later, multiply together with other parameters to get intersection of independent variables
@@ -35,37 +34,41 @@ class ColonyBase {
 			dayCounter = 0;
 			//Student Graduations
 			float[3] rates = education.getGraduationRates(ages);
-			professions.shiftPopulation(Profession.Names.Student, Profession.Names.Worker, cast(ulong)(rates[0] * population), population);	//Dropouts become Workers
-			professions.shiftPopulation(Profession.Names.Student, Profession.Names.Technician, cast(ulong)(rates[1] * population), population);//School graduates become Technicians
-			professions.shiftPopulation(Profession.Names.Student, Profession.Names.Engineer, cast(ulong)(rates[2] * population), population);	//College graduates become Engineers
-			sectors.shiftPopulation(Sector.Names.Unemployed, Sector.Names.Engineering, cast(ulong)(rates[2] * population), population); //put engineers in employment
-			sectors.shiftPopulation(Sector.Names.Unemployed, Sector.Names.Manufacturing, cast(ulong)(rates[1] * population), population);//put technicians in employment
-			sectors.shiftPopulation(Sector.Names.Unemployed, Sector.Names.Agriculture, cast(ulong)(rates[0] * population), population); //put workers in employment
-			education.students -= cast(ulong)((rates[0] + rates[1] + rates[2]) * population);
+			professions.shiftPopulation(Profession.Names.Student, Profession.Names.Worker, cast(ulong)(rates[0] * ages.totalPopulation), ages.totalPopulation);	//Dropouts become Workers
+			professions.shiftPopulation(Profession.Names.Student, Profession.Names.Technician, cast(ulong)(rates[1] * ages.totalPopulation), ages.totalPopulation);//School graduates become Technicians
+			professions.shiftPopulation(Profession.Names.Student, Profession.Names.Engineer, cast(ulong)(rates[2] * ages.totalPopulation), ages.totalPopulation);	//College graduates become Engineers
+			sectors.shiftPopulation(Sector.Names.Unemployed, Sector.Names.Engineering, cast(ulong)(rates[2] * ages.totalPopulation), ages.totalPopulation); //put engineers in employment
+			sectors.shiftPopulation(Sector.Names.Unemployed, Sector.Names.Manufacturing, cast(ulong)(rates[1] * ages.totalPopulation), ages.totalPopulation);//put technicians in employment
+			sectors.shiftPopulation(Sector.Names.Unemployed, Sector.Names.Agriculture, cast(ulong)(rates[0] * ages.totalPopulation), ages.totalPopulation); //put workers in employment
+			education.students -= cast(ulong)((rates[0] + rates[1] + rates[2]) * ages.totalPopulation);
 		}
 
 		//Adjust ages
 		ages.agePopulation();
 		//New Births
 		float fr = getFertilityRate();
-		ulong newPop = cast(ulong)((fr + fertilityRateOverflow) * population);
+		ulong newPop = cast(ulong)((fr + fertilityRateOverflow) * ages.totalPopulation);
 		if (newPop == 0) {
 			fertilityRateOverflow += fr;
-		} else {
+		} else if (newPop > 0){
 			fertilityRateOverflow = 0;
-			ages.addPopulation(0, newPop, population);
-			professions.addPopulation(Profession.Names.Student, newPop, population);
-			sectors.addPopulation(Sector.Names.Unemployed, newPop, population);
+			ages.addPopulation(0, newPop);
+			professions.addPopulation(Profession.Names.Student, newPop, ages.totalPopulation);
+			sectors.addPopulation(Sector.Names.Unemployed, newPop, ages.totalPopulation);
 			education.students += newPop;
-			population += newPop;
+		} else {
+			//Handle deaths due to fertility rate
+			fertilityRateOverflow = 0;
 		}
-		float[] xV = new float[ages.percentages.length];
-		for(int i = 0; i < ages.percentages.length; i++) {
+
+
+		float[] xV = new float[ages.ages.length];
+		for(int i = 0; i < ages.ages.length; i++) {
 			xV[i] = i;
 		}
-		float[] yV = ages.percentages.dup;
-		for(int i = 0; i < yV.length; i++) {
-			yV[i] *= population;
+		float[] yV = new float[ages.ages.length];
+		for(int i = 0; i < ages.ages.length; i++) {
+			yV[i] = cast(float)ages.ages[i];
 		}
 		cht.setData(cast(shared)xV, cast(shared)yV);
 
@@ -80,22 +83,26 @@ class ColonyBase {
 		generatePopulation();
 	}
 
-	private immutable int initialCount = 1000;
+	private enum initialCount = 100000;
 	private void generatePopulation() {
-		ages.generateDistribution();
-		population = initialCount;
+		ages.generateDistribution(initialCount);
 		float studentRate = ages.rangedRate(0, 18);
 		professions.percentages[Profession.Names.Worker] -= studentRate;
 		professions.percentages[Profession.Names.Student] += studentRate;
 		education.employees = 10;
-		education.students = cast(ulong)(studentRate * population);
+		education.students = cast(ulong)(studentRate * ages.totalPopulation);
+		housing.capacity = 2000;
 	}
+
+	private float maxFert = 1.4f;
+
+	private float baseFert = .0000001f;
 
 	/++
 	Returns the growth rate per tick for the given population
 	+/
 	protected float getFertilityRate() {
-		return .00001f;
+		return baseFert * (maxFert - housing.getSaturationRate(ages.totalPopulation));
 	}
 
 }
