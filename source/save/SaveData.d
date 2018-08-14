@@ -15,6 +15,9 @@ private string loadedSavePath;
 
 enum SaveComponentNames {stations = "_stations", ships = "_ships", colonies = "_colonies", world = "_world" };
 
+/++
+Loads the game files from disc at the string path given, returns true on success
++/
 public bool LoadGameFiles(string pathtoGameSave) {
 	loadedSave = LoadSave!GameSave(pathtoGameSave);
 	if (loadedSave is null)
@@ -36,6 +39,9 @@ public bool LoadGameFiles(string pathtoGameSave) {
 	return true;
 }
 
+/++
+Stores the currently loaded save to disc
++/
 public void SaveGameFiles() {
 	if (loadedSave is null)
 		return;
@@ -47,24 +53,38 @@ public void SaveGameFiles() {
 	StoreSave(loadedSave.world, loadedSave.saveName ~ SaveComponentNames.world, loadedSavePath);
 	StoreSave(loadedSave, loadedSave.saveName, loadedSavePath);
 
-	if (DEBUG)
+	static if (DEBUG)
 		writeln("Saved ", loadedSave.saveName);
 }
 
+/++
+Creates a new Game Save, loads it, and saves it to disc
++/
 public void NewGameFiles(string gameName) {
 	loadedSave = NewGameSave(gameName);
 	SaveGameFiles();
 }
 
+/++
+Returns a const pointer to the game save for read-only access
+Used for reading without using a Mutex lock
++/
 public const(GameSave)* readonlyGameSave() {
 	return &loadedSave;
 }
 
+/++
+Returns the currently loaded save, fails assert if none loaded
+Must use the mutex locks before writing any data to the save
++/
 public nothrow GameSave getGameSave() {
 	assert(loadedSave !is null, "No game save loaded");
 	return loadedSave;
 }
 
+/++
+Loads the settings file and sets various information as needed
++/
 public void LoadGameSettings() {
 	LoadSettingsFile();
 	import render.window.WindowLoop;

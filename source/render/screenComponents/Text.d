@@ -91,7 +91,7 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	/++
 	Sets the color of the text to RGB values from 0 to 255
-	++/
+	+/
 	public override void setColor(float r, float g, float b) {
 		colorR = r;
 		colorG = g;
@@ -109,7 +109,7 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	/++
 	Returns the number of pixels needed to render the current string of text at the given scale
-	++/
+	+/
 	public nothrow float getTextLength(float scale) {
 		int total = 0;
 		foreach(char c; displayText) {
@@ -118,6 +118,9 @@ class RenderText : RenderObject, ResponsiveElement {
 		return total * scale;
 	}
 
+	/++
+	Returns the number of pixels needed to render the current string of text at the given scale
+	+/
 	public nothrow float getTextHeight(float scale) {
 		int maxY = 0;
 		int minY = 0;
@@ -161,16 +164,16 @@ class RenderText : RenderObject, ResponsiveElement {
 	float boundingWidth, boundingHeight;
 
 	/++
-	+ Sets the displayed text and sets it to max size within the previous bounds
-	++/
-	public nothrow void swapText(string text) {
+	Sets the displayed text and sets it to max size within the previous bounds
+	+/
+	public nothrow void maxText(string text) {
 		displayText = text;
 		setMaxScale(boundingWidth, boundingHeight);
 	}
 
 	/++
-	+ Sets the displayed text with not further updates
-	++/
+	Sets the displayed text using previous sizing
+	+/
 	public nothrow void setText(string text) {
 		displayText = text;
 		newArray = true;
@@ -229,6 +232,11 @@ class RenderText : RenderObject, ResponsiveElement {
 			glUseProgram(shaderPrograms[winID]);
 	}
 
+	public override void onDestroy() {
+		glDeleteBuffers(1, &VBO);
+		glDeleteVertexArrays(1, &VAO);
+	}
+
 
 
 	private void loadTextShader() {
@@ -261,6 +269,9 @@ class RenderText : RenderObject, ResponsiveElement {
 
 	protected bool newArray = true;
 
+	/++
+	Flags the text for redrawing next frame
+	+/
 	public nothrow void setNewArray() {
 		newArray = true;
 	}

@@ -27,11 +27,11 @@ abstract class AnchorPoint {
 
 	abstract nothrow float getPos(ResponsiveRegion);
 }
+/*
+Anchor point targets a certain percentage of the screen from the center, -100 to 100 in both directions
+*/
 class AnchorPercentage : AnchorPoint {
 	float percentage;
-	/++
-	Percentage of the screen from -100% to +100% in both directions
-	+/
 	this(float percent, Side assigned) {
 		percentage = percent;
 		type = AnchorType.percentage;
@@ -44,6 +44,9 @@ class AnchorPercentage : AnchorPoint {
 			return percentage * reg.windowHeight / 2f;
 	}
 }
+/*
+Anchor point targets the edge of a region, always scalling to abut if possible
+*/
 class AnchorRegion : AnchorPoint {
 	ResponsiveRegion reg;
 
@@ -67,6 +70,9 @@ class AnchorRegion : AnchorPoint {
 		return reg.getPosition(-assignedAnchor);
 	}
 }
+/*
+Anchor point targets a specific ratio between the two dimensions of the region, only one ratio may be assigned per region
+*/
 class AnchorRatio : AnchorPoint {
 	float ratio;
 
@@ -102,6 +108,9 @@ class AnchorRatio : AnchorPoint {
 		}
 	}
 }
+/*
+Anchor point targets a specific pixel count relative to the opposite side
+*/
 class AnchorPixel : AnchorPoint {
 	
 	float pixels;
@@ -133,6 +142,10 @@ class AnchorPixel : AnchorPoint {
 	}
 }
 
+/*
+Drag Anchors allow the user to drag the region boundaries around, changing the values with which the regions are automatically scaled and positioned
+Each point functions exactly the same as the standard version, just with added control outside of constructor values
+*/
 interface DragAnchor {
 	nothrow RegionBoarder linkRegion(ResponsiveRegion);
 	nothrow bool updateValue(float value, int width, int height);
@@ -295,6 +308,10 @@ class ResponsiveRegion {
 		elements.assumeSafeAppend();
 	}
 
+	/++
+	Links up drag anchors in the region, sizes the boarders correctly, and sorts existing render elements
+	To be called before the first render or resize event
+	+/
 	public nothrow void postInit(float width, float height) {
 		windowWidth = width;
 		windowHeight = height;
@@ -330,6 +347,9 @@ class ResponsiveRegion {
 	}
 
 
+	/++
+	Returns the AnchorPoint at the given side
+	+/
 	nothrow AnchorPoint getAnchor(int sd) {
 		switch(sd) {
 			case Side.left:
@@ -345,13 +365,22 @@ class ResponsiveRegion {
 		}
 	}
 
+	/++
+	Returns the list of positionable RenderObjects
+	+/
 	public nothrow RenderObject[] getRenderObjects() {
 		return elements;
 	}
+	/++
+	Returns the list of non-positionable RenderObjects
+	+/
 	public nothrow RenderObject[] getFixedRenderObjects() {
 		return fixedElements;
 	}
 
+	/++
+	Allows for a custom RenderObject to be rendered behind all other objects on the region
+	+/
 	public void setBackground(RenderObject o) {
 		background = o;
 		renderBackground = true;
@@ -365,6 +394,9 @@ class ResponsiveRegion {
 		leftBound = topBound = rightBound = bottomBound = float.infinity;
 	}
 
+	/++
+	Returns the screen position on the window where each side of the region exists
+	+/
 	protected nothrow float getPosition(Side sd) {
 		switch (sd) {
 			case Side.left:
@@ -394,6 +426,9 @@ class ResponsiveRegion {
 
 	protected bool reUpdate;
 
+	/++
+	Hides the region, using surroundings to fill in the gap
+	+/
 	public nothrow void setHidden() {
 		hidden = true;
 		reUpdate = true;
@@ -437,6 +472,9 @@ class ResponsiveRegion {
 		elements = elements.remove(index);
 	}
 
+	/++
+	Clears all objects in the region
+	+/
 	public void clearObjects() {
 		elements = [];
 	}
@@ -485,6 +523,9 @@ class ResponsiveRegion {
 		}
 	}
 
+	/++
+	Renders all RenderObjects and boarders if applicable
+	+/
 	public nothrow void renderObjects() {
 		if (hidden)
 			return;
@@ -508,7 +549,7 @@ class ResponsiveRegion {
 	}
 
 	/++
-	Scales and shifts the elements to fill the bounds given, called on window resizes, returns true on success
+	Scales and shifts the elements to fill the bounds given, called on window resizes, returns true on success, false if additional resizing is in order
 	+/
 	public nothrow bool updateElements(float width, float height) {
 		windowWidth = width;
@@ -533,6 +574,9 @@ class ResponsiveRegion {
 		return true;
 	}
 
+	/++
+	Implemented by child classes to arrange elements according to a pattern (e.g. rows, columns, grids)
+	+/
 	protected nothrow void arrangeElements() {
 		return;
 	}

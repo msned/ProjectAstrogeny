@@ -8,6 +8,10 @@ import Settings;
 
 const string settingsName = "Settings.cfg";
 
+
+/*
+Uses compile-time reflection to identify all public variables in the settings file and set them when reading from the save
+*/
 void LoadSettingsFile() {
 	if (exists(settingsName)) {
 		string s = cast(string)read(settingsName);
@@ -26,6 +30,9 @@ void LoadSettingsFile() {
 	}
 }
 
+/*
+Uses compile-time reflection to identify all the public variables to be saved to disc and saves each one in order to the JSON file
+*/
 void SaveSettingsFile() {
 	JSONValue set = ["Version" : VERSION];
 	static foreach(i, m; __traits(allMembers, GameSettings)) {
@@ -36,6 +43,9 @@ void SaveSettingsFile() {
 	write(settingsName, set.toPrettyString());
 }
 
+/*
+Casts the JSONValue as returned from disc to the correct value for the variable
+*/
 private void parseJSONValue(T)(JSONValue json, ref T value) {
 	switch(json.type) with (JSON_TYPE) {
 		case TRUE:

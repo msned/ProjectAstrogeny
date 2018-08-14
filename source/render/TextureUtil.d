@@ -8,8 +8,12 @@ import std.uuid;
 
 const static string texturePath = "textures/";
 
+/++
+Loads the texture by the given file name and returns the GLuint ID for it
++/
 GLuint LoadTexture(string fileName, UUID windowID) {
 	static GLuint[string][UUID] loadedTextures;
+
 	if (windowID in loadedTextures) {
 		GLuint* ptr = fileName in loadedTextures[windowID];
 		if (ptr !is null) {

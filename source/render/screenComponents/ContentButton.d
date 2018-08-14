@@ -10,13 +10,13 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 	protected RenderText displayText;
 	protected RenderScalingIcon icon;
 
-	int sidePadding = 10, topPadding = 10;
+	private int sidePadding = 10, topPadding = 10;
 	Side iconSide;
 
 	float defaultWidth, defaultHeight;
 
-	protected float minimumFontSize = .15f;
-	protected float minimumIconSize = 10f;
+	protected enum minimumFontSize = .15f;
+	protected enum minimumIconSize = 10f;
 
 	this(float width, float height, Color background, string label, WindowObject win, void delegate() nothrow click = null) {
 		displayText = new RenderText(label, 0, 0, 1f, win);
@@ -47,7 +47,9 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 
 	private bool justIcon = false;
 
-
+	/++
+	Sets the position of the button
+	+/
 	public override nothrow void setPosition(float x = 0, float y = 0) {
 		super.setPosition(x, y);
 		if (justIcon) {
@@ -60,6 +62,9 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 		}
 	}
 
+	/++
+	Sets the scale of the button, intelligently scaling or shifting the other content on the button
+	+/
 	public override nothrow void setScale(float width, float height) {
 		if (icon !is null) {
 			if (width < height) {
@@ -97,15 +102,21 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 			icon.setDepth(depth - .05f);
 	}
 
+	/++
+	Sets the text displayed on the button
+	+/
 	public nothrow void setText(string s) {
 		if (displayText is null)
 			return;
-		displayText.swapText(s);
+		displayText.maxText(s);
 		setScale(width, height);
 	}
 
 	public nothrow bool isStretchy() {return true;}
 
+	/++
+	Returns the minimum width at which the button will still display some of it's content
+	+/
 	public nothrow float getMinWidth() {
 		if (icon is null) {
 			if (displayText !is null)
@@ -119,6 +130,9 @@ class RenderContentButton : RenderButton, ResponsiveElement {
 		return 0;
 	}
 
+	/++
+	Returns the minimum height at which the button will still display content
+	+/
 	public nothrow float getMinHeight() {
 		if (icon is null) {
 			if (displayText !is null)

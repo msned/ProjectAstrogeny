@@ -37,6 +37,9 @@ abstract class WindowObject {
 
 	public Inputable[] inputs;
 
+	/++
+	Returns the GLFW window pointer for this window
+	+/
 	public nothrow GLFWwindow* getGLFW() { return window; }
 	
 	this(string name, int x = 540, int y = 540) {
@@ -79,6 +82,9 @@ abstract class WindowObject {
 		glfwShowWindow(window);
 	}
 
+	/++
+	Handles rendering of everything in the window
+	+/
 	public nothrow void renderElements() {
 		glfwMakeContextCurrent(window);
 		OpenglPreRender();
@@ -99,6 +105,9 @@ abstract class WindowObject {
 				i.keyInput(key, mod);
 	}
 
+	/++
+	Implemented by child classes to add all the objects to the window, called during initialization
+	+/
 	protected abstract void loadRenderObjects();
 
 	public nothrow void renderObjects() {
@@ -120,12 +129,18 @@ abstract class WindowObject {
 		oldTime = t;
 	}
 
+	/++
+	Recalculates all Responsive Elements in regions for visibility and size
+	+/
 	protected nothrow void updateResponsiveElements() {
 		foreach(ResponsiveRegion r; regions)
 			r.clearHidden();
 		responsiveElementsLoop();
 	}
-	protected nothrow void responsiveElementsLoop() {
+	/++
+	Recursively loops over all Responsive Regions until sizing is correct
+	+/
+	private nothrow void responsiveElementsLoop() {
 		foreach(ResponsiveRegion r; regions)
 			r.clearBounds();
 		foreach(ResponsiveRegion r; regions)
@@ -323,10 +338,14 @@ abstract class WindowObject {
 
 }
 
+/++
+Safely prints to Console in a try/catch
+Do not use in production code
++/
 nothrow void writelnNothrow(T)(T s) {
 	try {
 		writeln(s);
-	} catch (Exception e) {}
+	} catch (Exception e) { assert(0); }
 }
 
 extern (C)

@@ -120,6 +120,12 @@ class RenderBasicChart : RenderObject, ResponsiveElement {
 			glUseProgram(shaderPrograms[winID]);
 	}
 
+	public override void onDestroy() {
+		glDeleteBuffers(1, &VBO);
+		glDeleteVertexArrays(1, &VAO);
+	}
+
+
 	public nothrow void setData(shared float[] datX, shared float[] datY) {
 		assert(datX.length == datY.length);
 		dataX = datX;

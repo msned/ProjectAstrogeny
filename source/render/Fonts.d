@@ -27,6 +27,9 @@ void FontInit() {
 	}
 }
 
+/++
+Loads all the standard ascii characters from the FreeType library and creates GL textures for all of them
++/
 nothrow void NewFont(UUID winID) {
 	face = faces[GameSettings.FontName];
 	FT_Set_Pixel_Sizes(face, 0, GameSettings.FontSize);
@@ -76,4 +79,7 @@ struct Character {
 	GLuint Advance;
 };
 
+/++
+Stores all data on GL textures for ascii characters, initialized per window
++/
 Character[GLchar][UUID] Characters;

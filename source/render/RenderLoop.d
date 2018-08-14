@@ -9,12 +9,11 @@ import Settings;
 import render.Color;
 
 /++
-	Initializes the OpenGL settings, returns success
+Initializes the OpenGL settings for each window
 +/
-public nothrow bool RenderInit() {
+public nothrow void RenderInit() {
 	try {
-		auto loaded = DerelictGL3.reload();
-		//writeln(loaded);
+		DerelictGL3.reload();
 	} catch (Exception e) {
 		try {
 		writeln("Error loading %s", DerelictGL3.loadedVersion);
@@ -34,7 +33,6 @@ public nothrow bool RenderInit() {
 		glfwSwapInterval(1);
 	else
 		glfwSwapInterval(0);
-	return true;
 }
 
 nothrow void OpenglPreRender() {
@@ -42,6 +40,7 @@ nothrow void OpenglPreRender() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
+
 extern (Windows)
 nothrow void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userparam) {
 	if (severity > 33387)

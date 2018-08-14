@@ -26,11 +26,16 @@ class GameSave {
 
 	}
 	void postSerialize() {
+		import Settings;
+		static if (DEBUG)
 		writeln("loaded save ", saveName);
 	}
 
 }
 
+/++
+Generates a new GameSave with the given name
++/
 GameSave NewGameSave(string saveName) {
 	GameSave g = new GameSave();
 	g.saveName = saveName;

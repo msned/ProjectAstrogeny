@@ -5,8 +5,11 @@ import save.WorldSave;
 import world.SolarSystem;
 import std.stdio;
 
-const uint genNumber = 200;
+enum genNumber = 200;
 
+/++
+Generates a substantial number of solar systems for testing in the current save
++/
 void GenerateNewWorld(WorldSave save) {
 
 	for(int i = 0; i < genNumber; i++) {

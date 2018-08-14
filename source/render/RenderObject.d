@@ -157,13 +157,19 @@ class RenderObject {
 		setPosition(xPos, yPos);
 	}
 
-
+	/++
+	Sets the scale and position at the same time
+	More efficient than calling separately
+	+/
 	public nothrow void setScaleAndPosition(float width, float height, float x, float y) {
 		xPos = x;
 		yPos = y;
 		setScale(width, height);
 	}
 
+	/++
+	Sets the render depth of the object, higher values for farther back (0 to 1)
+	+/
 	public nothrow void setDepth(float depth) {
 		vertices[2] = depth;
 		vertices[10] = depth;
@@ -182,14 +188,12 @@ class RenderObject {
 	protected static GLuint EBO;
 	protected static GLuint[UUID] shaderPrograms;
 	protected static float[16][UUID] projMatrices;
-
-	UUID windowID;
+	protected UUID windowID;
 	
 	this(string textureName, WindowObject windowObj) {
 		texture = LoadTexture(textureName, windowObj.windowID);
 		this(windowObj);
 	}
-
 
 	this(float xPos, float yPos, float depth, string textureName, WindowObject windowObj) {
 		this(textureName, windowObj);
@@ -241,14 +245,17 @@ class RenderObject {
 		}
 
 	}
-	void loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
+	/*
+	Compiles the shader from the strings at the top of the file, builds the shader, and stores it in the array
+	*/
+	private void loadShader(const char* vertexShaderSource, const char* fragmentShaderSource) {
 
 		int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vertexShaderSource, null);
 		glCompileShader(vertexShader);
 		int success;
 		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-		if (!success) 
+		if (!success)
 			throw new Exception("Vertex Shader Error");
 
 		int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -286,6 +293,11 @@ class RenderObject {
 		glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[windowID], "proj"), 1, GL_FALSE, &projMatrices[windowID][0]);
 	}
 
+	/++
+	Updates orthographic projections for any object type extending from RenderObject
+	(as long as it's been registered in the delegate array correctly)
+	Called from WindowObject
+	+/
 	public static nothrow void updateOrtho(GLdouble width, GLdouble height, UUID winID) {
 		void delegate(GLdouble, GLdouble, UUID) nothrow [] arr = orthoUpdates[winID];
 		if (arr !is null) {
@@ -296,25 +308,34 @@ class RenderObject {
 		}
 	}
 
+	/++
+	Removes delegates and projection matrices when the window is destroyed
+	+/
 	public static void onDestroyWindow(UUID winID) {
 		projMatrices.remove(winID);
 		orthoUpdates.remove(winID);
-		registeredOrtho[winID] = false;
 	}
 
 	public void onDestroy() {
 		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
 		glDeleteVertexArrays(1, &VAO);
 	}
 
 	private bool nineSlice = false;
 	private float nineSliceBoarder;
 
+	/++
+	Enables 9-slice rendering for the texture being rendered on the quad
+	+/
 	public void enableNineSlice(float boarder) {
 		nineSliceBoarder = boarder;
 		nineSlice = true;
 	}
 
+	/++
+	Renders the object
+	+/
 	public nothrow void render() {
 	if (!visible)
 		return;

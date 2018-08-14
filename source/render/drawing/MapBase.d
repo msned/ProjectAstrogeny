@@ -203,6 +203,11 @@ class RenderMapBase : RenderObject, ResponsiveElement {
 		}
 	}
 
+	public override void onDestroy() {
+		glDeleteBuffers(1, &VBO);
+		glDeleteVertexArrays(1, &VAO);
+	}
+
 	
 	private nothrow void delegate() nothrow genDel(T)(T p) {
 		import render.window.WindowLoop;

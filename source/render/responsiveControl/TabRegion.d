@@ -24,11 +24,17 @@ class TabRegion : ResponsiveRegion {
 		this.tabs = tabs;
 	}
 
+	/++
+	Sets the currently-displayed tab
+	+/
 	public nothrow void setTab(int tabIndex) {
 		if (tabIndex < tabCount)
 			currentTab = tabIndex;
 	}
 
+	/++
+	Automatically assigns tab functionality to the click actions for the buttons provided
+	+/
 	public RenderButton[] setupTabButtons(RenderButton[] buttons) {
 		static if (DEBUG)
 			enforce(buttons.length == tabs.length, "Number of buttons does not match number of tabs");

@@ -22,7 +22,6 @@ int globalSwapInterval = 1;
 public void WindowLoop() {
 	Array!int removeList;
 	while (running){
-		
 		foreach(i, current; windowList) {
 			if (GameSettings.VSync && windowList.length > 1 && i != windowList.length - 1)
 				glfwSwapInterval(0);
@@ -36,7 +35,6 @@ public void WindowLoop() {
 			if (GameSettings.VSync && windowList.length > 1)
 				glfwSwapInterval(1);
 		}
-		
 
 		foreach(i; removeList) {
 			RemoveWindow(i);
@@ -47,6 +45,9 @@ public void WindowLoop() {
 	}
 }
 
+/++
+Adds a new WindowObject to the window list for rendering and event polling
++/
 public nothrow WindowObject AddWindow(WindowObject o) {
 	windowList ~= o;
 	return o;
@@ -58,6 +59,9 @@ public void RemoveWindow(int index) {
 	windowList = windowList.remove(index);
 }
 
+/++
+Updates the swap interval for all open windows and any future windows
++/
 public nothrow void UpdateSwapInterval(int newInterval) {
 	GLFWwindow* current = glfwGetCurrentContext();
 	foreach(WindowObject o; windowList) {
@@ -68,6 +72,9 @@ public nothrow void UpdateSwapInterval(int newInterval) {
 	globalSwapInterval = newInterval;
 }
 
+/++
+Updates the font in all open windows to the newly selected one
++/
 public nothrow void UpdateFonts() {
 	GLFWwindow* current = glfwGetCurrentContext();
 	foreach(WindowObject o; windowList) {

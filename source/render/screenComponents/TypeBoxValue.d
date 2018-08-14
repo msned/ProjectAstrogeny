@@ -39,6 +39,9 @@ class RenderTypeBoxValue(T) : RenderTypeBox {
 		}
 	}
 
+	/++
+	Handles input as a character, limits it to only valid characters for the input type
+	+/
 	public override nothrow void charInput(uint c) {
 		if (!focused)
 			return;
